@@ -1,0 +1,25 @@
+// has potential for new growth upon zooming I think
+void KochSnowflake::recurse(const sf::Vector2f end_point, int limit)
+{
+	if (limit == 0) {
+		line.push_back(end_point);
+	}
+	else {
+		const sf::Vector2f origin_point = line[line.size() - 1].position;
+		const float line_angle = angle_between_ab(origin_point, end_point), subline_length = vec_len(end_point - origin_point) / 5;
+
+		const sf::Vector2f p1 = origin_point + vec_from_len_angle(subline_length, line_angle),
+			p2 = p1 + vec_from_len_angle(subline_length, line_angle - (M_PI / 3)),
+			p3 = p2 + vec_from_len_angle(subline_length * 2, line_angle + (M_PI / 3)),
+			p4 = p3 + vec_from_len_angle(subline_length * 2, line_angle - (M_PI / 3)),
+			p5 = p4 + vec_from_len_angle(subline_length, line_angle + (M_PI / 3));
+			
+
+		recurse(p1, limit - 1);
+		recurse(p2, limit - 1);
+		recurse(p3, limit - 1);
+		recurse(p4, limit - 1);
+		recurse(p5, limit - 1);
+		recurse(end_point, limit - 1);
+	}
+}
