@@ -21,10 +21,13 @@
   <ItemGroup>
     <ClCompile Include="KochSnowflake.cpp" />
     <ClCompile Include="Source.cpp" />
+    <ClCompile Include="ZoomBox.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="signum.h" />
     <ClInclude Include="KochSnowflake.h" />
     <ClInclude Include="vecutil.h" />
+    <ClInclude Include="ZoomBox.h" />
   </ItemGroup>
   <ItemGroup>
     <Text Include="other algos.txt" />
