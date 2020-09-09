@@ -22,6 +22,7 @@ public:
 	void generate(int recursions);
 	const sf::VertexArray* getLine() const;
 private:
+	void generate();
 	sf::Vector2f origin, pa, pb;
 	float scale;
 	sf::RenderWindow* window;

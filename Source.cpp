@@ -22,7 +22,7 @@ float scale_multi = 0.2;
 
 sf::ContextSettings settings(0, 0, 8);
 sf::RenderWindow window(sf::VideoMode(900, 600), "asd", sf::Style::Default, settings);
-KochSnowflake snowflake(sf::Vector2f(-600, 0), sf::Vector2f(600, 0), &window);
+KochSnowflake snowflake(sf::Vector2f(-50, 0), sf::Vector2f(50, 0), &window);
 
 ZoomBox zoom_box(&window);
 
@@ -45,8 +45,9 @@ void draw() {
 
 int main()
 {
-	snowflake.setOrigin(sf::Vector2f(window.getSize().x / 2, window.getSize().y - 30));
+	snowflake.setOrigin(sf::Vector2f(window.getSize().x / 2, window.getSize().y -20));
 	snowflake.generate(10);
+
 
 	while (window.isOpen()) {
 		sf::Event event;
