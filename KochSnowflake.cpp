@@ -51,6 +51,7 @@ void KochSnowflake::transfromLine() {
 		line[i].position.y *= scale;
 		line[i].position += origin;
 	}
+
 }
 
 void KochSnowflake::setPointA(sf::Vector2f pa)
@@ -89,6 +90,9 @@ void KochSnowflake::scaleMult(float scale_multi, sf::Vector2f scale_point)
 	origin.x += diff.x * (scale_multi-1);
 	origin.y += diff.y * (scale_multi-1);
 	scale *= scale_multi;
+	PRINT("zoom factor: " << getScale());
+	PRINT("minimum float value * scale: " << FLT_EPSILON * getScale());
+	PRINT("minimum double value * scale: " << DBL_EPSILON * getScale());
 	transfromLine();
 }
 

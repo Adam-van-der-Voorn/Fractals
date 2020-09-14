@@ -15,14 +15,14 @@
 #endif
 
 //TODO
+// - add undo
 // - fix floating point innaccuaracies when zooming in very large amounts
-
 
 float scale_multi = 0.2;
 
 sf::ContextSettings settings(0, 0, 8);
 sf::RenderWindow window(sf::VideoMode(900, 600), "asd", sf::Style::Default, settings);
-KochSnowflake snowflake(sf::Vector2f(-50, 0), sf::Vector2f(50, 0), &window);
+KochSnowflake snowflake(sf::Vector2f(-1, 0), sf::Vector2f(1, 0), &window);
 
 ZoomBox zoom_box(&window);
 
@@ -48,24 +48,20 @@ int main()
 	snowflake.setOrigin(sf::Vector2f(window.getSize().x / 2, window.getSize().y -20));
 	snowflake.generate(10);
 
-
 	while (window.isOpen()) {
 		sf::Event event;
 		while (window.pollEvent(event)) {
 			if (event.type == sf::Event::Closed) {
 				window.close();
 			}
-			else if (event.type == sf::Event::MouseWheelScrolled) {
-				float multi = 1 + (event.mouseWheelScroll.delta*scale_multi);
-				sf::Vector2f mouse_pos = sf::Vector2f(event.mouseWheelScroll.x, event.mouseWheelScroll.y);
-				snowflake.scaleMult(multi, mouse_pos);
-			}
 			else if (event.type == sf::Event::MouseButtonPressed) {
 				if (event.mouseButton.button == sf::Mouse::Left) {
 					zoom_box.setStartPoint(sf::Vector2f(event.mouseButton.x, event.mouseButton.y));
 				}
 				if (event.mouseButton.button == sf::Mouse::Right) {
-					snowflake.setOrigin(sf::Vector2f(event.mouseButton.x, event.mouseButton.y));
+					float multi = 2;
+					sf::Vector2f mouse_pos = sf::Vector2f(event.mouseButton.x, event.mouseButton.y);
+					snowflake.scaleMult(multi, mouse_pos);
 				}
 			}
 			else if (event.type == sf::Event::MouseMoved) {
@@ -75,9 +71,11 @@ int main()
 			}
 			else if (event.type == sf::Event::MouseButtonReleased) {
 				if (event.mouseButton.button == sf::Mouse::Left) {
-					PRINT("rect pos: " << zoom_box.getRect()->getPosition().x << ", " << zoom_box.getRect()->getPosition().x << ")")
-					PRINT("rect size: " << zoom_box.getRect()->getSize().x << ", " << zoom_box.getRect()->getSize().x << ")")
-					snowflake.scaleMult(zoom_box.getZoomMulti(), zoom_box.getZoomPoint());
+					PRINT("rect pos: " << zoom_box.getRect()->getPosition().x << ", " << zoom_box.getRect()->getPosition().x << ")");
+					PRINT("rect size: " << zoom_box.getRect()->getSize().x << ", " << zoom_box.getRect()->getSize().x << ")");
+					if (zoom_box.getRect()->getSize().x != 0 && zoom_box.getRect()->getSize().y != 0) {
+						snowflake.scaleMult(zoom_box.getZoomMulti(), zoom_box.getZoomPoint());
+					}	
 					zoom_box.setUnactive();
 				}
 			}
