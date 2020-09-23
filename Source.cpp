@@ -1,9 +1,7 @@
 #pragma once
 #define _USE_MATH_DEFINES
 #include <cmath>
-#include "KochSnowflake.h"
-#include "MultiLineSnowflake.h"
-#include "YTree.h"
+#include "LineFractal.h"
 #include "ZoomBox.h"
 #include <SFML/Graphics.hpp>
 #include <vector>
@@ -24,16 +22,13 @@ float scale_multi = 0.2;
 
 sf::ContextSettings settings(0, 0, 8);
 sf::RenderWindow window(sf::VideoMode(900, 600), "asd", sf::Style::Default, settings);
-KochSnowflake snowflake(sf::Vector2f(-450, 0), sf::Vector2f(450, 0), &window);
-YTree y_tree(200, &window);
+LineFractal fractal(0, 0, 0, -150);
 
 ZoomBox zoom_box(&window);
 
 void draw() {
 	window.clear();
-	window.draw(*snowflake.getLine());
-	sf::VertexArray y_tree_line = *y_tree.getLine();
-	window.draw(y_tree_line);
+	window.draw(*fractal.getFractal());
 	if (zoom_box.isActive()) {
 		window.draw(*zoom_box.getRect());
 		sf::VertexArray line1(sf::LineStrip, 2);
@@ -50,10 +45,8 @@ void draw() {
 
 int main()
 {
-	snowflake.setOrigin(sf::Vector2f(450, 580));
-	y_tree.setOrigin(sf::Vector2f(200, 400));
-	snowflake.generate(9);
-	y_tree.generate(9);
+	fractal.setOrigin(sf::Vector2f(450, 598));
+	fractal.generate(5);
 	while (window.isOpen()) {
 		sf::Event event;
 		while (window.pollEvent(event)) {
@@ -67,8 +60,7 @@ int main()
 				if (event.mouseButton.button == sf::Mouse::Right) {
 					float multi = 2;
 					sf::Vector2f mouse_pos = sf::Vector2f(event.mouseButton.x, event.mouseButton.y);
-					snowflake.scaleMult(multi, mouse_pos);
-					y_tree.scaleMult(multi, mouse_pos);
+					fractal.zoom(multi, mouse_pos);
 				}
 			}
 			else if (event.type == sf::Event::MouseMoved) {
@@ -81,8 +73,7 @@ int main()
 					PRINT("rect pos: " << zoom_box.getRect()->getPosition().x << ", " << zoom_box.getRect()->getPosition().x << ")");
 					PRINT("rect size: " << zoom_box.getRect()->getSize().x << ", " << zoom_box.getRect()->getSize().x << ")");
 					if (zoom_box.getRect()->getSize().x != 0 && zoom_box.getRect()->getSize().y != 0) {
-						snowflake.scaleMult(zoom_box.getZoomMulti(), zoom_box.getZoomPoint());
-						y_tree.scaleMult(zoom_box.getZoomMulti(), zoom_box.getZoomPoint());
+						fractal.zoom(zoom_box.getZoomMulti(), zoom_box.getZoomPoint());
 					}	
 					zoom_box.setUnactive();
 				}
