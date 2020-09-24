@@ -1,5 +1,8 @@
 #pragma once
-#include <SFML/Graphics.hpp>
+#include <SFML/System/Vector2.hpp>
+#include <SFML/Graphics/VertexArray.hpp>
+#include <vector>
+
 class LineFractal
 {
 public:
