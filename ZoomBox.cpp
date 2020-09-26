@@ -2,7 +2,7 @@
 #include "signum.h"
 #include "algorithm"
 
-ZoomBox::ZoomBox(const sf::RenderWindow * window) : window(window) {
+ZoomBox::ZoomBox(const sf::RenderWindow* window): window(window) {
 	rect.setFillColor(sf::Color::Transparent);
 	rect.setOutlineThickness(1.0f);
 	rect.setOutlineColor(sf::Color::Red);
@@ -63,9 +63,9 @@ const sf::RectangleShape* ZoomBox::getRect()
 }
 
 sf::Vector2f ZoomBox::getFinalBoxSize() const {
-	sf::Vector2f window_size = sf::Vector2f((float)window->getSize().x, (float)window->getSize().y);
-	float window_gradient = window_size.y / window_size.x;
 	sf::Vector2f box_size = (end_point - start_point); // could be negative
+	sf::Vector2f window_size = sf::Vector2f((float)(window->getSize().x), (float)(window->getSize().y));
+	float window_gradient = window_size.y / window_size.x;
 
 	float box_gradient = abs(box_size.y / box_size.x);
 	//PRINT("Box size: (" << box_size.x << ", " << box_size.y << ") Box, Window gradient : " << box_gradient << ", " << window_gradient)
