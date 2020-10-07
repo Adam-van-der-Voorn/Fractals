@@ -3,12 +3,12 @@
 #include <memory>
 #include <TGUI/TGUI.hpp>
 #include "State.h"
-#include "Drawable.h"
 
 class LineFractal;
 class ZoomBox;
+class StateMachine;
 
-class Viewing : public State, public Drawable
+class Viewing : public State
 {
 public:
 	Viewing(sf::RenderWindow* window);

@@ -13,31 +13,55 @@
       <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
       <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
     </Filter>
+    <Filter Include="Source Files\State">
+      <UniqueIdentifier>{c9961204-187e-4f05-9bf5-b3b135ae2a31}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\State">
+      <UniqueIdentifier>{38b8109f-2c2f-4075-ae5f-2ffeeb92aed7}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\Editing">
+      <UniqueIdentifier>{92e7d333-5e2d-454b-84c3-989437f6c67b}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\Viewing">
+      <UniqueIdentifier>{dc727d65-67e5-40f1-b78b-c8758a732abb}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Editing">
+      <UniqueIdentifier>{c9a0d82e-c066-4023-9b71-d11e79db456a}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Viewing">
+      <UniqueIdentifier>{01a2201e-4ed1-417c-9e2b-7b192bf030cd}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Source.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="ZoomBox.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="LineFractal.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Editor.cpp">
-      <Filter>Source Files</Filter>
+    <ClCompile Include="EmptyState.cpp">
+      <Filter>Source Files\State</Filter>
+    </ClCompile>
+    <ClCompile Include="StateMachine.cpp">
+      <Filter>Source Files\State</Filter>
+    </ClCompile>
+    <ClCompile Include="Editing.cpp">
+      <Filter>Source Files\Editing</Filter>
+    </ClCompile>
+    <ClCompile Include="ZoomBox.cpp">
+      <Filter>Source Files\Viewing</Filter>
     </ClCompile>
     <ClCompile Include="Viewing.cpp">
+      <Filter>Source Files\Viewing</Filter>
+    </ClCompile>
+    <ClCompile Include="EditableLine.cpp">
+      <Filter>Source Files\Editing</Filter>
+    </ClCompile>
+    <ClCompile Include="FractalEditor.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="vecutil.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="ZoomBox.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="signum.h">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -47,13 +71,43 @@
     <ClInclude Include="Drawable.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Editor.h">
-      <Filter>Header Files</Filter>
+    <ClInclude Include="EmptyState.h">
+      <Filter>Header Files\State</Filter>
     </ClInclude>
-    <ClInclude Include="Viewing.h">
-      <Filter>Header Files</Filter>
+    <ClInclude Include="StateMachine.h">
+      <Filter>Header Files\State</Filter>
     </ClInclude>
     <ClInclude Include="State.h">
+      <Filter>Header Files\State</Filter>
+    </ClInclude>
+    <ClInclude Include="debug_printing.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Editing.h">
+      <Filter>Header Files\Editing</Filter>
+    </ClInclude>
+    <ClInclude Include="Viewing.h">
+      <Filter>Header Files\Viewing</Filter>
+    </ClInclude>
+    <ClInclude Include="ZoomBox.h">
+      <Filter>Header Files\Viewing</Filter>
+    </ClInclude>
+    <ClInclude Include="EditableLine.h">
+      <Filter>Header Files\Editing</Filter>
+    </ClInclude>
+    <ClInclude Include="RelLine.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="AbsLine.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="pi.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="vecutil.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="FractalEditor.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

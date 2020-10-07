@@ -9,10 +9,10 @@ void KochSnowflake::recurse(const sf::Vector2f end_point, int limit)
 		const float line_angle = angle_between_ab(origin_point, end_point), subline_length = vec_len(end_point - origin_point) / 5;
 
 		const sf::Vector2f p1 = origin_point + vec_from_len_angle(subline_length, line_angle),
-			p2 = p1 + vec_from_len_angle(subline_length, line_angle - (M_PI / 3)),
-			p3 = p2 + vec_from_len_angle(subline_length * 2, line_angle + (M_PI / 3)),
-			p4 = p3 + vec_from_len_angle(subline_length * 2, line_angle - (M_PI / 3)),
-			p5 = p4 + vec_from_len_angle(subline_length, line_angle + (M_PI / 3));
+			p2 = p1 + vec_from_len_angle(subline_length, line_angle - (m_pi / 3)),
+			p3 = p2 + vec_from_len_angle(subline_length * 2, line_angle + (m_pi / 3)),
+			p4 = p3 + vec_from_len_angle(subline_length * 2, line_angle - (m_pi / 3)),
+			p5 = p4 + vec_from_len_angle(subline_length, line_angle + (m_pi / 3));
 
 		recurse(p1, limit - 1);
 		recurse(p2, limit - 1);
@@ -34,7 +34,7 @@ void KochSnowflake::recurse(const sf::Vector2f end_point, int limit)
 		const float line_angle = angle_between_ab(origin_point, end_point), line_length = vec_len(end_point - origin_point);
 
 		const sf::Vector2f first_third = origin_point + vec_from_len_angle(line_length/3, line_angle),
-			triangle_tip = first_third + vec_from_len_angle(line_length*0.5, line_angle - (M_PI / 2.55)),
+			triangle_tip = first_third + vec_from_len_angle(line_length*0.5, line_angle - (m_pi / 2.55)),
 			second_third = first_third + vec_from_len_angle(line_length/3, line_angle);
 
 		recurse(first_third, limit - 1);
@@ -55,7 +55,7 @@ void KochSnowflake::recurse(const sf::Vector2f end_point, int limit)
 		const float line_angle = angle_between_ab(origin_point, end_point), subline_length = vec_len(end_point - origin_point) / 3;
 
 		const sf::Vector2f first_third = origin_point + vec_from_len_angle(subline_length, line_angle),
-			triangle_tip = first_third + vec_from_len_angle(subline_length, line_angle - (M_PI / 3)),
+			triangle_tip = first_third + vec_from_len_angle(subline_length, line_angle - (m_pi / 3)),
 			second_third = first_third + vec_from_len_angle(subline_length, line_angle);
 
 		recurse(first_third, limit - 1);

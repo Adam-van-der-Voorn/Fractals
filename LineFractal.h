@@ -2,44 +2,37 @@
 #include <SFML/System/Vector2.hpp>
 #include <SFML/Graphics/VertexArray.hpp>
 #include <vector>
+#include "RelLine.h"
 
 class LineFractal
 {
 public:
-	LineFractal(double x1, double y1, double x2, double y2, float scale = 1, sf::Vector2f origin = sf::Vector2f(0, 0));
+	LineFractal(double x1, double y1, double x2, double y2, double scale = 1, double origin_x = 0, double origin_y = 0);
 
 	// getters & setters
-	void setScale(float new_scale, sf::Vector2f scale_point);
-	float getScale() const;
-	void setOrigin(sf::Vector2f origin);
-	sf::Vector2f getOrigin() const;
+	void setScale(double new_scale, double scale_point_x, double scale_point_y);
+	double getScale() const;
+	void setOrigin(double x, double y);
+	double getOriginX() const;
+	double getOriginY() const;
 
-	void zoom(float zoom_multi, sf::Vector2f zoom_point);
-	void translate(sf::Vector2f translation);
+	void zoom(double zoom_multi, double zoom_point_x, double zoom_point_y);
+	void translate(double translation_x, double translation_y);
 
 	void generate(int recursions);
 
 	const sf::VertexArray* getFractal() const;
 private:
 
-	sf::Vector2f origin, pa, pb;
-	float scale;
+	double x1, y1, x2, y2, scale, origin_x, origin_y;
 
-	std::vector<sf::Vertex> base_lines;
+	std::vector<double> base_lines;
 	sf::VertexArray final_lines = sf::VertexArray(sf::Lines);
 
-	void recurse(sf::Vector2f start_point, sf::Vector2f end_point, int limit);
+	void recurse(double x1, double y1, double x2, double y2, int limit);
 	void transfromLine();
 
-	struct Line {
-		double distance1;
-		double angle1;
-		double distance2;
-		double angle2;
-		bool recursing;
-	};
-
-	std::vector<Line> derived_lines;
+	std::vector<RelLine> derived_lines;
 };
 
 
