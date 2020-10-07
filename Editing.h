@@ -8,7 +8,7 @@ class EditableLine;
 class Editing : public State
 {
 public:
-	Editing(sf::RenderWindow* window);
+	Editing(sf::RenderWindow& window);
 	~Editing();
 
 	void enter();

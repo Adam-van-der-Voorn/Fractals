@@ -11,7 +11,7 @@ class StateMachine;
 class Viewing : public State
 {
 public:
-	Viewing(sf::RenderWindow* window);
+	Viewing(sf::RenderWindow& window);
 	~Viewing();
 
 	void enter();

@@ -21,7 +21,7 @@ public:
 
 	void generate(int recursions);
 
-	const sf::VertexArray* getFractal() const;
+	const sf::VertexArray& getFractal() const;
 private:
 
 	double x1, y1, x2, y2, scale, origin_x, origin_y;

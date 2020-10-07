@@ -22,8 +22,8 @@ LineFractal fractal(0, 0, 0, -100);
 
 int main()
 {	
-	editing = new Editing(&window);
-	viewing = new Viewing(&window);
+	editing = new Editing(window);
+	viewing = new Viewing(window);
 	state_machine.addState("viewing", viewing);
 	state_machine.addState("editing", editing);
 	state_machine.changeState("editing");

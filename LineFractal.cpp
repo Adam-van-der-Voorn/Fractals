@@ -87,8 +87,8 @@ void LineFractal::generate(int recursions)
 	transfromLine();
 }
 
-const sf::VertexArray* LineFractal::getFractal() const {
-	return &final_lines;
+const sf::VertexArray& LineFractal::getFractal() const {
+	return final_lines;
 }
 
 void LineFractal::transfromLine() {

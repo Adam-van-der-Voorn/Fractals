@@ -28,9 +28,9 @@ void addLine(std::unordered_map<int, EditableLine>* lines) {
 	lines->emplace(id, EditableLine(id, -x, -y, x, y));
 }
 
-Editing::Editing(sf::RenderWindow* window) {
-	gui = new tgui::Gui{ *window };
-	setupGUI(window->getSize().x, window->getSize().y);
+Editing::Editing(sf::RenderWindow& window) {
+	gui = new tgui::Gui{ window };
+	setupGUI(window.getSize().x, window.getSize().y);
 	srand(80085);
 }
 
@@ -52,7 +52,7 @@ void Editing::exit()
 {
 }
 
-void Editing::handleEvent(sf::Event & event)
+void Editing::handleEvent(sf::Event& event)
 {
 	if (event.type == sf::Event::Resized) {
 		realignGUI(event.size.width, event.size.height);
@@ -67,7 +67,7 @@ void Editing::drawTo(sf::RenderTarget& surface) const
 		l.second.drawTo(surface);
 	}
 
-	surface.draw(*fractal.getFractal());
+	surface.draw(fractal.getFractal());
 }
 
 void Editing::realignGUI(int window_width, int window_height)

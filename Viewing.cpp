@@ -11,10 +11,10 @@ void cs_editing() {
 	state_machine.changeState("editing");
 }
 
-Viewing::Viewing(sf::RenderWindow* window)
+Viewing::Viewing(sf::RenderWindow& window)
 {
-	zoom_box = new ZoomBox(window);
-	gui = new tgui::Gui{ *window };
+	zoom_box = new ZoomBox(&window);
+	gui = new tgui::Gui{ window };
 
 	auto swap_button = tgui::Button::create();
 	gui->add(swap_button);
@@ -53,8 +53,7 @@ ZoomBox* Viewing::getZoomBox() const
 void Viewing::drawTo(sf::RenderTarget& surface) const {
 	gui->draw();
 	for (auto f : fractals) {
-		const sf::VertexArray* frac_lines = f->getFractal();
-		surface.draw(*frac_lines);
+		surface.draw(f->getFractal());
 	}
 	
 	if (zoom_box->isActive()) {
