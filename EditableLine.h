@@ -12,7 +12,7 @@ public:
 	void setAngle(double angle);
 	void switchSelection();
 
-	void draw(sf::RenderWindow* window) const;
+	void drawTo(sf::RenderTarget& surface) const;
 private:
 	int id;
 	double x1, y1, x2, y2;

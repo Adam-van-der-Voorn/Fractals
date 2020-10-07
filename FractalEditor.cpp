@@ -3,6 +3,6 @@
 FractalEditor::FractalEditor(LineFractal& fractal) {
 }
 
-void FractalEditor::draw(sf::RenderWindow * drawable) const
+void FractalEditor::drawTo(sf::RenderTarget& surface) const
 {
 }

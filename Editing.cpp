@@ -60,14 +60,14 @@ void Editing::handleEvent(sf::Event & event)
 	gui->handleEvent(event);
 }
 
-void Editing::draw(sf::RenderWindow* window) const
+void Editing::drawTo(sf::RenderTarget& surface) const
 {
 	gui->draw();
 	for (auto l : lines) {
-		l.second.draw(window);
+		l.second.drawTo(surface);
 	}
 
-	window->draw(*fractal.getFractal());
+	surface.draw(*fractal.getFractal());
 }
 
 void Editing::realignGUI(int window_width, int window_height)

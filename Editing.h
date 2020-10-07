@@ -16,7 +16,7 @@ public:
 	void exit();
 	void handleEvent(sf::Event& event);
 
-	void draw(sf::RenderWindow* window) const;
+	void drawTo(sf::RenderTarget& surface) const;
 private:
 	std::unordered_map<int, EditableLine> lines;
 

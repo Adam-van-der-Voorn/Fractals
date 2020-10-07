@@ -3,5 +3,5 @@
 
 class Drawable {
 public: 
-	virtual void draw(sf::RenderWindow* window) const = 0;
+	virtual void drawTo(sf::RenderTarget& surface) const = 0;
 };

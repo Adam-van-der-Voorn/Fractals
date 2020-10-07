@@ -16,5 +16,5 @@ void EmptyState::handleEvent(sf::Event& event)
 {
 }
 
-void EmptyState::draw(sf::RenderWindow* window) const {
+void EmptyState::drawTo(sf::RenderTarget& surface) const {
 }

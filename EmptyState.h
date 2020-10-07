@@ -8,6 +8,6 @@ public:
 	void run();
 	void exit();
 	void handleEvent(sf::Event& event);
-	void draw(sf::RenderWindow* window) const;
+	void drawTo(sf::RenderTarget& surface) const;
 };
 

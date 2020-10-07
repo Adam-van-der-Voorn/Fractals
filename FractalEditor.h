@@ -8,6 +8,6 @@ class FractalEditor : public Drawable
 {
 public:
 	FractalEditor(LineFractal& fractal);
-	void draw(sf::RenderWindow* drawable) const;
+	void drawTo(sf::RenderTarget& surface) const;
 };
 

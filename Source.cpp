@@ -38,7 +38,7 @@ int main()
 		}
 		state_machine.getState()->run();
 		window.clear();
-		state_machine.getState()->draw(&window);
+		state_machine.getState()->drawTo(window);
 		window.display();
 	}
 	delete viewing;

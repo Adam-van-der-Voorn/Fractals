@@ -50,16 +50,16 @@ ZoomBox* Viewing::getZoomBox() const
 	return zoom_box;
 }
 
-void Viewing::draw(sf::RenderWindow* window) const {
+void Viewing::drawTo(sf::RenderTarget& surface) const {
 	gui->draw();
 	for (auto f : fractals) {
 		const sf::VertexArray* frac_lines = f->getFractal();
-		window->draw(*frac_lines);
+		surface.draw(*frac_lines);
 	}
 	
 	if (zoom_box->isActive()) {
 		const sf::RectangleShape* rect = zoom_box->getRect();
-		window->draw(*rect);
+		surface.draw(*rect);
 	}
 }
 
