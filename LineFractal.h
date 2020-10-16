@@ -2,7 +2,12 @@
 #include <SFML/System/Vector2.hpp>
 #include <SFML/Graphics/VertexArray.hpp>
 #include <vector>
-#include "RelLine.h"
+#include "LFLine.h"
+
+
+struct AbsLine;
+//struct LFLine; // do later
+
 
 class LineFractal
 {
@@ -15,13 +20,15 @@ public:
 	void setOrigin(double x, double y);
 	double getOriginX() const;
 	double getOriginY() const;
-
+	void setDerivedLines(std::vector<LFLine>& lines);
+	void setBaseLine(AbsLine line);
+		
 	void zoom(double zoom_multi, double zoom_point_x, double zoom_point_y);
 	void translate(double translation_x, double translation_y);
 
 	void generate(int recursions);
 
-	const sf::VertexArray& getFractal() const;
+	sf::VertexArray& getFractal();
 private:
 
 	double x1, y1, x2, y2, scale, origin_x, origin_y;
@@ -32,7 +39,7 @@ private:
 	void recurse(double x1, double y1, double x2, double y2, int limit);
 	void transfromLine();
 
-	std::vector<RelLine> derived_lines;
+	std::vector<LFLine> derived_lines;
 };
 
 

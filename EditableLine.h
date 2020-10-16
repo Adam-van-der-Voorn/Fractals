@@ -1,27 +1,66 @@
 #pragma once
 #include "Drawable.h"
+#include "AbsLine.h"
+#include <SFML/Graphics/CircleShape.hpp>
+#include <SFML/Graphics/VertexArray.hpp>
 
-class EditableLine : public Drawable
+
+struct LFLine;
+class EditableLineNode;
+
+/**
+Used to build a line fractal in the editing state.
+Is made up of two selectable and transformable nodes- one for each endpoint on the line.
+Only one node can be selected at a time.
+**/
+class EditableLine
 {
 public:
-	EditableLine(int id, double x1, double y1, double x2, double y2);
-	bool attemptSelection(int x, int y);
-	void translate(double dx, double dy);
-	void setPosition(double x, double y);
-	void setLength(double length);
-	void setAngle(double angle);
-	void switchSelection();
+	EditableLine(int line_id, int node_id_1, int node_id_2, AbsLine line);
+	
+	/**
+	\return node a
+	**/
+	std::shared_ptr<EditableLineNode> getNodeA() const;
 
-	void drawTo(sf::RenderTarget& surface) const;
+	/**
+	\return node b
+	**/
+	std::shared_ptr<EditableLineNode> getNodeB() const;
+
+	/**
+	Sets the recusion status for this line.
+	If true the line will recurse.
+	**/
+	void setRecursive(bool b);
+
+	/**
+	\param base_line the line that the LFLine will be based off
+	\return a line fractal line relative to the given baseline
+	**/
+	LFLine toLFLine(AbsLine base_line) const;
+
+	/**
+	\return the absolute line
+	**/
+	AbsLine toAbsLine() const;
+
+	/**
+	\return the line drawable
+	**/
+	sf::VertexArray& getDrLine();
+
+	/**
+	adjusts the drawable line based off the node positions
+	**/
+	void adjustDrawables();
+	
 private:
 	int id;
-	double x1, y1, x2, y2;
-	enum Selection {
-		START, END, NONE
-	};
-	Selection selected = NONE;
-	const float nodeSize = 10;
 
-
+	std::shared_ptr<EditableLineNode> a;
+	std::shared_ptr<EditableLineNode> b;
+	sf::VertexArray dr_line;
+	bool recursive = true;
 };
 

@@ -60,6 +60,9 @@
     <ClCompile Include="FractalEditor.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="EditableLineNode.cpp">
+      <Filter>Source Files\Editing</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="signum.h">
@@ -95,9 +98,6 @@
     <ClInclude Include="EditableLine.h">
       <Filter>Header Files\Editing</Filter>
     </ClInclude>
-    <ClInclude Include="RelLine.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="AbsLine.h">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -108,6 +108,15 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="FractalEditor.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="LFLine.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="EditableLineNode.h">
+      <Filter>Header Files\Editing</Filter>
+    </ClInclude>
+    <ClInclude Include="vertarrutil.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

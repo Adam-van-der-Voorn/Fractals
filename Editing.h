@@ -1,8 +1,11 @@
 #pragma once
 #include "State.h"
 #include <unordered_map>
+#include <unordered_set>
 #include <TGUI/TGUI.hpp>
+#include <memory>
 
+class EditableLineNode;
 class EditableLine;
 
 class Editing : public State
@@ -18,13 +21,24 @@ public:
 
 	void drawTo(sf::RenderTarget& surface) const;
 private:
-	std::unordered_map<int, EditableLine> lines;
+	void fractalChanged();
+
+	std::unordered_map<int, std::shared_ptr<EditableLineNode>> nodes;
+	std::unordered_set<int> selected_nodes;
+	std::unordered_set<int> dragging_nodes;
+	std::unordered_map<int, std::shared_ptr<EditableLine>> lines;
+	std::shared_ptr<EditableLine> base_line;
+
+	int num_recursions = 6;
+	bool mouse_moved_since_lpress = false;
+	sf::Vector2i left_press_location;
 
 	// gui stuff
 	void realignGUI(int window_width, int window_height);
 	void setupGUI(int window_width, int window_height);
 
 	sf::Vector2i editing_frame_center;
+	sf::Vector2i mouse_location;
 
 	tgui::Gui* gui;
 	tgui::Panel::Ptr right_panel;
@@ -37,6 +51,7 @@ private:
 	tgui::Panel::Ptr measurements_block;
 	tgui::EditBox::Ptr measurement_inputs[3];
 	tgui::Label::Ptr measurement_labels[3];
+	tgui::ScrollablePanel::Ptr node_selections;
 
 	const int right_panel_width = 200;
 	const int general_padding = 5;

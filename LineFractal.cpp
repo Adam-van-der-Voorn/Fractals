@@ -1,7 +1,8 @@
 //#include <cmath>
 #include "pi.h"
 #include "vecutil.h"
-#include "RelLine.h"
+#include "LFLine.h"
+#include "AbsLine.h"
 #include <memory>
 #include "debug_printing.h"
 #include "LineFractal.h"
@@ -10,9 +11,9 @@ LineFractal::LineFractal(double x1, double y1, double x2, double y2, double scal
 	x1(x1), y1(y1), x2(x2), y2(y2), scale(scale), origin_x(origin_x), origin_y(origin_y)
 {
 	derived_lines = {
-		{0, 0, 0.5, 0, false},
-		{0.5, 0, 0.5, m_pi / 4, true},
-		{0.5, 0, 0.5, -m_pi / 4, true}
+		{0, 0, 0.5, 0, true},
+		{0.5, 0, 0.5, m_pi4, true},
+		//{0.5, 0, 0.5, -m_pi4, true}
 	};
 }
 
@@ -25,23 +26,21 @@ void LineFractal::recurse(double x1, double y1, double x2, double y2, int limit)
 		base_lines.push_back(y2);
 	}
 	else {
-		const double line_angle = angle_between_ab(x1, y1, x2, y2), line_length = vec_len(x2-x1, y2-y1);
+		double line_angle = angleBetweenAB(x1, y1, x2, y2), line_length = distanceBetweenAB(x1, y1, x2, y2);
 		for (size_t i = 0; i < derived_lines.size(); i++) {
 			// the distace from the start point of the parent line to the start point of this child line
-			double a1 = line_length * derived_lines[i].distance1; 
+			double a1 = line_length * derived_lines[i].distance; 
 			// the angle from the start point of the parent line to the start point of this child line
 			double a2 = line_angle + derived_lines[i].angle1;
 			// the length of the child line
-			double b1 = line_length * derived_lines[i].distance2;
+			double b1 = line_length * derived_lines[i].length;
 			// the angle of the child line
 			double b2 = line_angle + derived_lines[i].angle2;
 
-			double new_x1 = x1 + lendir_x(a1, a2);
-			double new_y1 = y1 + lendir_y(a1, a2);
-			double new_x2 = new_x1 + lendir_x(b1, b2);
-			double new_y2 = new_y1 + lendir_y(b1, b2);
-			//sf::Vector2f p1 = start_point + vec_from_len_angle(line_length * derived_lines[i].distance1, line_angle + derived_lines[i].angle1);
-			//sf::Vector2f p2 = p1 + vec_from_len_angle(line_length * derived_lines[i].distance2, line_angle + derived_lines[i].angle2);
+			double new_x1 = x1 + lendirX(a1, a2);
+			double new_y1 = y1 + lendirY(a1, a2);
+			double new_x2 = new_x1 + lendirX(b1, b2);
+			double new_y2 = new_y1 + lendirY(b1, b2);
 			if (derived_lines[i].recursing) {
 				recurse(new_x1, new_y1, new_x2, new_y2, limit - 1);
 			}
@@ -55,30 +54,6 @@ void LineFractal::recurse(double x1, double y1, double x2, double y2, int limit)
 	}
 }
 
-/*void LineFractal::recurse(double x1, double y1, double len, double dir, int limit)
-{
-	if (limit == 0) {
-		base_lines.push_back(x1);
-		base_lines.push_back(y1);
-		base_lines.push_back(len);
-		base_lines.push_back(dir);
-	}
-	else {
-		for (size_t i = 0; i < derived_lines.size(); i++) {
-
-			sf::Vector2f p1 = start_point + vec_from_len_angle(line_length * derived_lines[i].distance1, line_angle + derived_lines[i].angle1);
-			sf::Vector2f p2 = p1 + vec_from_len_angle(line_length * derived_lines[i].distance2, line_angle + derived_lines[i].angle2);
-			if (derived_lines[i].recursing) {
-				recurse(p1, p2, limit - 1);
-			}
-			else {
-				base_lines.push_back(p1);
-				base_lines.push_back(p2);
-			}
-		}
-	}
-}*/
-
 void LineFractal::generate(int recursions)
 {
 	base_lines.clear();
@@ -87,7 +62,19 @@ void LineFractal::generate(int recursions)
 	transfromLine();
 }
 
-const sf::VertexArray& LineFractal::getFractal() const {
+void LineFractal::setDerivedLines(std::vector<LFLine>& lines) {
+	derived_lines = lines;
+}
+
+void LineFractal::setBaseLine(AbsLine line)
+{
+	x1 = line.x1;
+	x2 = line.x2;
+	y1 = line.y1;
+	y2 = line.y2;
+}
+
+sf::VertexArray& LineFractal::getFractal() {
 	return final_lines;
 }
 
