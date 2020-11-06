@@ -45,21 +45,22 @@ void Viewing::addFractal(LineFractal* fractal) {
 	fractals.push_back(fractal);
 }
 
+void Viewing::draw(sf::RenderTarget& target, sf::RenderStates states) const
+{
+	gui->draw();
+	for (auto f : fractals) {
+		target.draw(f->getFractal());
+	}
+
+	if (zoom_box->isActive()) {
+		const sf::RectangleShape* rect = zoom_box->getRect();
+		target.draw(*rect);
+	}
+}
+
 ZoomBox* Viewing::getZoomBox() const
 {
 	return zoom_box;
-}
-
-void Viewing::drawTo(sf::RenderTarget& surface) const {
-	gui->draw();
-	for (auto f : fractals) {
-		surface.draw(f->getFractal());
-	}
-	
-	if (zoom_box->isActive()) {
-		const sf::RectangleShape* rect = zoom_box->getRect();
-		surface.draw(*rect);
-	}
 }
 
 void Viewing::handleEvent(sf::Event& event)

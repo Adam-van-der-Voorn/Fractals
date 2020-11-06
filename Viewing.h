@@ -20,7 +20,7 @@ public:
 	void handleEvent(sf::Event& event);
 
 	void addFractal(LineFractal* fractal);
-	void drawTo(sf::RenderTarget& surface) const;
+	void draw(sf::RenderTarget& target, sf::RenderStates states = sf::RenderStates::Default) const;
 
 	void incFractal();
 

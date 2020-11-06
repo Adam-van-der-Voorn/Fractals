@@ -16,26 +16,16 @@
 // - fix floating point innaccuaracies when zooming in very large amounts
 sf::ContextSettings settings(0, 0, 8);
 sf::RenderWindow window(sf::VideoMode(900, 600), "asd", sf::Style::Default, settings);
+LineFractal fractal(0, 0, 0, -100);
 
 StateMachine state_machine;
-State* viewing;
-State* editing;
-LineFractal fractal(0, 0, 0, -100);
+State* viewing_state = new Viewing(window);
+State* editing_state = new Editing(window);
 
 int main()
 {	
-	PRINT("e  " << angleBetweenAB(-1, 0, 1, 0) << " 0");
-	PRINT("se " << angleBetweenAB(-1, -1, 1, 1) << " pi/4 : " << m_pi4);
-	PRINT("s  " << angleBetweenAB(0, -1, 0, 1) << " pi/2 : " << m_pi2);
-	PRINT("sw " << angleBetweenAB(1, -1, -1, 1) << " 3pi/4 : " << 3 * m_pi4);
-	PRINT("w  " << angleBetweenAB(1, 0, -1, 0) << " pi : " << m_pi);
-	PRINT("nw " << angleBetweenAB(1, 1, -1, -1) << " 5pi/4 : " << 5 * m_pi4);
-	PRINT("n  " << angleBetweenAB(0, 1, 0, -1) << " 3pi/2 : " << 3 * m_pi2);
-	PRINT("ne " << angleBetweenAB(-1, 1, 1, -1) << " 7pi/4 : " << 7 * m_pi4);
-	editing = new Editing(window);
-	viewing = new Viewing(window);
-	state_machine.addState("viewing", viewing);
-	state_machine.addState("editing", editing);
+	state_machine.addState("viewing", viewing_state);
+	state_machine.addState("editing", editing_state);
 	state_machine.changeState("editing");
 
 	while (window.isOpen()) {
@@ -47,11 +37,10 @@ int main()
 			state_machine.getState()->handleEvent(event);
 		}
 		state_machine.getState()->run();
+
 		window.clear();
-		state_machine.getState()->drawTo(window);
+		state_machine.getState()->draw(window);
 		window.display();
 	}
-	delete viewing;
-	delete editing;
 	return 0;
 }

@@ -1,4 +1,5 @@
 #include "EmptyState.h"
+#include <SFML/Graphics/RenderTarget.hpp>
 
 void EmptyState::enter()
 {
@@ -16,5 +17,7 @@ void EmptyState::handleEvent(sf::Event& event)
 {
 }
 
-void EmptyState::drawTo(sf::RenderTarget& surface) const {
+void EmptyState::draw(sf::RenderTarget& target, sf::RenderStates states) const
+{
 }
+

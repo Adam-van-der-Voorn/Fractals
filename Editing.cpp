@@ -7,6 +7,8 @@
 #include "vertarrutil.h"
 #include "AbsLine.h"
 #include "EditableLineNode.h"
+#include "SelLineWidget.h"
+#include "EditingGUI.h"
 #include <cstdlib>
 #include <string>
 
@@ -22,19 +24,20 @@ int getID() {
 	return i++;
 }
 
-void addLine(sf::Vector2i* position, std::unordered_map<int, std::shared_ptr<EditableLineNode>>* nodes, std::unordered_map<int, std::shared_ptr<EditableLine>>* lines) {
+void Editing::addLine() {
 	float length = rand() % 50 + 50; // random length from 50 - 100
 	float angle = ((float)(rand() % (3141 * 2))) / 100; // random angle in radians from 0 - ~2pi
 	float x = lendirX(length, angle);
 	float y = lendirY(length, angle);
 
 	int id_arr[] = { getID(), getID(), getID() };
-	AbsLine l = { position->x - x, position->y - y, position->x + x, position->y + y };
+	AbsLine l = { editing_frame_center.x - x, editing_frame_center.y - y, editing_frame_center.x + x, editing_frame_center.y + y };
 	std::shared_ptr<EditableLine> line = std::make_shared<EditableLine>(id_arr[0], id_arr[1], id_arr[2], l);
 
-	lines->emplace(id_arr[0], line);
-	nodes->emplace(id_arr[1], line->getNodeA());
-	nodes->emplace(id_arr[2], line->getNodeB());
+	lines.emplace(id_arr[0], line);
+	nodes.emplace(id_arr[1], line->getNodeA());
+	nodes.emplace(id_arr[2], line->getNodeB());
+	notifyAll(Event::LINES_CHANGED);
 }
 
 void change_recursions_field(tgui::EditBox::Ptr field, int* num_recursions, LineFractal* fractal) {
@@ -54,7 +57,14 @@ void change_recursions_field(tgui::EditBox::Ptr field, int* num_recursions, Line
 			fractal->generate(*num_recursions);
 		}
 	}
+	PRINT("originx: " << fractal->getOriginX());
+	PRINT("originy: " << fractal->getOriginY());
+	PRINT("x1: " << fractal->x1);
+	PRINT("x2: " << fractal->x2);
+	PRINT("y1: " << fractal->y1);
+	PRINT("y2: " << fractal->y2);
 }
+
 Editing::Editing(sf::RenderWindow& window) {
 	gui = new tgui::Gui{ window };
 	setupGUI(window.getSize().x, window.getSize().y);
@@ -65,9 +75,10 @@ Editing::Editing(sf::RenderWindow& window) {
 	// setup base line
 	AbsLine l = { editing_frame_center.x-200, editing_frame_center.y, editing_frame_center.x + 200, editing_frame_center.y };
 	base_line = std::make_shared<EditableLine>(getID(), getID(), getID(), l);
-	base_line->getDrLine()[0].color = sf::Color::Color(80, 80, 80);
-	base_line->getDrLine()[1].color = sf::Color::Color(80, 80, 80);
-	fractal.setBaseLine(base_line->toAbsLine());
+	fractal.setBaseLine(l);
+
+	gui_2 = std::make_shared<EditingGUI>(this);
+
 	fillLineColour(fractal.getFractal(), sf::Color::Red);
 	fractal.generate(num_recursions);
 }
@@ -95,60 +106,62 @@ void Editing::handleEvent(sf::Event& event)
 	if (event.type == sf::Event::Resized) {
 		realignGUI(event.size.width, event.size.height);
 	}
-	if (event.type == sf::Event::MouseButtonPressed) {
-		if (event.mouseButton.button == sf::Mouse::Button::Left) {
-			left_press_location = mouse_location;
-			for (auto& node : nodes) {
-				if (node.second->pointIntersection(event.mouseButton.x, event.mouseButton.y)) {
-					dragging_nodes.emplace(node.first);
-				}
-			}
-		}
-	}
-	if (event.type == sf::Event::MouseMoved) {
-		bool node_moved = false;
-		for (int node_id : dragging_nodes) {
-			node_moved = true;
-			nodes[node_id]->translate(event.mouseMove.x - mouse_location.x, event.mouseMove.y - mouse_location.y);
-		}
-		if (node_moved) {
-			if (DEBUG) {
-				int i = 0;
-				for (auto l : lines) {
-					LFLine lfl = l.second->toLFLine(base_line->toAbsLine());
-					PRINT(i << ": " << lfl.distance << " | " << lfl.angle1 << " | " << lfl.length << " | " << lfl.angle2);
-					i++;
-				}
-			}
-			fractalChanged();
-		}
-		mouse_location.x = event.mouseMove.x;
-		mouse_location.y = event.mouseMove.y;
-	}
-	if (event.type == sf::Event::MouseButtonReleased) {
-		if (event.mouseButton.button == sf::Mouse::Button::Left) {
-			dragging_nodes.clear();
-			if (mouse_location == left_press_location) {
-
-				// recolour old selected nodes and remove
-				for (int sel_node_id : selected_nodes) {
-					nodes[sel_node_id]->getDrNode().setOutlineColor(sf::Color::White);
-				}
-				selected_nodes.clear();
-
-				// select new nodes
+	else if (event.type == sf::Event::MouseButtonPressed) {
+		if (isWithinEditingFrame(sf::Vector2f(event.mouseButton.x, event.mouseButton.y))) {
+			if (event.mouseButton.button == sf::Mouse::Button::Left) {
+				left_press_location = mouse_framepos;
 				for (auto& node : nodes) {
-					if (node.second->pointIntersection(mouse_location.x, mouse_location.y)) {
-						node.second->getDrNode().setOutlineColor(sf::Color::Red);
-						selected_nodes.emplace(node.first);
+					if (node.second->pointIntersection(event.mouseButton.x, event.mouseButton.y)) {
+						dragging_nodes.emplace(node.first);
 					}
 				}
+			}
+		}
+	}
+	else if (event.type == sf::Event::MouseMoved) {
+		if (isWithinEditingFrame(sf::Vector2f(event.mouseMove.x, event.mouseMove.y))) {		
+			bool node_moved = false;
+			for (int node_id : dragging_nodes) {
+				node_moved = true;
+				nodes[node_id]->translate(event.mouseMove.x - mouse_framepos.x, event.mouseMove.y - mouse_framepos.y);
+			}
+			if (node_moved) {
 				if (DEBUG) {
-					PRINT("Seletec ids:");
-					for (int i : selected_nodes) {
-						PRINT(i);
+					int i = 0;
+					for (auto l : lines) {
+						LFLine lfl = l.second->toLFLine(base_line->toAbsLine());
+						PRINT(i << ": " << lfl.distance << " | " << lfl.angle1 << " | " << lfl.length << " | " << lfl.angle2);
+						i++;
 					}
-					PRINT("");
+				}
+				notifyAll(Event::LINES_CHANGED);
+				fractalChanged();
+			}
+			mouse_framepos.x = event.mouseMove.x;
+			mouse_framepos.y = event.mouseMove.y;
+		}
+	}
+	else if (event.type == sf::Event::MouseButtonReleased) {
+		if (isWithinEditingFrame(sf::Vector2f(event.mouseButton.x, event.mouseButton.y))) {
+			if (event.mouseButton.button == sf::Mouse::Button::Left) {
+				dragging_nodes.clear();
+				if (mouse_framepos == left_press_location) {
+					selected_nodes.clear();
+
+					// select new nodes
+					for (auto& node : nodes) {
+						if (node.second->pointIntersection(mouse_framepos.x, mouse_framepos.y)) {
+							selected_nodes.insert(node.first);
+						}
+					}
+					if (DEBUG) {
+						PRINT("Seletec ids:");
+						for (int i : selected_nodes) {
+							PRINT(i);
+						}
+						PRINT("");
+					}
+					notifyAll(Event::SELECTION_CHANGED);
 				}
 			}
 		}
@@ -156,20 +169,37 @@ void Editing::handleEvent(sf::Event& event)
 	gui->handleEvent(event);
 }
 
-void Editing::drawTo(sf::RenderTarget& surface) const
+void Editing::draw(sf::RenderTarget& target, sf::RenderStates states) const
 {
-	surface.draw(base_line->getDrLine());
-	surface.draw(fractal.getFractal());
-	for (auto& line : lines) {
-		surface.draw(line.second->getDrLine());
-	}
-	for (auto& node : nodes) {
-		if (selected_nodes.count(node.first) || // if node is selected
-		node.second->pointIntersection(mouse_location.x, mouse_location.y)) {
-			surface.draw(node.second->getDrNode());
-		}
-	}
+	target.draw(fractal.getFractal());
+	
 	gui->draw();
+	target.draw(*gui_2);
+}
+
+const std::unordered_map<int, std::shared_ptr<EditableLineNode>>& Editing::getNodes() const
+{
+	return nodes;
+}
+
+const std::unordered_map<int, std::shared_ptr<EditableLine>>& Editing::getLines() const
+{
+	return lines;
+}
+
+const std::shared_ptr<EditableLine> Editing::getBaseLine() const
+{
+	return base_line;
+}
+
+const std::unordered_set<int>& Editing::getSelectedNodes() const
+{
+	return selected_nodes;
+}
+
+void Editing::addObserver(Observer* observer)
+{
+	observers.insert(observer);
 }
 
 void Editing::fractalChanged()
@@ -183,14 +213,31 @@ void Editing::fractalChanged()
 	fractal.generate(num_recursions);
 }
 
+void Editing::notifyAll(Event e) const
+{
+	for (Observer* observer : observers) {
+		observer->onNotify(e);
+	}
+}
+
+bool Editing::isWithinEditingFrame(sf::Vector2f point) const
+{
+	if (point.x >= 0 && point.y >= 0 && point.x < editing_frame_size.x && point.y < editing_frame_size.y) {
+		return true;
+	}
+	return false;
+}
+
 void Editing::realignGUI(int window_width, int window_height)
 {
 	right_panel->setSize(right_panel_width, window_height);
 	right_panel->setPosition(window_width - right_panel_width, 0);
-	display_button->setPosition(general_padding, window_height - general_padding - display_button_height);
-	node_selections->setSize(general_element_width, window_height - (3 * general_padding) - display_button_height);
-	editing_frame_center.x = (window_width - right_panel_width) / 2;
-	editing_frame_center.y = window_height / 2;
+	display_button->setPosition(general_padding, window_height - general_padding - display_button->getSize().y);
+	node_selections->setSize(general_element_width, display_button->getPosition().y - (2 * general_padding) - (measurement_fields[2]->getPosition().y + measurement_fields[2]->getSize().y));
+	editing_frame_size.x = (window_width - right_panel_width);
+	editing_frame_size.y = window_height;
+	editing_frame_center.x = editing_frame_size.x / 2;
+	editing_frame_center.y = editing_frame_size.y / 2;
 }
 
 void Editing::setupGUI(int window_width, int window_height)
@@ -203,74 +250,86 @@ void Editing::setupGUI(int window_width, int window_height)
 	// display button
 	display_button = tgui::Button::create();
 	right_panel->add(display_button);
-	display_button->setSize(general_element_width, display_button_height);
+	display_button->setSize(general_element_width, 50);
 	display_button->onClick(cs_viewing);
 	display_button->setText("Display fractal");
 
 	// recursions field
 	recursions_field = tgui::Panel::create();
 	right_panel->add(recursions_field);
-	recursions_field->setSize(general_element_width, recursions_field_height);
+	recursions_field->setSize(general_element_width, 20);
 	recursions_field->setPosition(general_padding, general_padding);
-
-	// recursions input
-	recursions_input = tgui::EditBox::create();
-	recursions_field->add(recursions_input);
-	recursions_input->setSize(tgui::Layout2d{ recursions_input_width, recursions_field_height });
-	recursions_input->setPosition(tgui::Layout2d{ general_element_width - recursions_input_width, 0 });
-	recursions_input->setText(std::to_string(num_recursions));
-	recursions_input->onReturnKeyPress(change_recursions_field, recursions_input, &num_recursions, &fractal);
 
 	// recursions label
 	recursions_label = tgui::Label::create();
 	recursions_field->add(recursions_label);
-	recursions_label->setSize(tgui::Layout2d{ general_element_width - recursions_input_width - general_padding, recursions_field_height });
-	recursions_label->setPosition(tgui::Layout2d{ 0, 3 }); // slight adjustment so it lines up with input text
+	recursions_label->setSize({ "100%", "100%" });
+	recursions_label->setPosition(0, 3); // slight adjustment so it lines up with input text
 	recursions_label->setHorizontalAlignment(tgui::Label::HorizontalAlignment::Left);
 	recursions_label->setText("Number of recursions");
 
+	// recursions input
+	recursions_input = tgui::EditBox::create();
+	recursions_field->add(recursions_input);
+	recursions_input->setSize({ 33, "100%" });
+	recursions_input->setPosition({ recursions_field->getSize().x - recursions_input->getSize().x, 0 });
+	recursions_input->setText(std::to_string(num_recursions));
+	recursions_input->onReturnKeyPress(change_recursions_field, recursions_input, &num_recursions, &fractal);
+
+	// line actions field
+	line_actions_field = tgui::Panel::create();
+	right_panel->add(line_actions_field);
+	line_actions_field->setSize(general_element_width, 40);
+	line_actions_field->setPosition({ general_padding, tgui::bindBottom(recursions_field) + general_padding });
+
 	// add line button
 	add_line_button = tgui::Button::create();
-	right_panel->add(add_line_button);
-	add_line_button->setSize((general_element_width - general_padding) / 2, add_remove_button_height);
-	add_line_button->setPosition(general_padding, recursions_field->getPosition().y + recursions_field_height + (general_padding * 2));
+	line_actions_field->add(add_line_button);
+	add_line_button->setSize((line_actions_field->getSize().x - general_padding) / 2, "100%");
+	add_line_button->setPosition(0, 0);
 	add_line_button->setText("add line");
-	add_line_button->onClick(addLine, &editing_frame_center, &nodes, &lines);
+	add_line_button->onClick(&Editing::addLine, this);
 
 	// remove line button
 	remove_line_button = tgui::Button::create();
-	right_panel->add(remove_line_button);
-	remove_line_button->setSize((general_element_width - general_padding) / 2, add_remove_button_height);
-	remove_line_button->setPosition((general_padding * 2) + remove_line_button->getSize().x, recursions_field->getPosition().y + recursions_field_height + (general_padding * 2));
+	line_actions_field->add(remove_line_button);
+	remove_line_button->setSize((general_element_width - general_padding) / 2, "100%");
+	remove_line_button->setPosition({ tgui::bindRight(add_line_button) + general_padding, 0 });
 	remove_line_button->setText("remove line");
+	remove_line_button->onClick(&Editing::enter, this);
 
 	// measurements block
-	measurements_block = tgui::Panel::create();
-	right_panel->add(measurements_block);
-	measurements_block->setPosition(general_padding, add_line_button->getPosition().y + add_remove_button_height + general_padding);
-	measurements_block->setSize(general_element_width, measurements_block_height);
-	
 	std::string label_names[] = { "Length", "Angle", "Position" };
+	static const int no_measurement_fields = sizeof(measurement_inputs) / sizeof(tgui::EditBox::Ptr);
 	for (int i = 0; i < no_measurement_fields; i++) {
-		// measurement inputs
-		measurement_inputs[i] = tgui::EditBox::create();
-		measurements_block->add(measurement_inputs[i]);
-		measurement_inputs[i]->setSize(measurements_input_width, measurements_field_height);
-		measurement_inputs[i]->setPosition(general_element_width - measurements_input_width, general_padding + (general_padding + measurements_field_height) * i);
-		
+		// measurement fields
+		measurement_fields[i] = tgui::Panel::create();
+		right_panel->add(measurement_fields[i]);
+		measurement_fields[i]->setSize(general_element_width, 20);
+
 		// measurement labels
 		measurement_labels[i] = tgui::Label::create();
-		measurements_block->add(measurement_labels[i]);
+		measurement_fields[i]->add(measurement_labels[i]);
 		measurement_labels[i]->setText(label_names[i]);
-		measurement_labels[i]->setSize(general_element_width - measurements_input_width - general_padding, measurements_field_height);
-		measurement_labels[i]->setPosition(0, general_padding + 6 + (general_padding + measurements_field_height) * i);
+		measurement_labels[i]->setSize("100%", "100%");
+		measurement_labels[i]->setPosition(0, 3);
+
+		// measurement inputs
+		measurement_inputs[i] = tgui::EditBox::create();
+		measurement_fields[i]->add(measurement_inputs[i]);
+		measurement_inputs[i]->setSize(120, "100%");
+		measurement_inputs[i]->setPosition(general_element_width - measurement_inputs[i]->getSize().x, 0);
 	}
+	measurement_fields[0]->setPosition(general_padding, tgui::bindBottom(line_actions_field) + general_padding);
+	measurement_fields[1]->setPosition(general_padding, tgui::bindBottom(measurement_fields[0]) + general_padding);
+	measurement_fields[2]->setPosition(general_padding, tgui::bindBottom(measurement_fields[1]) + general_padding);
+
 
 	// node selections
 	node_selections = tgui::ScrollablePanel::create();
 	right_panel->add(node_selections);
+	node_selections->setPosition({ general_padding, tgui::bindBottom(measurement_fields[2]) + general_padding });
 	
-	node_selections->setPosition(general_padding, measurements_block->getPosition().y + general_padding);
 
 	realignGUI(window_width, window_height);
 }

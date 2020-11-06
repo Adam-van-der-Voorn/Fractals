@@ -10,9 +10,6 @@ EditableLine::EditableLine(int line_id, int node_id_1, int node_id_2, AbsLine li
 {
 	a = std::make_shared<EditableLineNode>(node_id_1, line.x1, line.y1, this);
 	b = std::make_shared<EditableLineNode>(node_id_2, line.x2, line.y2, this);
-	dr_line.setPrimitiveType(sf::Lines);
-	dr_line.resize(2);
-	adjustDrawables();
 }
 
 std::shared_ptr<EditableLineNode> EditableLine::getNodeA() const
@@ -23,13 +20,6 @@ std::shared_ptr<EditableLineNode> EditableLine::getNodeA() const
 std::shared_ptr<EditableLineNode> EditableLine::getNodeB() const
 {
 	return b;
-}
-
-void EditableLine::adjustDrawables() {
-	dr_line[0].position.x = a->getX();
-	dr_line[0].position.y = a->getY();
-	dr_line[1].position.x = b->getX();
-	dr_line[1].position.y = b->getY();
 }
 
 void EditableLine::setRecursive(bool b)
@@ -51,10 +41,5 @@ LFLine EditableLine::toLFLine(AbsLine base_line) const
 AbsLine EditableLine::toAbsLine() const
 {
 	return { a->getX(), a->getY(), b->getX(), b->getY() };
-}
-
-sf::VertexArray& EditableLine::getDrLine()
-{
-	return dr_line;
 }
 

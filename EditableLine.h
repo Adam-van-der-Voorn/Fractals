@@ -44,23 +44,11 @@ public:
 	\return the absolute line
 	**/
 	AbsLine toAbsLine() const;
-
-	/**
-	\return the line drawable
-	**/
-	sf::VertexArray& getDrLine();
-
-	/**
-	adjusts the drawable line based off the node positions
-	**/
-	void adjustDrawables();
 	
 private:
 	int id;
-
 	std::shared_ptr<EditableLineNode> a;
 	std::shared_ptr<EditableLineNode> b;
-	sf::VertexArray dr_line;
 	bool recursive = true;
 };
 

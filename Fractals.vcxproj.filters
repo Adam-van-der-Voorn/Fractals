@@ -57,10 +57,19 @@
     <ClCompile Include="EditableLine.cpp">
       <Filter>Source Files\Editing</Filter>
     </ClCompile>
-    <ClCompile Include="FractalEditor.cpp">
+    <ClCompile Include="EditableLineNode.cpp">
+      <Filter>Source Files\Editing</Filter>
+    </ClCompile>
+    <ClCompile Include="WidgetHoriStack.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="EditableLineNode.cpp">
+    <ClCompile Include="Observer.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="EditingGUI.cpp">
+      <Filter>Source Files\Editing</Filter>
+    </ClCompile>
+    <ClCompile Include="SelLineWidget.cpp">
       <Filter>Source Files\Editing</Filter>
     </ClCompile>
   </ItemGroup>
@@ -107,9 +116,6 @@
     <ClInclude Include="vecutil.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="FractalEditor.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="LFLine.h">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -118,6 +124,21 @@
     </ClInclude>
     <ClInclude Include="vertarrutil.h">
       <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="WidgetHoriStack.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Observer.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Subject.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="EditingGUI.h">
+      <Filter>Header Files\Editing</Filter>
+    </ClInclude>
+    <ClInclude Include="SelLineWidget.h">
+      <Filter>Header Files\Editing</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

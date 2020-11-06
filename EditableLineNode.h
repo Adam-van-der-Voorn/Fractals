@@ -69,18 +69,11 @@ public:
 	**/
 	int getID() const;
 
-	/**
-	\return the node drawable
-	**/
-	sf::CircleShape& getDrNode();
+	static constexpr double NODE_RADIUS = 10;
 
 private:
 	int id;
-	void adjustDrawables();
-
 	EditableLine* line;
-	const double node_radius = 10;
 	double xpos, ypos;
-	sf::CircleShape dr_node;
 };
 
