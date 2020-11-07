@@ -16,14 +16,13 @@
 // - fix floating point innaccuaracies when zooming in very large amounts
 sf::ContextSettings settings(0, 0, 8);
 sf::RenderWindow window(sf::VideoMode(900, 600), "asd", sf::Style::Default, settings);
-LineFractal fractal(0, 0, 0, -100);
-
-StateMachine state_machine;
-State* viewing_state = new Viewing(window);
-State* editing_state = new Editing(window);
 
 int main()
 {	
+	LineFractal fractal(0, 0, 0, 0);
+	StateMachine state_machine;
+	State* viewing_state = new Viewing(window);
+	State* editing_state = new Editing(window, &fractal, &state_machine);
 	state_machine.addState("viewing", viewing_state);
 	state_machine.addState("editing", editing_state);
 	state_machine.changeState("editing");

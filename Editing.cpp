@@ -12,60 +12,33 @@
 #include <cstdlib>
 #include <string>
 
-extern StateMachine state_machine;
-extern LineFractal fractal;
-
-void cs_viewing() {
-	state_machine.changeState("viewing");
-}
-
 int getID() {
 	static int i = 0;
 	return i++;
 }
 
-void Editing::addLine() {
-	float length = rand() % 50 + 50; // random length from 50 - 100
-	float angle = ((float)(rand() % (3141 * 2))) / 100; // random angle in radians from 0 - ~2pi
-	float x = lendirX(length, angle);
-	float y = lendirY(length, angle);
-
-	int id_arr[] = { getID(), getID(), getID() };
-	AbsLine l = { editing_frame_center.x - x, editing_frame_center.y - y, editing_frame_center.x + x, editing_frame_center.y + y };
-	std::shared_ptr<EditableLine> line = std::make_shared<EditableLine>(id_arr[0], id_arr[1], id_arr[2], l);
-
-	lines.emplace(id_arr[0], line);
-	nodes.emplace(id_arr[1], line->getNodeA());
-	nodes.emplace(id_arr[2], line->getNodeB());
-	notifyAll(Event::LINES_CHANGED);
-}
-
-void change_recursions_field(tgui::EditBox::Ptr field, int* num_recursions, LineFractal* fractal) {
-	tgui::String new_val = field->getText();
+void Editing::changeRecursionsField() {
+	tgui::String new_val = recursions_input->getText();
 	if (new_val.length() == 0) {
-		field->setText(std::to_string(*num_recursions));
+		recursions_input->setText(std::to_string(num_recursions));
 	}
 	else {
 		int new_num = new_val.toInt();
-		if (new_num != *num_recursions) {
+		if (new_num != num_recursions) {
 			const int max_val = 20;
 			if (new_num > max_val) {
 				new_num = max_val;
-				field->setText(std::to_string(new_num));
+				recursions_input->setText(std::to_string(new_num));
 			}
-			*num_recursions = new_num;
-			fractal->generate(*num_recursions);
+			num_recursions = new_num;
+			fractal->generate(num_recursions);
 		}
 	}
-	PRINT("originx: " << fractal->getOriginX());
-	PRINT("originy: " << fractal->getOriginY());
-	PRINT("x1: " << fractal->x1);
-	PRINT("x2: " << fractal->x2);
-	PRINT("y1: " << fractal->y1);
-	PRINT("y2: " << fractal->y2);
 }
 
-Editing::Editing(sf::RenderWindow& window) {
+Editing::Editing(sf::RenderWindow& window, LineFractal* fractal, StateMachine* state_machine) :
+	fractal(fractal), state_machine(state_machine)
+{
 	gui = new tgui::Gui{ window };
 	setupGUI(window.getSize().x, window.getSize().y);
 
@@ -75,12 +48,11 @@ Editing::Editing(sf::RenderWindow& window) {
 	// setup base line
 	AbsLine l = { editing_frame_center.x-200, editing_frame_center.y, editing_frame_center.x + 200, editing_frame_center.y };
 	base_line = std::make_shared<EditableLine>(getID(), getID(), getID(), l);
-	fractal.setBaseLine(l);
+	fractal->setBaseLine(l);
 
 	gui_2 = std::make_shared<EditingGUI>(this);
 
-	fillLineColour(fractal.getFractal(), sf::Color::Red);
-	fractal.generate(num_recursions);
+	fractal->generate(num_recursions);
 }
 
 Editing::~Editing() {
@@ -89,7 +61,6 @@ Editing::~Editing() {
 
 void Editing::enter(){
 	PRINT("entered editing state");
-	//fractal.setOrigin(editing_frame_center.x, editing_frame_center.y);
 }
 
 void Editing::run()
@@ -171,10 +142,26 @@ void Editing::handleEvent(sf::Event& event)
 
 void Editing::draw(sf::RenderTarget& target, sf::RenderStates states) const
 {
-	target.draw(fractal.getFractal());
+	target.draw(fractal->getFractal());
 	
 	gui->draw();
 	target.draw(*gui_2);
+}
+
+void Editing::addLine() {
+	float length = rand() % 50 + 50; // random length from 50 - 100
+	float angle = ((float)(rand() % (3141 * 2))) / 100; // random angle in radians from 0 - ~2pi
+	float x = lendirX(length, angle);
+	float y = lendirY(length, angle);
+
+	int id_arr[] = { getID(), getID(), getID() };
+	AbsLine l = { editing_frame_center.x - x, editing_frame_center.y - y, editing_frame_center.x + x, editing_frame_center.y + y };
+	std::shared_ptr<EditableLine> line = std::make_shared<EditableLine>(id_arr[0], id_arr[1], id_arr[2], l);
+
+	lines.emplace(id_arr[0], line);
+	nodes.emplace(id_arr[1], line->getNodeA());
+	nodes.emplace(id_arr[2], line->getNodeB());
+	notifyAll(Event::LINES_CHANGED);
 }
 
 const std::unordered_map<int, std::shared_ptr<EditableLineNode>>& Editing::getNodes() const
@@ -209,8 +196,8 @@ void Editing::fractalChanged()
 		LFLine lfl = line.second->toLFLine(base_line->toAbsLine());
 		final_lines.push_back(lfl);
 	}
-	fractal.setDerivedLines(final_lines);
-	fractal.generate(num_recursions);
+	fractal->setDerivedLines(final_lines);
+	fractal->generate(num_recursions);
 }
 
 void Editing::notifyAll(Event e) const
@@ -251,7 +238,7 @@ void Editing::setupGUI(int window_width, int window_height)
 	display_button = tgui::Button::create();
 	right_panel->add(display_button);
 	display_button->setSize(general_element_width, 50);
-	display_button->onClick(cs_viewing);
+	display_button->onClick(&StateMachine::changeState, state_machine, "viewing");
 	display_button->setText("Display fractal");
 
 	// recursions field
@@ -274,7 +261,7 @@ void Editing::setupGUI(int window_width, int window_height)
 	recursions_input->setSize({ 33, "100%" });
 	recursions_input->setPosition({ recursions_field->getSize().x - recursions_input->getSize().x, 0 });
 	recursions_input->setText(std::to_string(num_recursions));
-	recursions_input->onReturnKeyPress(change_recursions_field, recursions_input, &num_recursions, &fractal);
+	recursions_input->onReturnKeyPress(&Editing::changeRecursionsField, this);
 
 	// line actions field
 	line_actions_field = tgui::Panel::create();

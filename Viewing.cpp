@@ -5,12 +5,6 @@
 #include "StateMachine.h"
 #include <iostream>
 
-extern StateMachine state_machine;
-
-void cs_editing() {
-	state_machine.changeState("editing");
-}
-
 Viewing::Viewing(sf::RenderWindow& window)
 {
 	zoom_box = new ZoomBox(&window);
@@ -21,7 +15,7 @@ Viewing::Viewing(sf::RenderWindow& window)
 	swap_button->setText("swap");
 	swap_button->setSize(80, 40);
 	swap_button->setPosition(50, 50);
-	swap_button->onClick(cs_editing);
+	//swap_button->onClick(cs_editing);
 
 	auto text = tgui::EditBox::create();
 	gui->add(text);

@@ -11,11 +11,13 @@
 class EditableLineNode;
 class EditableLine;
 class EditingGUI;
+class LineFractal;
+class StateMachine;
 
 class Editing : public State
 {
 public:
-	Editing(sf::RenderWindow& window);
+	Editing(sf::RenderWindow& window, LineFractal* fractal, StateMachine* state_machine);
 	~Editing();
 
 	void enter();
@@ -38,14 +40,20 @@ public:
 private:
 	void fractalChanged();
 	void addLine();
+	void changeRecursionsField();
+
 	void notifyAll(Event e) const;
 	bool isWithinEditingFrame(sf::Vector2f point) const;
+
+
 	std::unordered_set<Observer*> observers;
 	std::unordered_map<int, std::shared_ptr<EditableLineNode>> nodes;
 	std::unordered_set<int> selected_nodes;
 	std::unordered_set<int> dragging_nodes;
 	std::unordered_map<int, std::shared_ptr<EditableLine>> lines;
 	std::shared_ptr<EditableLine> base_line;
+	LineFractal* fractal;
+	StateMachine* state_machine;
 
 	int num_recursions = 6;
 	bool mouse_moved_since_lpress = false;
