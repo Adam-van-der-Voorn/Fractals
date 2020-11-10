@@ -42,7 +42,7 @@ public:
 	void addObserver(Observer* observer);
 
 	enum Event{
-		LINES_CHANGED, SELECTION_CHANGED, FRACTAL_CHANGED
+		LINES_CHANGED, SELECTION_CHANGED, FRACTAL_CHANGED, MOUSE_MOVED
 	};
 
 	const int right_panel_width = 200;

@@ -25,6 +25,9 @@ private:
 	void realignTGUI(int window_width, int window_height);
 	void setupTGUI(int window_width, int window_height);
 
+	const sf::Color LINE_COL = sf::Color::Blue;
+	const sf::Color LINE_COL_UNRECURSIVE = sf::Color::Red;
+
 	Editing* editing;
 	EditingState* state;
 	sf::VertexArray nodeLines = sf::VertexArray(sf::Lines);

@@ -71,6 +71,7 @@ void Editing::handleEvent(sf::Event& event)
 			}
 			mouse_framepos.x = event.mouseMove.x;
 			mouse_framepos.y = event.mouseMove.y;
+			notifyAll(Event::MOUSE_MOVED);
 		}
 	}
 	else if (event.type == sf::Event::MouseButtonReleased) {

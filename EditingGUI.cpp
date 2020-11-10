@@ -7,6 +7,8 @@
 #include "StateMachine.h"
 #include "LineFractal.h"
 #include "AbsLine.h"
+#include "vecutil.h"
+#include "pi.h"
 #include <unordered_set>
 #include <unordered_map>
 #include <vector>
@@ -45,6 +47,8 @@ void EditingGUI::onNotify(int event_num)
 	case Editing::FRACTAL_CHANGED:
 		updateFractal();
 		break;
+	case Editing::MOUSE_MOVED:
+		updateNodes();
 	default:
 		break;
 	}
@@ -56,17 +60,21 @@ void EditingGUI::updateNodes()
 	nodes.resize(editing->getNodes().size());
 	int i = 0;
 	for (const auto& node_pair : editing->getNodes()) {
-		nodes[i].setPosition(sf::Vector2f(node_pair.second->getX(), node_pair.second->getY()));
 		nodes[i].setRadius(EditableLineNode::NODE_RADIUS);
 		nodes[i].setFillColor(sf::Color::Transparent);
-		nodes[i].setOutlineColor(sf::Color::White);
 		nodes[i].setOutlineThickness(1.0f);
 		nodes[i].setOrigin(sf::Vector2f(EditableLineNode::NODE_RADIUS, EditableLineNode::NODE_RADIUS));
+
+		nodes[i].setPosition(sf::Vector2f(node_pair.second->getX(), node_pair.second->getY()));
+
 		if (editing->getSelectedNodes().count(node_pair.first)) { // node is selected
 			nodes[i].setOutlineColor(sf::Color::Red);
 		}
-		else {
+		else if (node_pair.second->pointIntersection(editing->getMousePosInFrame().x, editing->getMousePosInFrame().y)) {
 			nodes[i].setOutlineColor(sf::Color::White);
+		}
+		else {
+			nodes[i].setOutlineColor(sf::Color::Transparent);
 		}
 		i++;
 	}
@@ -75,16 +83,43 @@ void EditingGUI::updateNodes()
 void EditingGUI::updateLines()
 {
 	assert(editing->getNodes().size() % 2 == 0 && "uneven amount of nodes");
-	nodeLines.resize(editing->getNodes().size()); // using num of nodes instead of num of lines because each line has two verts
+	int old_vertcount = nodeLines.getVertexCount();
+	int new_vertcount = editing->getLines().size() * 6; // 6 bc two verts each on three lines making up an arrow.
+	nodeLines.resize(new_vertcount);
+	if (new_vertcount > old_vertcount) {
+		for (int i = old_vertcount; i < new_vertcount; i++) {
+			nodeLines[i].color = LINE_COL;
+		}
+	}
 	int i = 0;
 	for (const auto& line_pair : editing->getLines()) {
-		std::shared_ptr<EditableLineNode> node_a = line_pair.second->getNodeA();
-		nodeLines[i].position.x = node_a->getX();
-		nodeLines[i].position.y = node_a->getY();
+		double node_a_x = line_pair.second->getNodeA()->getX();
+		double node_a_y = line_pair.second->getNodeA()->getY();
+		double node_b_x = line_pair.second->getNodeB()->getX();
+		double node_b_y = line_pair.second->getNodeB()->getY();
+
+		// centerline
+		nodeLines[i].position.x = node_a_x;
+		nodeLines[i].position.y = node_a_y;
 		i++;
-		std::shared_ptr<EditableLineNode> node_b = line_pair.second->getNodeB();
-		nodeLines[i].position.x = node_b->getX();
-		nodeLines[i].position.y = node_b->getY();
+		nodeLines[i].position.x = node_b_x;
+		nodeLines[i].position.y = node_b_y;
+		i++;
+
+		// arrowheads
+		constexpr double arrowhead_len = EditableLineNode::NODE_RADIUS;
+		const double arrow_dir = lineAngle({ node_a_x, node_a_y, node_b_x, node_b_y });
+		nodeLines[i].position.x = node_b_x;
+		nodeLines[i].position.y = node_b_y;
+		i++;
+		nodeLines[i].position.x = node_b_x + lendirX(arrowhead_len, arrow_dir + m_pi4*3);
+		nodeLines[i].position.y = node_b_y + lendirY(arrowhead_len, arrow_dir + m_pi4*3);
+		i++;
+		nodeLines[i].position.x = node_b_x;
+		nodeLines[i].position.y = node_b_y;
+		i++;
+		nodeLines[i].position.x = node_b_x + lendirX(arrowhead_len, arrow_dir - m_pi4*3);
+		nodeLines[i].position.y = node_b_y + lendirY(arrowhead_len, arrow_dir - m_pi4*3);
 		i++;
 	}
 }
