@@ -1,5 +1,6 @@
 #include "EditingGUI.h"
 #include "Editing.h"
+#include "EditingState.h"
 #include "EditableLine.h"
 #include "EditableLineNode.h"
 #include "debug_printing.h"
@@ -8,7 +9,8 @@
 #include <unordered_map>
 #include <memory>
 
-EditingGUI::EditingGUI(Editing * editing, sf::RenderWindow& window) : editing(editing)
+EditingGUI::EditingGUI(EditingState* state, Editing* data)
+	: state(state), editing(data)
 {
 	baseLine[0].position.x = editing->getBaseLine()->getNodeA()->getX();
 	baseLine[0].position.y = editing->getBaseLine()->getNodeA()->getY();
@@ -17,8 +19,9 @@ EditingGUI::EditingGUI(Editing * editing, sf::RenderWindow& window) : editing(ed
 	baseLine[1].position.x = editing->getBaseLine()->getNodeB()->getX();
 	baseLine[1].position.y = editing->getBaseLine()->getNodeB()->getY();
 	baseLine[1].color = sf::Color::Color(80, 80, 80);
-	tGui = std::make_shared<tgui::Gui>(window);
-	setupTGUI(window.getSize().x, window.getSize().y);
+
+	tGui = std::make_shared<tgui::Gui>(*state->getRenderWindow());
+	setupTGUI(state->getRenderWindow()->getSize().x, state->getRenderWindow()->getSize().y);
 	editing->addObserver(this);
 }
 
@@ -100,7 +103,7 @@ void EditingGUI::setupTGUI(int window_width, int window_height)
 	display_button = tgui::Button::create();
 	right_panel->add(display_button);
 	display_button->setSize(editing->general_element_width, 50);
-	display_button->onClick(&StateMachine::changeState, editing->getStateMachine(), "viewing");
+	display_button->onClick(&StateMachine::changeState, state->getStateMachine(), "viewing");
 	display_button->setText("Display fractal");
 
 	// recursions field
@@ -195,7 +198,6 @@ void EditingGUI::handleEvent(sf::Event& event)
 {
 	if (event.type == sf::Event::Resized) {
 		realignTGUI(event.size.width, event.size.height);
-
 	}
 	tGui->handleEvent(event);
 }

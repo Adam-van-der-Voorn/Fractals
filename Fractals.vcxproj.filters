@@ -72,6 +72,9 @@
     <ClCompile Include="SelLineWidget.cpp">
       <Filter>Source Files\Editing</Filter>
     </ClCompile>
+    <ClCompile Include="EditingState.cpp">
+      <Filter>Source Files\Editing</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="signum.h">
@@ -135,6 +138,9 @@
       <Filter>Header Files\Editing</Filter>
     </ClInclude>
     <ClInclude Include="SelLineWidget.h">
+      <Filter>Header Files\Editing</Filter>
+    </ClInclude>
+    <ClInclude Include="EditingState.h">
       <Filter>Header Files\Editing</Filter>
     </ClInclude>
   </ItemGroup>

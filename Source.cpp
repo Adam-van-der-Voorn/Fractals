@@ -1,7 +1,7 @@
 #pragma once
 #include "LineFractal.h"
 #include "Viewing.h"
-#include "Editing.h"
+#include "EditingState.h"
 #include "StateMachine.h"
 #include <SFML/Window/ContextSettings.hpp>
 #include <SFML/Graphics/RenderWindow.hpp>
@@ -21,10 +21,10 @@ int main()
 {	
 	LineFractal fractal(0, 0, 0, 0);
 	StateMachine state_machine;
-	State* viewing_state = new Viewing(window);
-	State* editing_state = new Editing(window, &fractal, &state_machine);
-	state_machine.addState("viewing", viewing_state);
-	state_machine.addState("editing", editing_state);
+	std::shared_ptr<State> viewing_state = std::make_shared<Viewing>(window);
+	std::shared_ptr<State> editing_state = std::make_shared<EditingState>(&state_machine, &fractal, &window);
+	state_machine.addState("viewing", viewing_state.get());
+	state_machine.addState("editing", editing_state.get());
 	state_machine.changeState("editing");
 
 	while (window.isOpen()) {

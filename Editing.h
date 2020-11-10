@@ -15,15 +15,13 @@ class EditingGUI;
 class LineFractal;
 class StateMachine;
 class Observer;
+class EditingState;
 
-class Editing : public State
+class Editing : public sf::Drawable
 {
 public:
-	Editing(sf::RenderWindow& window, LineFractal* fractal, StateMachine* state_machine);
+	Editing(EditingState* state, LineFractal* fractal);
 
-	void enter();
-	void run();
-	void exit();
 	void handleEvent(sf::Event& event);
 
 	void draw(sf::RenderTarget& target, sf::RenderStates states = sf::RenderStates::Default) const;
@@ -32,7 +30,6 @@ public:
 	const std::unordered_map<int, std::shared_ptr<EditableLine>>& getLines() const;
 	const std::shared_ptr<EditableLine> getBaseLine() const;
 	const std::unordered_set<int>& getSelectedNodes() const;
-	StateMachine* getStateMachine();
 	int getNumRecursions() const;
 	void setNumRecursions(int num);
 	sf::Vector2i getEditingFrameSize() const;
@@ -64,7 +61,7 @@ private:
 	std::unordered_map<int, std::shared_ptr<EditableLine>> lines;
 	std::shared_ptr<EditableLine> base_line;
 	LineFractal* fractal;
-	StateMachine* state_machine;
+	EditingState* state;
 
 	int num_recursions = 6;
 	bool mouse_moved_since_lpress = false;
@@ -73,9 +70,5 @@ private:
 	sf::Vector2i editing_frame_size;
 	sf::Vector2i editing_frame_center;
 	sf::Vector2i mouse_framepos;
-
-	std::shared_ptr<EditingGUI> gui;
-
-
 };
 

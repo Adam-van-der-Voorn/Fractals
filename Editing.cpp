@@ -9,6 +9,7 @@
 #include "EditableLineNode.h"
 #include "SelLineWidget.h"
 #include "EditingGUI.h"
+#include "EditingState.h"
 #include <cstdlib>
 #include <string>
 #include <memory>
@@ -18,34 +19,18 @@ int getID() {
 	return i++;
 }
 
-Editing::Editing(sf::RenderWindow& window, LineFractal* fractal, StateMachine* state_machine) :
-	fractal(fractal), state_machine(state_machine)
+Editing::Editing(EditingState* state, LineFractal* fractal) :
+	state(state), fractal(fractal)
 {
 	// set seed for line creation
 	srand(80085);
 
 	// setup base line
-	recalcEditingFrameCenter(window.getSize().x, window.getSize().y);
+	recalcEditingFrameCenter(state->getRenderWindow()->getSize().x, state->getRenderWindow()->getSize().y);
 	AbsLine l = { editing_frame_center.x-200, editing_frame_center.y, editing_frame_center.x + 200, editing_frame_center.y };
 	base_line = std::make_shared<EditableLine>(getID(), getID(), getID(), l);
 	fractal->setBaseLine(l);
-
-	gui = std::make_shared<EditingGUI>(this, window);
-
 	fractal->generate(num_recursions);
-}
-
-void Editing::enter(){
-	PRINT("entered editing state");
-}
-
-void Editing::run()
-{
-
-}
-
-void Editing::exit()
-{
 }
 
 void Editing::handleEvent(sf::Event& event)
@@ -113,13 +98,11 @@ void Editing::handleEvent(sf::Event& event)
 			}
 		}
 	}
-	gui->handleEvent(event);
 }
 
 void Editing::draw(sf::RenderTarget& target, sf::RenderStates states) const
 {
 	target.draw(fractal->getFractal());
-	target.draw(*gui);
 }
 
 void Editing::recalcEditingFrameCenter(int window_width, int window_height) {
@@ -173,11 +156,6 @@ const std::shared_ptr<EditableLine> Editing::getBaseLine() const
 const std::unordered_set<int>& Editing::getSelectedNodes() const
 {
 	return selected_nodes;
-}
-
-StateMachine* Editing::getStateMachine()
-{
-	return state_machine;
 }
 
 int Editing::getNumRecursions() const

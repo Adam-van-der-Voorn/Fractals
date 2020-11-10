@@ -4,17 +4,18 @@
 #include <SFML/Window/Event.hpp>
 #include <TGUI/TGUI.hpp>
 #include "Observer.h"
-
+#include "EditingState.h"
 class Editing;
 class EditableLineNode;
 
-class EditingGUI : public sf::Drawable, Observer
+class EditingGUI : public sf::Drawable, public Observer
 {
 public:
-	EditingGUI(Editing* editing, sf::RenderWindow& window);
+	EditingGUI(EditingState* state, Editing* data);
 	void onNotify(int event_num);
 	void draw(sf::RenderTarget& target, sf::RenderStates states) const;
 	void handleEvent(sf::Event& event);
+
 private:
 	void updateNodes();
 	void updateLines();
@@ -24,6 +25,7 @@ private:
 	void setupTGUI(int window_width, int window_height);
 
 	Editing* editing;
+	EditingState* state;
 	sf::VertexArray nodeLines = sf::VertexArray(sf::Lines);
 	sf::VertexArray baseLine = sf::VertexArray(sf::Lines, 2);
 	std::vector<sf::CircleShape> nodes;
