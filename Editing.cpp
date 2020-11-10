@@ -11,52 +11,28 @@
 #include "EditingGUI.h"
 #include <cstdlib>
 #include <string>
+#include <memory>
 
 int getID() {
 	static int i = 0;
 	return i++;
 }
 
-void Editing::changeRecursionsField() {
-	tgui::String new_val = recursions_input->getText();
-	if (new_val.length() == 0) {
-		recursions_input->setText(std::to_string(num_recursions));
-	}
-	else {
-		int new_num = new_val.toInt();
-		if (new_num != num_recursions) {
-			const int max_val = 20;
-			if (new_num > max_val) {
-				new_num = max_val;
-				recursions_input->setText(std::to_string(new_num));
-			}
-			num_recursions = new_num;
-			fractal->generate(num_recursions);
-		}
-	}
-}
-
 Editing::Editing(sf::RenderWindow& window, LineFractal* fractal, StateMachine* state_machine) :
 	fractal(fractal), state_machine(state_machine)
 {
-	gui = new tgui::Gui{ window };
-	setupGUI(window.getSize().x, window.getSize().y);
-
 	// set seed for line creation
 	srand(80085);
 
 	// setup base line
+	recalcEditingFrameCenter(window.getSize().x, window.getSize().y);
 	AbsLine l = { editing_frame_center.x-200, editing_frame_center.y, editing_frame_center.x + 200, editing_frame_center.y };
 	base_line = std::make_shared<EditableLine>(getID(), getID(), getID(), l);
 	fractal->setBaseLine(l);
 
-	gui_2 = std::make_shared<EditingGUI>(this);
+	gui = std::make_shared<EditingGUI>(this, window);
 
 	fractal->generate(num_recursions);
-}
-
-Editing::~Editing() {
-	delete gui;
 }
 
 void Editing::enter(){
@@ -75,7 +51,7 @@ void Editing::exit()
 void Editing::handleEvent(sf::Event& event)
 {
 	if (event.type == sf::Event::Resized) {
-		realignGUI(event.size.width, event.size.height);
+		recalcEditingFrameCenter(event.size.width, event.size.height);
 	}
 	else if (event.type == sf::Event::MouseButtonPressed) {
 		if (isWithinEditingFrame(sf::Vector2f(event.mouseButton.x, event.mouseButton.y))) {
@@ -143,9 +119,24 @@ void Editing::handleEvent(sf::Event& event)
 void Editing::draw(sf::RenderTarget& target, sf::RenderStates states) const
 {
 	target.draw(fractal->getFractal());
-	
-	gui->draw();
-	target.draw(*gui_2);
+	target.draw(*gui);
+}
+
+void Editing::recalcEditingFrameCenter(int window_width, int window_height) {
+	editing_frame_size.x = (window_width - right_panel_width);
+	editing_frame_size.y = window_height;
+	editing_frame_center.x = editing_frame_size.x / 2;
+	editing_frame_center.y = editing_frame_size.y / 2;
+}
+
+sf::Vector2i Editing::getEditingFrameCenter() const
+{
+	return editing_frame_center;
+}
+
+sf::Vector2i Editing::getMousePosInFrame() const
+{
+	return mouse_framepos;
 }
 
 void Editing::addLine() {
@@ -184,6 +175,26 @@ const std::unordered_set<int>& Editing::getSelectedNodes() const
 	return selected_nodes;
 }
 
+StateMachine* Editing::getStateMachine()
+{
+	return state_machine;
+}
+
+int Editing::getNumRecursions() const
+{
+	return num_recursions;
+}
+
+void Editing::setNumRecursions(int num)
+{
+	num_recursions = num;
+}
+
+sf::Vector2i Editing::getEditingFrameSize() const
+{
+	return editing_frame_size;
+}
+
 void Editing::addObserver(Observer* observer)
 {
 	observers.insert(observer);
@@ -213,110 +224,4 @@ bool Editing::isWithinEditingFrame(sf::Vector2f point) const
 		return true;
 	}
 	return false;
-}
-
-void Editing::realignGUI(int window_width, int window_height)
-{
-	right_panel->setSize(right_panel_width, window_height);
-	right_panel->setPosition(window_width - right_panel_width, 0);
-	display_button->setPosition(general_padding, window_height - general_padding - display_button->getSize().y);
-	node_selections->setSize(general_element_width, display_button->getPosition().y - (2 * general_padding) - (measurement_fields[2]->getPosition().y + measurement_fields[2]->getSize().y));
-	editing_frame_size.x = (window_width - right_panel_width);
-	editing_frame_size.y = window_height;
-	editing_frame_center.x = editing_frame_size.x / 2;
-	editing_frame_center.y = editing_frame_size.y / 2;
-}
-
-void Editing::setupGUI(int window_width, int window_height)
-{
-	// right panel
-	right_panel = tgui::Panel::create();
-	gui->add(right_panel);
-	right_panel->setInheritedOpacity(0.8);
-
-	// display button
-	display_button = tgui::Button::create();
-	right_panel->add(display_button);
-	display_button->setSize(general_element_width, 50);
-	display_button->onClick(&StateMachine::changeState, state_machine, "viewing");
-	display_button->setText("Display fractal");
-
-	// recursions field
-	recursions_field = tgui::Panel::create();
-	right_panel->add(recursions_field);
-	recursions_field->setSize(general_element_width, 20);
-	recursions_field->setPosition(general_padding, general_padding);
-
-	// recursions label
-	recursions_label = tgui::Label::create();
-	recursions_field->add(recursions_label);
-	recursions_label->setSize({ "100%", "100%" });
-	recursions_label->setPosition(0, 3); // slight adjustment so it lines up with input text
-	recursions_label->setHorizontalAlignment(tgui::Label::HorizontalAlignment::Left);
-	recursions_label->setText("Number of recursions");
-
-	// recursions input
-	recursions_input = tgui::EditBox::create();
-	recursions_field->add(recursions_input);
-	recursions_input->setSize({ 33, "100%" });
-	recursions_input->setPosition({ recursions_field->getSize().x - recursions_input->getSize().x, 0 });
-	recursions_input->setText(std::to_string(num_recursions));
-	recursions_input->onReturnKeyPress(&Editing::changeRecursionsField, this);
-
-	// line actions field
-	line_actions_field = tgui::Panel::create();
-	right_panel->add(line_actions_field);
-	line_actions_field->setSize(general_element_width, 40);
-	line_actions_field->setPosition({ general_padding, tgui::bindBottom(recursions_field) + general_padding });
-
-	// add line button
-	add_line_button = tgui::Button::create();
-	line_actions_field->add(add_line_button);
-	add_line_button->setSize((line_actions_field->getSize().x - general_padding) / 2, "100%");
-	add_line_button->setPosition(0, 0);
-	add_line_button->setText("add line");
-	add_line_button->onClick(&Editing::addLine, this);
-
-	// remove line button
-	remove_line_button = tgui::Button::create();
-	line_actions_field->add(remove_line_button);
-	remove_line_button->setSize((general_element_width - general_padding) / 2, "100%");
-	remove_line_button->setPosition({ tgui::bindRight(add_line_button) + general_padding, 0 });
-	remove_line_button->setText("remove line");
-	remove_line_button->onClick(&Editing::enter, this);
-
-	// measurements block
-	std::string label_names[] = { "Length", "Angle", "Position" };
-	static const int no_measurement_fields = sizeof(measurement_inputs) / sizeof(tgui::EditBox::Ptr);
-	for (int i = 0; i < no_measurement_fields; i++) {
-		// measurement fields
-		measurement_fields[i] = tgui::Panel::create();
-		right_panel->add(measurement_fields[i]);
-		measurement_fields[i]->setSize(general_element_width, 20);
-
-		// measurement labels
-		measurement_labels[i] = tgui::Label::create();
-		measurement_fields[i]->add(measurement_labels[i]);
-		measurement_labels[i]->setText(label_names[i]);
-		measurement_labels[i]->setSize("100%", "100%");
-		measurement_labels[i]->setPosition(0, 3);
-
-		// measurement inputs
-		measurement_inputs[i] = tgui::EditBox::create();
-		measurement_fields[i]->add(measurement_inputs[i]);
-		measurement_inputs[i]->setSize(120, "100%");
-		measurement_inputs[i]->setPosition(general_element_width - measurement_inputs[i]->getSize().x, 0);
-	}
-	measurement_fields[0]->setPosition(general_padding, tgui::bindBottom(line_actions_field) + general_padding);
-	measurement_fields[1]->setPosition(general_padding, tgui::bindBottom(measurement_fields[0]) + general_padding);
-	measurement_fields[2]->setPosition(general_padding, tgui::bindBottom(measurement_fields[1]) + general_padding);
-
-
-	// node selections
-	node_selections = tgui::ScrollablePanel::create();
-	right_panel->add(node_selections);
-	node_selections->setPosition({ general_padding, tgui::bindBottom(measurement_fields[2]) + general_padding });
-	
-
-	realignGUI(window_width, window_height);
 }
