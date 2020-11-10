@@ -35,7 +35,6 @@ void EditingState::exit()
 void EditingState::draw(sf::RenderTarget & target, sf::RenderStates states) const
 {
 	target.draw(*view);
-	target.draw(*data);
 }
 
 void EditingState::handleEvent(sf::Event & event)

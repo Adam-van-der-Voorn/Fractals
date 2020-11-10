@@ -19,6 +19,7 @@ public:
 private:
 	void updateNodes();
 	void updateLines();
+	void updateFractal();
 	void changeRecursionsField();
 
 	void realignTGUI(int window_width, int window_height);
@@ -30,6 +31,8 @@ private:
 	sf::VertexArray baseLine = sf::VertexArray(sf::Lines, 2);
 	std::vector<sf::CircleShape> nodes;
 	sf::VertexArray fractalLines = sf::VertexArray(sf::Lines);
+
+	sf::VertexArray fractal = sf::VertexArray(sf::Lines);
 
 
 	std::shared_ptr<tgui::Gui> tGui;

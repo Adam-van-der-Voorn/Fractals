@@ -18,8 +18,8 @@ sf::ContextSettings settings(0, 0, 8);
 sf::RenderWindow window(sf::VideoMode(900, 600), "asd", sf::Style::Default, settings);
 
 int main()
-{	
-	LineFractal fractal(0, 0, 0, 0);
+{
+	LineFractal fractal({0, 0, 0, 0});
 	StateMachine state_machine;
 	std::shared_ptr<State> viewing_state = std::make_shared<Viewing>(window);
 	std::shared_ptr<State> editing_state = std::make_shared<EditingState>(&state_machine, &fractal, &window);

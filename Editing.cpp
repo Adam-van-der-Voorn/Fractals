@@ -100,11 +100,6 @@ void Editing::handleEvent(sf::Event& event)
 	}
 }
 
-void Editing::draw(sf::RenderTarget& target, sf::RenderStates states) const
-{
-	target.draw(fractal->getFractal());
-}
-
 void Editing::recalcEditingFrameCenter(int window_width, int window_height) {
 	editing_frame_size.x = (window_width - right_panel_width);
 	editing_frame_size.y = window_height;
@@ -135,6 +130,7 @@ void Editing::addLine() {
 	lines.emplace(id_arr[0], line);
 	nodes.emplace(id_arr[1], line->getNodeA());
 	nodes.emplace(id_arr[2], line->getNodeB());
+	fractalChanged();
 	notifyAll(Event::LINES_CHANGED);
 }
 
@@ -156,6 +152,11 @@ const std::shared_ptr<EditableLine> Editing::getBaseLine() const
 const std::unordered_set<int>& Editing::getSelectedNodes() const
 {
 	return selected_nodes;
+}
+
+const LineFractal* Editing::getFractal() const
+{
+	return fractal;
 }
 
 int Editing::getNumRecursions() const
@@ -187,6 +188,7 @@ void Editing::fractalChanged()
 	}
 	fractal->setDerivedLines(final_lines);
 	fractal->generate(num_recursions);
+	notifyAll(Event::FRACTAL_CHANGED);
 }
 
 void Editing::notifyAll(Event e) const

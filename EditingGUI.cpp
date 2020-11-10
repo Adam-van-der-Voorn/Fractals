@@ -5,8 +5,11 @@
 #include "EditableLineNode.h"
 #include "debug_printing.h"
 #include "StateMachine.h"
+#include "LineFractal.h"
+#include "AbsLine.h"
 #include <unordered_set>
 #include <unordered_map>
+#include <vector>
 #include <memory>
 
 EditingGUI::EditingGUI(EditingState* state, Editing* data)
@@ -20,6 +23,8 @@ EditingGUI::EditingGUI(EditingState* state, Editing* data)
 	baseLine[1].position.y = editing->getBaseLine()->getNodeB()->getY();
 	baseLine[1].color = sf::Color::Color(80, 80, 80);
 
+	updateFractal();
+
 	tGui = std::make_shared<tgui::Gui>(*state->getRenderWindow());
 	setupTGUI(state->getRenderWindow()->getSize().x, state->getRenderWindow()->getSize().y);
 	editing->addObserver(this);
@@ -31,26 +36,24 @@ void EditingGUI::onNotify(int event_num)
 	switch (event)
 	{
 	case Editing::LINES_CHANGED:
-		// make data structs the correct size
-		assert(editing->getNodes().size() % 2 == 0 && "uneven amount of nodes");
-		nodeLines.resize(editing->getNodes().size()); // using num of nodes instead of num of lines because each line has two verts
-		nodes.resize(editing->getNodes().size());
 		updateLines();
 		updateNodes();
 		break;
 	case Editing::SELECTION_CHANGED:
-		assert(editing->getNodes().size() % 2 == 0 && "uneven amount of nodes");
-		nodes.resize(editing->getNodes().size());
 		updateNodes();
 		break;
+	case Editing::FRACTAL_CHANGED:
+		updateFractal();
+		break;
 	default:
-		assert(false && "bad enum somehow");
 		break;
 	}
 }
 
 void EditingGUI::updateNodes()
 {
+	assert(editing->getNodes().size() % 2 == 0 && "uneven amount of nodes");
+	nodes.resize(editing->getNodes().size());
 	int i = 0;
 	for (const auto& node_pair : editing->getNodes()) {
 		nodes[i].setPosition(sf::Vector2f(node_pair.second->getX(), node_pair.second->getY()));
@@ -71,6 +74,8 @@ void EditingGUI::updateNodes()
 
 void EditingGUI::updateLines()
 {
+	assert(editing->getNodes().size() % 2 == 0 && "uneven amount of nodes");
+	nodeLines.resize(editing->getNodes().size()); // using num of nodes instead of num of lines because each line has two verts
 	int i = 0;
 	for (const auto& line_pair : editing->getLines()) {
 		std::shared_ptr<EditableLineNode> node_a = line_pair.second->getNodeA();
@@ -81,6 +86,17 @@ void EditingGUI::updateLines()
 		nodeLines[i].position.x = node_b->getX();
 		nodeLines[i].position.y = node_b->getY();
 		i++;
+	}
+}
+
+void EditingGUI::updateFractal() {
+	int j = 0;
+	std::vector<AbsLine> fractal_lines = editing->getFractal()->getLines();
+	fractal.resize(fractal_lines.size() * 2);
+	for (size_t i = 0; i < fractal.getVertexCount(); i += 2) {
+		fractal[i] = sf::Vertex(sf::Vector2f(fractal_lines[j].x1, fractal_lines[j].y1));
+		fractal[i + 1] = sf::Vertex(sf::Vector2f(fractal_lines[j].x2, fractal_lines[j].y2));
+		j++;
 	}
 }
 
@@ -191,6 +207,7 @@ void EditingGUI::draw(sf::RenderTarget & target, sf::RenderStates states) const
 		target.draw(node);
 	}
 	target.draw(baseLine);
+	target.draw(fractal);
 	tGui->draw();
 }
 

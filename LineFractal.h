@@ -3,16 +3,12 @@
 #include <SFML/Graphics/VertexArray.hpp>
 #include <vector>
 #include "LFLine.h"
-
-
-struct AbsLine;
-//struct LFLine; // do later
-
+#include "AbsLine.h"
 
 class LineFractal
 {
 public:
-	LineFractal(double x1, double y1, double x2, double y2, double scale = 1, double origin_x = 0, double origin_y = 0);
+	LineFractal(AbsLine base_line, double scale = 1, double origin_x = 0, double origin_y = 0);
 
 	// getters & setters
 	void setScale(double new_scale, double scale_point_x, double scale_point_y);
@@ -29,17 +25,19 @@ public:
 	void generate(int recursions);
 
 	sf::VertexArray& getFractal();
+	const std::vector<AbsLine>& getLines() const;
 private:
-
-	double x1, y1, x2, y2, scale, origin_x, origin_y;
-
-	std::vector<double> base_lines;
-	sf::VertexArray final_lines = sf::VertexArray(sf::Lines);
-
-	void recurse(double x1, double y1, double x2, double y2, int limit);
+	void recurse(AbsLine line, int limit);
 	void transfromLine();
 
+	double scale, origin_x, origin_y;
+	AbsLine base_line;
 	std::vector<LFLine> derived_lines;
+	std::vector<AbsLine> lines;
+	sf::VertexArray final_lines = sf::VertexArray(sf::Lines);
+
+
+
 };
 
 
