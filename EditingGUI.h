@@ -7,6 +7,7 @@
 #include "EditingState.h"
 class Editing;
 class EditableLineNode;
+class WidgetHoriStack;
 
 class EditingGUI : public sf::Drawable, public Observer
 {
@@ -50,6 +51,6 @@ private:
 	tgui::Panel::Ptr measurement_fields[3];
 	tgui::EditBox::Ptr measurement_inputs[3];
 	tgui::Label::Ptr measurement_labels[3];
-	tgui::ScrollablePanel::Ptr node_selections;
+	std::shared_ptr<WidgetHoriStack> node_selections;
 };
 

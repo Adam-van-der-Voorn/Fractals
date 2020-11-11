@@ -9,27 +9,62 @@ tgui::Panel::Ptr WidgetHoriStack::getPanel()
 	return panel;
 }
 
-void WidgetHoriStack::appendWidget(tgui::Widget::Ptr widget, float xpos, float buffer)
+void WidgetHoriStack::swapStack(std::vector<tgui::Widget::Ptr>& new_widgets)
 {
-	panel->add(widget);
-	if (widgets.size() == 0) {
-		widget->setPosition(xpos, buffer);
+	// remove any widgets that are NOT in new_widgets but are in widgets
+	for (size_t i = 0; i < widgets.size(); i++) {
+		for (tgui::Widget::Ptr new_widget : new_widgets) {
+			if (widgets[i]->getWidgetName() == new_widget->getWidgetName()) {
+				continue;
+			}
+			else {
+				widgets.erase(widgets.begin() + i);
+				i--;
+			}
+
+		}
 	}
-	else {
-		widget->setPosition(xpos, tgui::bindBottom(widgets.back()) + buffer);
+
+	// check if any of the widgets in new_widgets are in widgets. if so, remove them from new_widgets
+	for (size_t i = 0; i < new_widgets.size(); i++) {
+		for (tgui::Widget::Ptr widget : widgets) {
+			if (new_widgets[i]->getWidgetName() == widget->getWidgetName()) {
+				new_widgets.erase(new_widgets.begin() + i);
+				i--;
+			}
+		}
 	}
-	widgets.push_back(widget);
+
+	// add the remaining new_widgets to the list
+	for (tgui::Widget::Ptr new_widget : new_widgets) {
+		widgets.push_back(new_widget);
+	}
+
+	reconstructPanel();
+	
 }
 
-void WidgetHoriStack::insertWidget(tgui::Widget::Ptr widget, float xpos, float buffer, int index)
+void WidgetHoriStack::reconstructPanel()
 {
+	panel->removeAllWidgets();
+	if (widgets.size() > 0) {
+		panel->add(widgets[0]);
+		widgets[0]->setPosition(left_margin, top_margin);
+		for (size_t i = 1; i < widgets.size(); i++) {
+			panel->add(widgets[i]);
+			widgets[i]->setPosition(left_margin, tgui::bindBottom(widgets[i-1]) + top_margin);
+		}
+	}
 }
 
-void WidgetHoriStack::removeWidget(int index)
+void WidgetHoriStack::setMargins(float left, float top)
 {
+	left_margin = left;
+	top_margin = top;
+	reconstructPanel();
 }
 
-void WidgetHoriStack::clearAllWidgets()
+void WidgetHoriStack::clear()
 {
 	panel->removeAllWidgets();
 	widgets.clear();

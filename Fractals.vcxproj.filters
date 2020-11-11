@@ -60,9 +60,6 @@
     <ClCompile Include="EditableLineNode.cpp">
       <Filter>Source Files\Editing</Filter>
     </ClCompile>
-    <ClCompile Include="WidgetHoriStack.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="Observer.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -73,6 +70,9 @@
       <Filter>Source Files\Editing</Filter>
     </ClCompile>
     <ClCompile Include="EditingState.cpp">
+      <Filter>Source Files\Editing</Filter>
+    </ClCompile>
+    <ClCompile Include="WidgetHoriStack.cpp">
       <Filter>Source Files\Editing</Filter>
     </ClCompile>
   </ItemGroup>
@@ -128,9 +128,6 @@
     <ClInclude Include="vertarrutil.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="WidgetHoriStack.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="Observer.h">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -141,6 +138,9 @@
       <Filter>Header Files\Editing</Filter>
     </ClInclude>
     <ClInclude Include="EditingState.h">
+      <Filter>Header Files\Editing</Filter>
+    </ClInclude>
+    <ClInclude Include="WidgetHoriStack.h">
       <Filter>Header Files\Editing</Filter>
     </ClInclude>
   </ItemGroup>

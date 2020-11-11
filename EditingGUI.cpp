@@ -6,6 +6,7 @@
 #include "debug_printing.h"
 #include "StateMachine.h"
 #include "LineFractal.h"
+#include "WidgetHoriStack.h"
 #include "AbsLine.h"
 #include "vecutil.h"
 #include "pi.h"
@@ -140,7 +141,8 @@ void EditingGUI::realignTGUI(int window_width, int window_height)
 	right_panel->setSize(editing->right_panel_width, window_height);
 	right_panel->setPosition(window_width - editing->right_panel_width, 0);
 	display_button->setPosition(editing->general_padding, window_height - editing->general_padding - display_button->getSize().y);
-	node_selections->setSize(editing->general_element_width, display_button->getPosition().y - (2 * editing->general_padding) - (measurement_fields[2]->getPosition().y + measurement_fields[2]->getSize().y));
+	tgui::Panel::Ptr p = node_selections->getPanel();
+	p->setSize(editing->general_element_width, display_button->getPosition().y - (2 * editing->general_padding) - (measurement_fields[2]->getPosition().y + measurement_fields[2]->getSize().y));
 }
 
 void EditingGUI::setupTGUI(int window_width, int window_height)
@@ -228,9 +230,15 @@ void EditingGUI::setupTGUI(int window_width, int window_height)
 
 
 	// node selections
-	node_selections = tgui::ScrollablePanel::create();
-	right_panel->add(node_selections);
-	node_selections->setPosition({ editing->general_padding, tgui::bindBottom(measurement_fields[2]) + editing->general_padding });
+	node_selections = std::make_shared<WidgetHoriStack>(tgui::ScrollablePanel::create());
+	node_selections->setMargins(0, editing->general_padding);
+	right_panel->add(node_selections->getPanel());
+	node_selections->getPanel()->setPosition({ editing->general_padding, tgui::bindBottom(measurement_fields[2]) + editing->general_padding });
+	std::vector<tgui::Widget::Ptr> v = { 
+		tgui::EditBox::create(), tgui::EditBox::create(), tgui::EditBox::create(), tgui::EditBox::create(), tgui::EditBox::create(), tgui::EditBox::create(), tgui::EditBox::create(),tgui::EditBox::create(), tgui::EditBox::create(), tgui::EditBox::create(), tgui::EditBox::create(), tgui::EditBox::create(),tgui::EditBox::create(), tgui::EditBox::create(), tgui::EditBox::create(),tgui::EditBox::create(), tgui::EditBox::create(), tgui::EditBox::create(), tgui::EditBox::create(),
+		tgui::Button::create(), tgui::Label::create(), tgui::EditBox::create() };
+	node_selections->swapStack(v);
+	//node_selections->getPanel()->add(tgui::EditBox::create());
 
 	realignTGUI(window_width, window_height);
 }
