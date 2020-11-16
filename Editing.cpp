@@ -42,9 +42,27 @@ void Editing::handleEvent(sf::Event& event)
 		if (isWithinEditingFrame(sf::Vector2f(event.mouseButton.x, event.mouseButton.y))) {
 			if (event.mouseButton.button == sf::Mouse::Button::Left) {
 				left_press_location = mouse_framepos;
-				for (auto& node : nodes) {
-					if (node.second->pointIntersection(event.mouseButton.x, event.mouseButton.y)) {
-						dragging_nodes.emplace(node.first);
+				if (selected_nodes.empty()) {
+					for (auto& node : nodes) {
+						if (node.second->pointIntersection(event.mouseButton.x, event.mouseButton.y)) {
+							dragging_nodes.emplace(node.first);
+						}
+					}
+				}
+				else {
+					bool on_any_selnode = false;
+					for (int node_id : selected_nodes) {
+						if (nodes[node_id]->pointIntersection(event.mouseButton.x, event.mouseButton.y)) {
+							dragging_nodes.insert(node_id);
+							on_any_selnode = true;
+						}
+					}
+					if (!on_any_selnode) {
+						for (auto& node : nodes) {
+							if (node.second->pointIntersection(event.mouseButton.x, event.mouseButton.y)) {
+								dragging_nodes.emplace(node.first);
+							}
+						}
 					}
 				}
 			}
@@ -87,6 +105,7 @@ void Editing::handleEvent(sf::Event& event)
 							selected_nodes.insert(node.first);
 						}
 					}
+					
 					if (DEBUG) {
 						PRINT("Seletec ids:");
 						for (int i : selected_nodes) {
@@ -116,6 +135,25 @@ sf::Vector2i Editing::getEditingFrameCenter() const
 sf::Vector2i Editing::getMousePosInFrame() const
 {
 	return mouse_framepos;
+}
+
+void Editing::setHoveredNode(int node_id)
+{
+	assert((selected_nodes.count(node_id) == 1 || node_id == -1) && "hovering over a non-selected node (or duplicate id)");
+	hovered_node = node_id;
+	notifyAll(Event::HOVERED_NODE_CHANGED);
+}
+
+int Editing::getHoveredNode() const
+{
+	return hovered_node;
+}
+
+void Editing::selectOnlyHoveredNode()
+{
+	selected_nodes.clear();
+	selected_nodes.insert(hovered_node);
+	notifyAll(Event::SELECTION_CHANGED);
 }
 
 void Editing::addLine() {

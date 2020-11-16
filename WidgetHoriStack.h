@@ -3,7 +3,7 @@
 class WidgetHoriStack
 {
 public:
-	WidgetHoriStack(tgui::Panel::Ptr panel);
+	WidgetHoriStack();
 	tgui::Panel::Ptr getPanel();
 	void swapStack(std::vector<tgui::Widget::Ptr>& new_widgets);
 	void setMargins(float left, float top);

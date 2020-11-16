@@ -5,6 +5,7 @@
 #include "EditableLineNode.h"
 #include "debug_printing.h"
 #include "StateMachine.h"
+#include "SelLineWidget.h"
 #include "LineFractal.h"
 #include "WidgetHoriStack.h"
 #include "AbsLine.h"
@@ -44,11 +45,21 @@ void EditingGUI::onNotify(int event_num)
 		break;
 	case Editing::SELECTION_CHANGED:
 		updateNodes();
+		{
+			std::vector<tgui::Widget::Ptr> widgets;
+			for (int selected_node_id : editing->getSelectedNodes()) {
+				auto widget = std::make_shared<SelLineWidget>(editing, selected_node_id, editing->general_element_width, 50);
+				widgets.push_back(widget->getPanel());
+			}
+			node_selections->swapStack(widgets);
+		}
 		break;
 	case Editing::FRACTAL_CHANGED:
 		updateFractal();
 		break;
 	case Editing::MOUSE_MOVED:
+		updateNodes();
+	case Editing::HOVERED_NODE_CHANGED:
 		updateNodes();
 	default:
 		break;
@@ -68,7 +79,10 @@ void EditingGUI::updateNodes()
 
 		nodes[i].setPosition(sf::Vector2f(node_pair.second->getX(), node_pair.second->getY()));
 
-		if (editing->getSelectedNodes().count(node_pair.first)) { // node is selected
+		if (editing->getHoveredNode() == node_pair.first) { // node is selected and hovered
+			nodes[i].setOutlineColor(sf::Color::Green);
+		}
+		else if (editing->getSelectedNodes().count(node_pair.first)) { // node is selected
 			nodes[i].setOutlineColor(sf::Color::Red);
 		}
 		else if (node_pair.second->pointIntersection(editing->getMousePosInFrame().x, editing->getMousePosInFrame().y)) {
@@ -141,8 +155,7 @@ void EditingGUI::realignTGUI(int window_width, int window_height)
 	right_panel->setSize(editing->right_panel_width, window_height);
 	right_panel->setPosition(window_width - editing->right_panel_width, 0);
 	display_button->setPosition(editing->general_padding, window_height - editing->general_padding - display_button->getSize().y);
-	tgui::Panel::Ptr p = node_selections->getPanel();
-	p->setSize(editing->general_element_width, display_button->getPosition().y - (2 * editing->general_padding) - (measurement_fields[2]->getPosition().y + measurement_fields[2]->getSize().y));
+	node_selections->getPanel()->setSize(editing->general_element_width, display_button->getPosition().y - (2 * editing->general_padding) - (measurement_fields[2]->getPosition().y + measurement_fields[2]->getSize().y));
 }
 
 void EditingGUI::setupTGUI(int window_width, int window_height)
@@ -230,15 +243,11 @@ void EditingGUI::setupTGUI(int window_width, int window_height)
 
 
 	// node selections
-	node_selections = std::make_shared<WidgetHoriStack>(tgui::ScrollablePanel::create());
+	node_selections = std::make_shared<WidgetHoriStack>();
 	node_selections->setMargins(0, editing->general_padding);
 	right_panel->add(node_selections->getPanel());
+
 	node_selections->getPanel()->setPosition({ editing->general_padding, tgui::bindBottom(measurement_fields[2]) + editing->general_padding });
-	std::vector<tgui::Widget::Ptr> v = { 
-		tgui::EditBox::create(), tgui::EditBox::create(), tgui::EditBox::create(), tgui::EditBox::create(), tgui::EditBox::create(), tgui::EditBox::create(), tgui::EditBox::create(),tgui::EditBox::create(), tgui::EditBox::create(), tgui::EditBox::create(), tgui::EditBox::create(), tgui::EditBox::create(),tgui::EditBox::create(), tgui::EditBox::create(), tgui::EditBox::create(),tgui::EditBox::create(), tgui::EditBox::create(), tgui::EditBox::create(), tgui::EditBox::create(),
-		tgui::Button::create(), tgui::Label::create(), tgui::EditBox::create() };
-	node_selections->swapStack(v);
-	//node_selections->getPanel()->add(tgui::EditBox::create());
 
 	realignTGUI(window_width, window_height);
 }

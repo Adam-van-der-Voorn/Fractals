@@ -1,29 +1,21 @@
 #include "SelLineWidget.h"
 #include "EditableLineNode.h"
+#include "Editing.h"
 #include <unordered_map>
-void highlight(std::unordered_map<int, std::shared_ptr<EditableLineNode>>* nodes, int node_id) {
-	//(*nodes)[node_id]->getDrNode().setOutlineColor(sf::Color::Green);
-}
 
-void unhighlight(std::unordered_map<int, std::shared_ptr<EditableLineNode>>* nodes, int node_id)
-{
-	//(*nodes)[node_id]->getDrNode().setOutlineColor(sf::Color::Red);
-}
+class Editing;
 
-void select(int node_id)
-{
-
-}
-SelLineWidget::SelLineWidget(std::unordered_map<int, std::shared_ptr<EditableLineNode>>& nodes, std::unordered_set<int>& selected_nodes,
-	int node_id, float width, float height, float xpos, float ypos)
-	: nodes(nodes), selected_nodes(selected_nodes), node_id(node_id)
+SelLineWidget::SelLineWidget(Editing* editing, int node_id, float width, float height, float xpos, float ypos)
+	: node_id(node_id)
 {
 	panel->setPosition(xpos, ypos);
 	panel->setSize(width, height);
+	panel->setWidgetName(std::to_string(node_id));
 	panel->add(select_button);
 	select_button->setSize("100%", "100%");
-	select_button->onMouseEnter(highlight, &nodes, node_id);
-	select_button->onMouseLeave(unhighlight, &nodes, node_id);
+	select_button->onClick(&Editing::selectOnlyHoveredNode, editing);
+	select_button->onMouseEnter(&Editing::setHoveredNode, editing, node_id);
+    select_button->onMouseLeave(&Editing::setHoveredNode, editing, -1);
 }
 
 tgui::Panel::Ptr SelLineWidget::getPanel()

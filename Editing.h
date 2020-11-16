@@ -37,12 +37,16 @@ public:
 	void recalcEditingFrameCenter(int window_width, int window_height);
 	void fractalChanged();
 
+	void setHoveredNode(int node_id);
+	int getHoveredNode() const;
+	void selectOnlyHoveredNode();
+
 	void addLine();
 
 	void addObserver(Observer* observer);
 
 	enum Event{
-		LINES_CHANGED, SELECTION_CHANGED, FRACTAL_CHANGED, MOUSE_MOVED
+		LINES_CHANGED, SELECTION_CHANGED, FRACTAL_CHANGED, MOUSE_MOVED, HOVERED_NODE_CHANGED
 	};
 
 	const int right_panel_width = 200;
@@ -59,6 +63,10 @@ private:
 	std::unordered_set<int> dragging_nodes;
 	std::unordered_map<int, std::shared_ptr<EditableLine>> lines;
 	std::shared_ptr<EditableLine> base_line;
+
+	// the id of the node that the user is hovering over in the gui
+	int hovered_node = 0;
+
 	LineFractal* fractal;
 	EditingState* state;
 
