@@ -12,6 +12,7 @@
 #include "vecutil.h"
 
 //TODO
+// - add subject class and allw it to remove observers
 // - add undo
 // - fix floating point innaccuaracies when zooming in very large amounts
 sf::ContextSettings settings(0, 0, 8);
@@ -26,7 +27,6 @@ int main()
 	state_machine.addState("viewing", viewing_state.get());
 	state_machine.addState("editing", editing_state.get());
 	state_machine.changeState("editing");
-
 	while (window.isOpen()) {
 		sf::Event event;
 		while (window.pollEvent(event)) {

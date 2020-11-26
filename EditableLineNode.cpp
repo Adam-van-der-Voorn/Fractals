@@ -3,7 +3,7 @@
 #include "vecutil.h"
 #include "LFLine.h"
 
-EditableLineNode::EditableLineNode(int id, double x, double y, EditableLine* line) : id(id), xpos(x), ypos(y), line(line)
+EditableLineNode::EditableLineNode(int id, double x, double y, bool is_front, EditableLine* line) : id(id), xpos(x), ypos(y), is_front(is_front), line(line)
 {
 }
 
@@ -48,6 +48,14 @@ double EditableLineNode::getX() const
 double EditableLineNode::getY() const
 {
 	return ypos;
+}
+bool EditableLineNode::isFront() const
+{
+	return is_front;
+}
+EditableLine* EditableLineNode::getLine() const
+{
+	return line;
 }
 int EditableLineNode::getID() const
 {

@@ -31,7 +31,6 @@ EditingGUI::EditingGUI(EditingState* state, Editing* data)
 
 	tGui = std::make_shared<tgui::Gui>(*state->getRenderWindow());
 	setupTGUI(state->getRenderWindow()->getSize().x, state->getRenderWindow()->getSize().y);
-	editing->addObserver(this);
 }
 
 void EditingGUI::onNotify(int event_num)
@@ -49,7 +48,7 @@ void EditingGUI::onNotify(int event_num)
 			std::vector<tgui::Widget::Ptr> widgets;
 			for (int selected_node_id : editing->getSelectedNodes()) {
 				auto widget = std::make_shared<SelLineWidget>(editing, selected_node_id, editing->general_element_width, 50);
-				widgets.push_back(widget->getPanel());
+				widgets.push_back(widget);
 			}
 			node_selections->swapStack(widgets);
 		}
@@ -163,7 +162,7 @@ void EditingGUI::setupTGUI(int window_width, int window_height)
 	// right panel
 	right_panel = tgui::Panel::create();
 	tGui->add(right_panel);
-	right_panel->setInheritedOpacity(0.8);
+	right_panel->setInheritedOpacity(1);
 
 	// display button
 	display_button = tgui::Button::create();
@@ -240,7 +239,6 @@ void EditingGUI::setupTGUI(int window_width, int window_height)
 	measurement_fields[0]->setPosition(editing->general_padding, tgui::bindBottom(line_actions_field) + editing->general_padding);
 	measurement_fields[1]->setPosition(editing->general_padding, tgui::bindBottom(measurement_fields[0]) + editing->general_padding);
 	measurement_fields[2]->setPosition(editing->general_padding, tgui::bindBottom(measurement_fields[1]) + editing->general_padding);
-
 
 	// node selections
 	node_selections = std::make_shared<WidgetHoriStack>();

@@ -76,14 +76,6 @@ void Editing::handleEvent(sf::Event& event)
 				nodes[node_id]->translate(event.mouseMove.x - mouse_framepos.x, event.mouseMove.y - mouse_framepos.y);
 			}
 			if (node_moved) {
-				if (DEBUG) {
-					int i = 0;
-					for (auto l : lines) {
-						LFLine lfl = l.second->toLFLine(base_line->toAbsLine());
-						PRINT(i << ": " << lfl.distance << " | " << lfl.angle1 << " | " << lfl.length << " | " << lfl.angle2);
-						i++;
-					}
-				}
 				notifyAll(Event::LINES_CHANGED);
 				fractalChanged();
 			}
@@ -215,7 +207,14 @@ sf::Vector2i Editing::getEditingFrameSize() const
 
 void Editing::addObserver(Observer* observer)
 {
-	observers.insert(observer);
+	observers.push_back(observer);
+	PRINT("observer added");
+}
+
+void Editing::removeObserver(Observer* observer)
+{
+	observers.remove(observer);
+	PRINT("Observer removed");
 }
 
 void Editing::fractalChanged()

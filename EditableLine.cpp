@@ -8,8 +8,8 @@
 
 EditableLine::EditableLine(int line_id, int node_id_1, int node_id_2, AbsLine line) : id(line_id)
 {
-	a = std::make_shared<EditableLineNode>(node_id_1, line.x1, line.y1, this);
-	b = std::make_shared<EditableLineNode>(node_id_2, line.x2, line.y2, this);
+	a = std::make_shared<EditableLineNode>(node_id_1, line.x1, line.y1, false, this);
+	b = std::make_shared<EditableLineNode>(node_id_2, line.x2, line.y2, true, this);
 }
 
 std::shared_ptr<EditableLineNode> EditableLine::getNodeA() const

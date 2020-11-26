@@ -40,7 +40,7 @@ void WidgetHoriStack::swapStack(std::vector<tgui::Widget::Ptr>& new_widgets)
 
 	// add the remaining new_widgets to the list
 	for (tgui::Widget::Ptr new_widget : new_widgets) {
-		widgets.push_back(new_widget);
+		widgets.emplace_back(new_widget);
 	}
 
 	reconstructPanel();

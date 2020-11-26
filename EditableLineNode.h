@@ -12,7 +12,7 @@ class EditableLineNode
 {
 public:
 
-	EditableLineNode(int id, double x, double y, EditableLine* line);
+	EditableLineNode(int id, double x, double y, bool is_front, EditableLine* line);
 
 	/**
 	\param pos the position to check
@@ -65,6 +65,16 @@ public:
 	double getY() const;
 
 	/**
+	\return true if thos node is at the front of its line;
+	**/
+	bool isFront() const;
+
+	/**
+	\return the line this node is a part of
+	**/
+	EditableLine* getLine() const;
+
+	/**
 	\return the id of the node
 	**/
 	int getID() const;
@@ -74,6 +84,7 @@ public:
 private:
 	int id;
 	EditableLine* line;
+	bool is_front;
 	double xpos, ypos;
 };
 

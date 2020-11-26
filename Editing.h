@@ -44,6 +44,7 @@ public:
 	void addLine();
 
 	void addObserver(Observer* observer);
+	void removeObserver(Observer* observer);
 
 	enum Event{
 		LINES_CHANGED, SELECTION_CHANGED, FRACTAL_CHANGED, MOUSE_MOVED, HOVERED_NODE_CHANGED
@@ -57,7 +58,7 @@ private:
 	void notifyAll(Event e) const;
 	bool isWithinEditingFrame(sf::Vector2f point) const;
 
-	std::unordered_set<Observer*> observers;
+	std::list<Observer*> observers;
 	std::unordered_map<int, std::shared_ptr<EditableLineNode>> nodes;
 	std::unordered_set<int> selected_nodes;
 	std::unordered_set<int> dragging_nodes;
