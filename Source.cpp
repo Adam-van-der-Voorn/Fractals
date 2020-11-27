@@ -11,8 +11,12 @@
 
 #include "vecutil.h"
 
+
+// done
+// added subject class
+// made fractals adaptable
+
 //TODO
-// - add subject class and allw it to remove observers
 // - add undo
 // - fix floating point innaccuaracies when zooming in very large amounts
 sf::ContextSettings settings(0, 0, 8);

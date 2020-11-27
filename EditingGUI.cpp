@@ -252,12 +252,13 @@ void EditingGUI::setupTGUI(int window_width, int window_height)
 
 void EditingGUI::draw(sf::RenderTarget & target, sf::RenderStates states) const
 {
+	target.draw(fractal);
+
 	target.draw(nodeLines);
 	for (auto& node : nodes) {
 		target.draw(node);
 	}
 	target.draw(baseLine);
-	target.draw(fractal);
 	tGui->draw();
 }
 
@@ -277,7 +278,7 @@ void EditingGUI::changeRecursionsField() {
 	else {
 		int new_num = new_val.toInt();
 		if (new_num != editing->getNumRecursions()) {
-			const int max_val = 20;
+			constexpr int max_val = 9999;
 			if (new_num > max_val) {
 				new_num = max_val;
 				recursions_input->setText(std::to_string(new_num));

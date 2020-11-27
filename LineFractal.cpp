@@ -4,6 +4,7 @@
 #include "LFLine.h"
 #include "AbsLine.h"
 #include <memory>
+#include <queue>
 #include "debug_printing.h"
 #include "LineFractal.h"
 
@@ -19,19 +20,19 @@ LineFractal::LineFractal(AbsLine base_line, double scale, double origin_x, doubl
 
 void LineFractal::recurse(AbsLine line, int limit)
 {
-	if (limit == 0) {
-
+	double line_length = lineLength(line);
+	if (limit == 0 || line_length < 2) {
 		lines.push_back(line);
 	}
 	else {
-		double line_angle = lineAngle(line), line_length = lineLength(line);
+		double line_angle = lineAngle(line);
 		for (size_t i = 0; i < derived_lines.size(); i++) {
+			// the length of the child line
+			double b1 = line_length * derived_lines[i].length;
 			// the distace from the start point of the parent line to the start point of this child line
 			double a1 = line_length * derived_lines[i].distance; 
 			// the angle from the start point of the parent line to the start point of this child line
 			double a2 = line_angle + derived_lines[i].angle1;
-			// the length of the child line
-			double b1 = line_length * derived_lines[i].length;
 			// the angle of the child line
 			double b2 = line_angle + derived_lines[i].angle2;
 
@@ -55,6 +56,51 @@ void LineFractal::generate(int recursions)
 	lines.clear();
 	recurse(base_line, recursions);
 	final_lines.resize(lines.size()*2); // resize array length, not scaling
+	transfromLine();
+}
+
+// 1 step = 100 lines
+void LineFractal::generateIter(int steps)
+{
+	steps *= 100;
+	lines.clear();
+	std::queue<AbsLine> line_queue;
+	line_queue.push(base_line);
+	while (!line_queue.empty() && steps > 0) {
+		AbsLine current_line = line_queue.front();
+		line_queue.pop();
+		double line_length = lineLength(current_line);
+		if (line_length < 2) {
+			lines.push_back(current_line);
+		}
+		else {
+			double line_angle = lineAngle(current_line);
+			for (size_t i = 0; i < derived_lines.size(); i++) {
+				// the length of the child line
+				double b1 = line_length * derived_lines[i].length;
+				// the distace from the start point of the parent line to the start point of this child line
+				double a1 = line_length * derived_lines[i].distance;
+				// the angle from the start point of the parent line to the start point of this child line
+				double a2 = line_angle + derived_lines[i].angle1;
+				// the angle of the child line
+				double b2 = line_angle + derived_lines[i].angle2;
+
+				AbsLine new_line;
+				new_line.x1 = current_line.x1 + lendirX(a1, a2);
+				new_line.y1 = current_line.y1 + lendirY(a1, a2);
+				new_line.x2 = new_line.x1 + lendirX(b1, b2);
+				new_line.y2 = new_line.y1 + lendirY(b1, b2);
+				if (derived_lines[i].recursing) {
+					line_queue.push(new_line);
+				}
+				else {
+					lines.push_back(new_line);
+				}
+			}
+		}
+		steps--;
+	}
+	final_lines.resize(lines.size() * 2); // resize array length, not scaling
 	transfromLine();
 }
 

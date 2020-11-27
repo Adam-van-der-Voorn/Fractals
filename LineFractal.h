@@ -23,6 +23,7 @@ public:
 	void translate(double translation_x, double translation_y);
 
 	void generate(int recursions);
+	void generateIter(int steps);
 
 	sf::VertexArray& getFractal();
 	const std::vector<AbsLine>& getLines() const;

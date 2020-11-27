@@ -1,5 +1,5 @@
 #pragma once
-#include "State.h"
+#include "Subject.h"
 #include <SFML/Graphics/Drawable.hpp>
 #include <SFML/Graphics/RenderWindow.hpp>
 #include <SFML/Graphics/RenderTarget.hpp>
@@ -17,7 +17,7 @@ class StateMachine;
 class Observer;
 class EditingState;
 
-class Editing
+class Editing : public Subject
 {
 public:
 	Editing(EditingState* state, LineFractal* fractal);

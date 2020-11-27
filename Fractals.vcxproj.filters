@@ -140,6 +140,9 @@
     <ClInclude Include="WidgetHoriStack.h">
       <Filter>Header Files\Editing</Filter>
     </ClInclude>
+    <ClInclude Include="Subject.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Text Include="other algos.txt" />

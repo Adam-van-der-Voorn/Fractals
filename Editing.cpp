@@ -225,7 +225,7 @@ void Editing::fractalChanged()
 		final_lines.push_back(lfl);
 	}
 	fractal->setDerivedLines(final_lines);
-	fractal->generate(num_recursions);
+	fractal->generateIter(num_recursions);
 	notifyAll(Event::FRACTAL_CHANGED);
 }
 
