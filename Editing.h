@@ -1,5 +1,6 @@
 #pragma once
 #include "Subject.h"
+#include "Point.h"
 #include <SFML/Graphics/Drawable.hpp>
 #include <SFML/Graphics/RenderWindow.hpp>
 #include <SFML/Graphics/RenderTarget.hpp>
@@ -16,6 +17,7 @@ class LineFractal;
 class StateMachine;
 class Observer;
 class EditingState;
+struct Point;
 
 class Editing : public Subject
 {
@@ -36,12 +38,16 @@ public:
 	sf::Vector2i getMousePosInFrame() const;
 	void recalcEditingFrameCenter(int window_width, int window_height);
 	void fractalChanged();
+	void moveNode(int node_id, double translation_x, double translation_y);
 
 	void setHoveredNode(int node_id);
 	int getHoveredNode() const;
+	void clearHoveredNode();
 	void selectOnlyHoveredNode();
+	bool nodeIsHovered() const;
 
 	void addLine();
+	void removeSelectedLines();
 
 	void addObserver(Observer* observer);
 	void removeObserver(Observer* observer);
@@ -61,12 +67,12 @@ private:
 	std::list<Observer*> observers;
 	std::unordered_map<int, std::shared_ptr<EditableLineNode>> nodes;
 	std::unordered_set<int> selected_nodes;
-	std::unordered_set<int> dragging_nodes;
+	std::unordered_map<int, Point> dragging_nodes;
 	std::unordered_map<int, std::shared_ptr<EditableLine>> lines;
 	std::shared_ptr<EditableLine> base_line;
 
 	// the id of the node that the user is hovering over in the gui
-	int hovered_node = 0;
+	int hovered_node;
 
 	LineFractal* fractal;
 	EditingState* state;

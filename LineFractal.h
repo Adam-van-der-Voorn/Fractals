@@ -24,6 +24,8 @@ public:
 
 	void generate(int recursions);
 	void generateIter(int steps);
+	void generateIter(double bbox_x, double bbox_y, double bbox_width, double bbox_height);
+
 
 	sf::VertexArray& getFractal();
 	const std::vector<AbsLine>& getLines() const;

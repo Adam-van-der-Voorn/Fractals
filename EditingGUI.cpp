@@ -19,12 +19,12 @@
 EditingGUI::EditingGUI(EditingState* state, Editing* data)
 	: state(state), editing(data)
 {
-	baseLine[0].position.x = editing->getBaseLine()->getNodeA()->getX();
-	baseLine[0].position.y = editing->getBaseLine()->getNodeA()->getY();
+	baseLine[0].position.x = editing->getBaseLine()->getBackNode()->getX();
+	baseLine[0].position.y = editing->getBaseLine()->getBackNode()->getY();
 	baseLine[0].color = sf::Color::Color(80, 80, 80);
 
-	baseLine[1].position.x = editing->getBaseLine()->getNodeB()->getX();
-	baseLine[1].position.y = editing->getBaseLine()->getNodeB()->getY();
+	baseLine[1].position.x = editing->getBaseLine()->getFrontNode()->getX();
+	baseLine[1].position.y = editing->getBaseLine()->getFrontNode()->getY();
 	baseLine[1].color = sf::Color::Color(80, 80, 80);
 
 	updateFractal();
@@ -107,10 +107,10 @@ void EditingGUI::updateLines()
 	}
 	int i = 0;
 	for (const auto& line_pair : editing->getLines()) {
-		double node_a_x = line_pair.second->getNodeA()->getX();
-		double node_a_y = line_pair.second->getNodeA()->getY();
-		double node_b_x = line_pair.second->getNodeB()->getX();
-		double node_b_y = line_pair.second->getNodeB()->getY();
+		double node_a_x = line_pair.second->getBackNode()->getX();
+		double node_a_y = line_pair.second->getBackNode()->getY();
+		double node_b_x = line_pair.second->getFrontNode()->getX();
+		double node_b_y = line_pair.second->getFrontNode()->getY();
 
 		// centerline
 		nodeLines[i].position.x = node_a_x;
@@ -143,8 +143,8 @@ void EditingGUI::updateFractal() {
 	std::vector<AbsLine> fractal_lines = editing->getFractal()->getLines();
 	fractal.resize(fractal_lines.size() * 2);
 	for (size_t i = 0; i < fractal.getVertexCount(); i += 2) {
-		fractal[i] = sf::Vertex(sf::Vector2f(fractal_lines[j].x1, fractal_lines[j].y1));
-		fractal[i + 1] = sf::Vertex(sf::Vector2f(fractal_lines[j].x2, fractal_lines[j].y2));
+		fractal[i] = sf::Vertex(sf::Vector2f(fractal_lines[j].back_x, fractal_lines[j].back_y));
+		fractal[i + 1] = sf::Vertex(sf::Vector2f(fractal_lines[j].head_x, fractal_lines[j].head_y));
 		j++;
 	}
 }
@@ -213,6 +213,7 @@ void EditingGUI::setupTGUI(int window_width, int window_height)
 	remove_line_button->setSize((editing->general_element_width - editing->general_padding) / 2, "100%");
 	remove_line_button->setPosition({ tgui::bindRight(add_line_button) + editing->general_padding, 0 });
 	remove_line_button->setText("remove line");
+	remove_line_button->onClick(&Editing::removeSelectedLines, editing);
 
 	// measurements block
 	std::string label_names[] = { "Length", "Angle", "Position" };
@@ -260,6 +261,16 @@ void EditingGUI::draw(sf::RenderTarget & target, sf::RenderStates states) const
 	}
 	target.draw(baseLine);
 	tGui->draw();
+
+	if (DEBUG) {
+		sf::RectangleShape tmp;
+		tmp.setOutlineColor(sf::Color::Magenta);
+		tmp.setOutlineThickness(1.0f);
+		tmp.setFillColor(sf::Color::Transparent);
+		tmp.setPosition(editing->getMousePosInFrame().x, editing->getMousePosInFrame().y);
+		tmp.setSize({10, 10});
+		target.draw(tmp);
+	}
 }
 
 void EditingGUI::handleEvent(sf::Event& event)

@@ -5,6 +5,7 @@
 #include "AbsLine.h"
 #include <memory>
 #include <queue>
+#include <cassert>
 #include "debug_printing.h"
 #include "LineFractal.h"
 
@@ -37,10 +38,10 @@ void LineFractal::recurse(AbsLine line, int limit)
 			double b2 = line_angle + derived_lines[i].angle2;
 
 			AbsLine new_line;
-			new_line.x1 = line.x1 + lendirX(a1, a2);
-			new_line.y1 = line.y1 + lendirY(a1, a2);
-			new_line.x2 = new_line.x1 + lendirX(b1, b2);
-			new_line.y2 = new_line.y1 + lendirY(b1, b2);
+			new_line.back_x = line.back_x + lendirX(a1, a2);
+			new_line.back_y = line.back_y + lendirY(a1, a2);
+			new_line.head_x = new_line.back_x + lendirX(b1, b2);
+			new_line.head_y = new_line.back_y + lendirY(b1, b2);
 			if (derived_lines[i].recursing) {
 				recurse(new_line, limit - 1);
 			}
@@ -86,10 +87,10 @@ void LineFractal::generateIter(int steps)
 				double b2 = line_angle + derived_lines[i].angle2;
 
 				AbsLine new_line;
-				new_line.x1 = current_line.x1 + lendirX(a1, a2);
-				new_line.y1 = current_line.y1 + lendirY(a1, a2);
-				new_line.x2 = new_line.x1 + lendirX(b1, b2);
-				new_line.y2 = new_line.y1 + lendirY(b1, b2);
+				new_line.back_x = current_line.back_x + lendirX(a1, a2);
+				new_line.back_y = current_line.back_y + lendirY(a1, a2);
+				new_line.head_x = new_line.back_x + lendirX(b1, b2);
+				new_line.head_y = new_line.back_y + lendirY(b1, b2);
 				if (derived_lines[i].recursing) {
 					line_queue.push(new_line);
 				}
@@ -104,7 +105,55 @@ void LineFractal::generateIter(int steps)
 	transfromLine();
 }
 
+void LineFractal::generateIter(double bbox_x, double bbox_y, double bbox_width, double bbox_height)
+{
+	lines.clear();
+	std::queue<AbsLine> line_queue;
+	line_queue.push(base_line);
+	while (!line_queue.empty()) {
+		AbsLine current_line = line_queue.front();
+		line_queue.pop();
+		double line_length = lineLength(current_line);
+		if (line_length < 2) {
+			lines.push_back(current_line);
+		}
+		else {
+			double line_angle = lineAngle(current_line);
+			for (size_t i = 0; i < derived_lines.size(); i++) {
+				// the length of the child line
+				double b1 = line_length * derived_lines[i].length;
+				// the distace from the start point of the parent line to the start point of this child line
+				double a1 = line_length * derived_lines[i].distance;
+				// the angle from the start point of the parent line to the start point of this child line
+				double a2 = line_angle + derived_lines[i].angle1;
+				// the angle of the child line
+				double b2 = line_angle + derived_lines[i].angle2;
+
+				AbsLine new_line;
+				new_line.back_x = current_line.back_x + lendirX(a1, a2);
+				new_line.back_y = current_line.back_y + lendirY(a1, a2);
+				new_line.head_x = new_line.back_x + lendirX(b1, b2);
+				new_line.head_y = new_line.back_y + lendirY(b1, b2);
+				if (derived_lines[i].recursing) {
+					line_queue.push(new_line);
+				}
+				else {
+					lines.push_back(new_line);
+				}
+			}
+		}
+	}
+	final_lines.resize(lines.size() * 2); // resize array length, not scaling
+	transfromLine();
+}
+
 void LineFractal::setDerivedLines(std::vector<LFLine>& lines) {
+	if (DEBUG) {
+		double base_line_len = lineLength(base_line);
+		for (LFLine line : lines) {
+			assert(line.length < base_line_len && "derived line length cannot be > base line length");
+		}
+	}
 	derived_lines = lines;
 }
 
@@ -127,8 +176,8 @@ void LineFractal::transfromLine() {
 	for (size_t i = 0; i < final_lines.getVertexCount(); i+=2) {
 		//float transformed_x = (float)((lines[j] * scale) + origin_x);
 		//float transformed_y = (float)((lines[j + 1] * scale) + origin_y);
-		final_lines[i] = sf::Vertex(sf::Vector2f(lines[j].x1, lines[j].y1));
-		final_lines[i+1] = sf::Vertex(sf::Vector2f(lines[j].x2, lines[j].y2));
+		final_lines[i] = sf::Vertex(sf::Vector2f(lines[j].back_x, lines[j].back_y));
+		final_lines[i+1] = sf::Vertex(sf::Vector2f(lines[j].head_x, lines[j].head_y));
 		j++;
 	}
 }

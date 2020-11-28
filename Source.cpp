@@ -11,11 +11,6 @@
 
 #include "vecutil.h"
 
-
-// done
-// added subject class
-// made fractals adaptable
-
 //TODO
 // - add undo
 // - fix floating point innaccuaracies when zooming in very large amounts

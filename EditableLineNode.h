@@ -52,7 +52,7 @@ public:
 	Sets the recusion status for this nodes line.
 	If true the line will recurse.
 	**/
-	void setRecursive(bool b);
+	void setRecursive(bool front_node);
 
 	/**
 	\return the x position of this node
@@ -73,6 +73,11 @@ public:
 	\return the line this node is a part of
 	**/
 	EditableLine* getLine() const;
+
+	/**
+	\return the other node on this nodes line
+	**/
+	std::shared_ptr<EditableLineNode> getOtherNode() const;
 
 	/**
 	\return the id of the node

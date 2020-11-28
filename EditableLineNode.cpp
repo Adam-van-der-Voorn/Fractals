@@ -36,7 +36,7 @@ void EditableLineNode::setAngle(double angle)
 {
 }
 
-void EditableLineNode::setRecursive(bool b)
+void EditableLineNode::setRecursive(bool front_node)
 {
 
 }
@@ -56,6 +56,15 @@ bool EditableLineNode::isFront() const
 EditableLine* EditableLineNode::getLine() const
 {
 	return line;
+}
+std::shared_ptr<EditableLineNode> EditableLineNode::getOtherNode() const
+{
+	if (isFront()) {
+		return line->getBackNode();
+	}
+	else {
+		return line->getFrontNode();
+	}
 }
 int EditableLineNode::getID() const
 {

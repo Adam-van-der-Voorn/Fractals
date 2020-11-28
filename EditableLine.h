@@ -19,14 +19,14 @@ public:
 	EditableLine(int line_id, int node_id_1, int node_id_2, AbsLine line);
 	
 	/**
-	\return node a
+	\return the back node
 	**/
-	std::shared_ptr<EditableLineNode> getNodeA() const;
+	std::shared_ptr<EditableLineNode> getBackNode() const;
 
 	/**
-	\return node b
+	\return the front node
 	**/
-	std::shared_ptr<EditableLineNode> getNodeB() const;
+	std::shared_ptr<EditableLineNode> getFrontNode() const;
 
 	/**
 	Sets the recusion status for this line.
@@ -44,11 +44,16 @@ public:
 	\return the absolute line
 	**/
 	AbsLine toAbsLine() const;
+
+	/**
+	\return this lines ID
+	**/
+	int getID() const;
 	
 private:
 	int id;
-	std::shared_ptr<EditableLineNode> a;
-	std::shared_ptr<EditableLineNode> b;
+	std::shared_ptr<EditableLineNode> back_node;
+	std::shared_ptr<EditableLineNode> front_node;
 	bool recursive = true;
 };
 

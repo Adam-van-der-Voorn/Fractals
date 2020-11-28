@@ -6,40 +6,45 @@
 #include <memory>
 #include <cassert>
 
-EditableLine::EditableLine(int line_id, int node_id_1, int node_id_2, AbsLine line) : id(line_id)
+EditableLine::EditableLine(int line_id, int back_node_id, int front_node_id, AbsLine line) : id(line_id)
 {
-	a = std::make_shared<EditableLineNode>(node_id_1, line.x1, line.y1, false, this);
-	b = std::make_shared<EditableLineNode>(node_id_2, line.x2, line.y2, true, this);
+	back_node = std::make_shared<EditableLineNode>(back_node_id, line.back_x, line.back_y, false, this);
+	front_node = std::make_shared<EditableLineNode>(front_node_id, line.head_x, line.head_y, true, this);
 }
 
-std::shared_ptr<EditableLineNode> EditableLine::getNodeA() const
+std::shared_ptr<EditableLineNode> EditableLine::getBackNode() const
 {
-	return a;
+	return back_node;
 }
 
-std::shared_ptr<EditableLineNode> EditableLine::getNodeB() const
+std::shared_ptr<EditableLineNode> EditableLine::getFrontNode() const
 {
-	return b;
+	return front_node;
 }
 
-void EditableLine::setRecursive(bool b)
+void EditableLine::setRecursive(bool front_node)
 {
-	recursive = b;
+	recursive = front_node;
 }
 
 LFLine EditableLine::toLFLine(AbsLine base_line) const
 {
 	double base_line_len = lineLength(base_line);
 	double base_line_angle = lineAngle(base_line);
-	double distance = distanceBetweenAB(base_line.x1, base_line.y1, a->getX(), a->getY()) / base_line_len;
-	double angle1 = angleBetweenAB(base_line.x1, base_line.y1, a->getX(), a->getY()) - base_line_angle;
-	double length = distanceBetweenAB(a->getX(), a->getY(), b->getX(), b->getY()) / base_line_len;
-	double angle2 = angleBetweenAB(a->getX(), a->getY(), b->getX(), b->getY()) - base_line_angle;
+	double distance = distanceBetweenAB(base_line.back_x, base_line.back_y, back_node->getX(), back_node->getY()) / base_line_len;
+	double angle1 = angleBetweenAB(base_line.back_x, base_line.back_y, back_node->getX(), back_node->getY()) - base_line_angle;
+	double length = distanceBetweenAB(back_node->getX(), back_node->getY(), front_node->getX(), front_node->getY()) / base_line_len;
+	double angle2 = angleBetweenAB(back_node->getX(), back_node->getY(), front_node->getX(), front_node->getY()) - base_line_angle;
 	return { distance, angle1, length, angle2, recursive};
 }
 
 AbsLine EditableLine::toAbsLine() const
 {
-	return { a->getX(), a->getY(), b->getX(), b->getY() };
+	return { back_node->getX(), back_node->getY(), front_node->getX(), front_node->getY() };
+}
+
+int EditableLine::getID() const
+{
+	return id;
 }
 

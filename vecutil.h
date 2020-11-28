@@ -4,9 +4,9 @@
 #include <cmath>
 #include <SFML/System/Vector2.hpp>
 
-inline float angleBetweenAB(sf::Vector2f a, sf::Vector2f b) {
-	float line_angle = atanf((a.y - b.y) / (a.x - b.x));
-	if (a.x >= b.x) {
+inline float angleBetweenAB(sf::Vector2f back_node, sf::Vector2f front_node) {
+	float line_angle = atanf((back_node.y - front_node.y) / (back_node.x - front_node.x));
+	if (back_node.x >= front_node.x) {
 		line_angle += m_pi;
 	}
 	return line_angle;
@@ -21,8 +21,8 @@ inline double angleBetweenAB(double ax, double ay, double bx, double by) {
 }
 
 inline double lineAngle(AbsLine line) {
-	double line_angle = atanf((line.y1 - line.y2) / (line.x1 - line.x2));
-	if (line.x1 >= line.x2) {
+	double line_angle = atanf((line.back_y - line.head_y) / (line.back_x - line.head_x));
+	if (line.back_x >= line.head_x) {
 		line_angle += m_pi;
 	}
 	return line_angle;
@@ -37,7 +37,7 @@ inline double distanceBetweenAB(double ax, double ay, double bx, double by) {
 }
 
 inline double lineLength(AbsLine line) {
-	return sqrt(pow(line.x1 - line.x2, 2) + pow(line.y1 - line.y2, 2));
+	return sqrt(pow(line.back_x - line.head_x, 2) + pow(line.back_y - line.head_y, 2));
 }
 
 /*
