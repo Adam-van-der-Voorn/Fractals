@@ -17,10 +17,20 @@ public:
 	SelLineWidget(Editing* editing, int node_id, float width, float height);
 	~SelLineWidget();
 	SelLineWidget(const SelLineWidget&); 
-	void onNotify(int event_num);
+
+	// Inherited via observer
+	void onNotify(int event_num) override;
+
+	/**
+	Redraws the icon to match the node paired with this widget
+	**/
 	void redrawIcon();
 
-	// Inherited via Widget
+	// Inherited via tgui::Widget
+	/**
+	creates a copy of this Panel, even if its static type is widget.
+	if you know the type is panel, you can use the copy constructor.
+	**/
 	tgui::Widget::Ptr clone() const override;
 
 private:

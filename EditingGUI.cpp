@@ -19,12 +19,12 @@
 EditingGUI::EditingGUI(EditingState* state, Editing* data)
 	: state(state), editing(data)
 {
-	baseLine[0].position.x = editing->getBaseLine()->getBackNode()->getX();
-	baseLine[0].position.y = editing->getBaseLine()->getBackNode()->getY();
+	baseLine[0].position.x = editing->getBaseLine()->getBackNode()->getPos().x;
+	baseLine[0].position.y = editing->getBaseLine()->getBackNode()->getPos().y;
 	baseLine[0].color = sf::Color::Color(80, 80, 80);
 
-	baseLine[1].position.x = editing->getBaseLine()->getFrontNode()->getX();
-	baseLine[1].position.y = editing->getBaseLine()->getFrontNode()->getY();
+	baseLine[1].position.x = editing->getBaseLine()->getFrontNode()->getPos().x;
+	baseLine[1].position.y = editing->getBaseLine()->getFrontNode()->getPos().y;
 	baseLine[1].color = sf::Color::Color(80, 80, 80);
 
 	updateFractal();
@@ -76,7 +76,7 @@ void EditingGUI::updateNodes()
 		nodes[i].setOutlineThickness(1.0f);
 		nodes[i].setOrigin(sf::Vector2f(EditableLineNode::NODE_RADIUS, EditableLineNode::NODE_RADIUS));
 
-		nodes[i].setPosition(sf::Vector2f(node_pair.second->getX(), node_pair.second->getY()));
+		nodes[i].setPosition(sf::Vector2f(node_pair.second->getPos().x, node_pair.second->getPos().y));
 
 		if (editing->getHoveredNode() == node_pair.first) { // node is selected and hovered
 			nodes[i].setOutlineColor(sf::Color::Green);
@@ -84,7 +84,7 @@ void EditingGUI::updateNodes()
 		else if (editing->getSelectedNodes().count(node_pair.first)) { // node is selected
 			nodes[i].setOutlineColor(sf::Color::Red);
 		}
-		else if (node_pair.second->pointIntersection(editing->getMousePosInFrame().x, editing->getMousePosInFrame().y)) {
+		else if (node_pair.second->pointIntersection(editing->getMousePosInFrame())) {
 			nodes[i].setOutlineColor(sf::Color::White);
 		}
 		else {
@@ -107,10 +107,10 @@ void EditingGUI::updateLines()
 	}
 	int i = 0;
 	for (const auto& line_pair : editing->getLines()) {
-		double node_a_x = line_pair.second->getBackNode()->getX();
-		double node_a_y = line_pair.second->getBackNode()->getY();
-		double node_b_x = line_pair.second->getFrontNode()->getX();
-		double node_b_y = line_pair.second->getFrontNode()->getY();
+		double node_a_x = line_pair.second->getBackNode()->getPos().x;
+		double node_a_y = line_pair.second->getBackNode()->getPos().y;
+		double node_b_x = line_pair.second->getFrontNode()->getPos().x;
+		double node_b_y = line_pair.second->getFrontNode()->getPos().y;
 
 		// centerline
 		nodeLines[i].position.x = node_a_x;
@@ -154,7 +154,7 @@ void EditingGUI::realignTGUI(int window_width, int window_height)
 	right_panel->setSize(editing->right_panel_width, window_height);
 	right_panel->setPosition(window_width - editing->right_panel_width, 0);
 	display_button->setPosition(editing->general_padding, window_height - editing->general_padding - display_button->getSize().y);
-	node_selections->getPanel()->setSize(editing->general_element_width, display_button->getPosition().y - (2 * editing->general_padding) - (measurement_fields[2]->getPosition().y + measurement_fields[2]->getSize().y));
+	node_selections->setSize(editing->general_element_width, display_button->getPosition().y - (2 * editing->general_padding) - (measurement_fields[2]->getPosition().y + measurement_fields[2]->getSize().y));
 }
 
 void EditingGUI::setupTGUI(int window_width, int window_height)
@@ -244,9 +244,9 @@ void EditingGUI::setupTGUI(int window_width, int window_height)
 	// node selections
 	node_selections = std::make_shared<WidgetHoriStack>();
 	node_selections->setMargins(0, editing->general_padding);
-	right_panel->add(node_selections->getPanel());
+	right_panel->add(node_selections);
 
-	node_selections->getPanel()->setPosition({ editing->general_padding, tgui::bindBottom(measurement_fields[2]) + editing->general_padding });
+	node_selections->setPosition({ editing->general_padding, tgui::bindBottom(measurement_fields[2]) + editing->general_padding });
 
 	realignTGUI(window_width, window_height);
 }
@@ -295,7 +295,7 @@ void EditingGUI::changeRecursionsField() {
 				recursions_input->setText(std::to_string(new_num));
 			}
 			editing->setNumRecursions(new_num);
-			editing->fractalChanged();
+			editing->updateFractal();
 		}
 	}
 }

@@ -14,13 +14,14 @@ public:
 	Viewing(sf::RenderWindow& window);
 	~Viewing();
 
+	//inherited via state
 	void enter();
 	void run();
 	void exit();
 	void handleEvent(sf::Event& event);
+	void draw(sf::RenderTarget& target, sf::RenderStates states = sf::RenderStates::Default) const;
 
 	void addFractal(LineFractal* fractal);
-	void draw(sf::RenderTarget& target, sf::RenderStates states = sf::RenderStates::Default) const;
 
 	void incFractal();
 

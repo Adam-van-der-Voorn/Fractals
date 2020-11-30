@@ -1,8 +1,6 @@
 #pragma once
-#include "Drawable.h"
 #include "AbsLine.h"
-#include <SFML/Graphics/CircleShape.hpp>
-#include <SFML/Graphics/VertexArray.hpp>
+#include <memory>
 
 
 struct LFLine;

@@ -1,9 +1,7 @@
 #pragma once
-#include <SFML/System/Vector2.hpp>
-#include <SFML/Graphics/CircleShape.hpp>
-#include <SFML/Graphics/VertexArray.hpp>
 #include <memory>
 #include "AbsLine.h"
+#include "Vec2.h"
 
 struct LFLine;
 class EditableLine;
@@ -12,27 +10,25 @@ class EditableLineNode
 {
 public:
 
-	EditableLineNode(int id, double x, double y, bool is_front, EditableLine* line);
+	EditableLineNode(int id, Vec2 pos, bool is_front, EditableLine* line);
 
 	/**
-	\param pos the position to check
+	\param point the point to check
 	\return true if the distance between the given position and start node < node size
 	**/
-	bool pointIntersection(int x, int y) const;
+	bool pointIntersection(Vec2 point) const;
 
 	/**
 	Translates the selected node by the given amount
-	\param double dx the horizontal translation
-	\param double dy the vertical translation
+	\param translation the horizontal translation
 	**/
-	void translate(double dx, double dy);
+	void translate(Vec2 translation);
 
 	/**
 	Sets the position of the selected node
-	\param double x the new x position
-	\param double y the new y position
+	\param position the new position
 	**/
-	void setPosition(double x, double y);
+	void setPosition(Vec2 position);
 
 	/**
 	Sets the length of this nodes line.
@@ -52,20 +48,15 @@ public:
 	Sets the recusion status for this nodes line.
 	If true the line will recurse.
 	**/
-	void setRecursive(bool front_node);
+	void setRecursive(bool b);
 
 	/**
-	\return the x position of this node
+	\return the position of this node
 	**/
-	double getX() const;
-	
-	/**
-	\return the y position of this node
-	**/
-	double getY() const;
+	Vec2 getPos() const;
 
 	/**
-	\return true if thos node is at the front of its line;
+	\return true if this node is at the front of it's line;
 	**/
 	bool isFront() const;
 
@@ -88,8 +79,8 @@ public:
 
 private:
 	int id;
+	Vec2 pos;
 	EditableLine* line;
 	bool is_front;
-	double xpos, ypos;
 };
 

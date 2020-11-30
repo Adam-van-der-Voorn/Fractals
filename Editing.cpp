@@ -10,7 +10,7 @@
 #include "SelLineWidget.h"
 #include "EditingGUI.h"
 #include "EditingState.h"
-#include "Point.h"
+#include "Vec2.h"
 #include <cstdlib>
 #include <string>
 #include <memory>
@@ -27,7 +27,7 @@ Editing::Editing(EditingState* state, LineFractal* fractal) :
 	srand(80085);
 
 	// setup base line
-	recalcEditingFrameCenter(state->getRenderWindow()->getSize().x, state->getRenderWindow()->getSize().y);
+	recalcEditingFrameCenter(Vec2::sf(state->getRenderWindow()->getSize()));
 	AbsLine l = { editing_frame_center.x-200, editing_frame_center.y, editing_frame_center.x + 200, editing_frame_center.y };
 	base_line = std::make_shared<EditableLine>(getID(), getID(), getID(), l);
 	fractal->setBaseLine(l);
@@ -40,7 +40,7 @@ Editing::Editing(EditingState* state, LineFractal* fractal) :
 void Editing::handleEvent(sf::Event& event)
 {
 	if (event.type == sf::Event::Resized) {
-		recalcEditingFrameCenter(event.size.width, event.size.height);
+		recalcEditingFrameCenter({ static_cast<double>(event.size.width), static_cast<double>(event.size.height) });
 	}
 	else if (event.type == sf::Event::MouseButtonPressed) {
 		if (isWithinEditingFrame(sf::Vector2f(event.mouseButton.x, event.mouseButton.y))) {
@@ -49,16 +49,16 @@ void Editing::handleEvent(sf::Event& event)
 				bool on_any_selnode = false;
 				for (int node_id : selected_nodes) {
 					std::shared_ptr<EditableLineNode> node = nodes[node_id];
-					if (node->pointIntersection(event.mouseButton.x, event.mouseButton.y)) {
-						Point selected_offset = { event.mouseButton.x - node->getX(), event.mouseButton.y - node->getY() };
+					if (node->pointIntersection(Vec2::prim(event.mouseButton.x, event.mouseButton.y))) {
+						Vec2 selected_offset = { event.mouseButton.x - node->getPos().x, event.mouseButton.y - node->getPos().y };
 						dragging_nodes.emplace(node_id, selected_offset);
 						on_any_selnode = true;
 					}
 				}
 				if (!on_any_selnode) {
 					for (auto& node : nodes) {
-						if (node.second->pointIntersection(event.mouseButton.x, event.mouseButton.y)) {
-							Point selected_offset = { event.mouseButton.x - node.second->getX(), event.mouseButton.y - node.second->getY() };
+						if (node.second->pointIntersection(Vec2::prim(event.mouseButton.x, event.mouseButton.y))) {
+							Vec2 selected_offset = { event.mouseButton.x - node.second->getPos().x, event.mouseButton.y - node.second->getPos().y };
 							dragging_nodes.emplace(node.first, selected_offset);
 						}
 					}
@@ -71,13 +71,14 @@ void Editing::handleEvent(sf::Event& event)
 			bool node_moved = false;
 			for (auto& pair : dragging_nodes) {
 				node_moved = true;
-				double translation_x = event.mouseMove.x - (nodes[pair.first]->getX() + pair.second.x);
-				double translation_y = event.mouseMove.y - (nodes[pair.first]->getY() + pair.second.y);
-				moveNode(pair.first, translation_x, translation_y);
+				Vec2 translation = { 
+				event.mouseMove.x - (nodes[pair.first]->getPos().x + pair.second.x),
+				event.mouseMove.y - (nodes[pair.first]->getPos().y + pair.second.y) };
+				moveNode(pair.first, translation);
 			}
 			if (node_moved) {
 				notifyAll(Event::LINES_CHANGED);
-				fractalChanged();
+				updateFractal();
 			}
 			mouse_framepos.x = event.mouseMove.x;
 			mouse_framepos.y = event.mouseMove.y;
@@ -93,7 +94,7 @@ void Editing::handleEvent(sf::Event& event)
 
 					// select new nodes
 					for (auto& node : nodes) {
-						if (node.second->pointIntersection(mouse_framepos.x, mouse_framepos.y)) {
+						if (node.second->pointIntersection({ mouse_framepos.x, mouse_framepos.y })) {
 							selected_nodes.insert(node.first);
 						}
 					}
@@ -112,19 +113,19 @@ void Editing::handleEvent(sf::Event& event)
 	}
 }
 
-void Editing::recalcEditingFrameCenter(int window_width, int window_height) {
-	editing_frame_size.x = (window_width - right_panel_width);
-	editing_frame_size.y = window_height;
+void Editing::recalcEditingFrameCenter(Vec2 dimensions) {
+	editing_frame_size.x = (dimensions.x - right_panel_width);
+	editing_frame_size.y = dimensions.y;
 	editing_frame_center.x = editing_frame_size.x / 2;
 	editing_frame_center.y = editing_frame_size.y / 2;
 }
 
-sf::Vector2i Editing::getEditingFrameCenter() const
+Vec2 Editing::getEditingFrameCenter() const
 {
 	return editing_frame_center;
 }
 
-sf::Vector2i Editing::getMousePosInFrame() const
+Vec2 Editing::getMousePosInFrame() const
 {
 	return mouse_framepos;
 }
@@ -176,7 +177,7 @@ void Editing::addLine() {
 	lines.emplace(id_arr[0], line);
 	nodes.emplace(id_arr[1], line->getBackNode());
 	nodes.emplace(id_arr[2], line->getFrontNode());
-	fractalChanged();
+	updateFractal();
 	notifyAll(Event::LINES_CHANGED);
 }
 
@@ -195,7 +196,7 @@ void Editing::removeSelectedLines()
 	clearHoveredNode();
 	notifyAll(Event::SELECTION_CHANGED);
 	notifyAll(Event::LINES_CHANGED);
-	fractalChanged();
+	updateFractal();
 }
 
 const std::unordered_map<int, std::shared_ptr<EditableLineNode>>& Editing::getNodes() const
@@ -233,7 +234,7 @@ void Editing::setNumRecursions(int num)
 	num_recursions = num;
 }
 
-sf::Vector2i Editing::getEditingFrameSize() const
+Vec2 Editing::getEditingFrameSize() const
 {
 	return editing_frame_size;
 }
@@ -250,7 +251,7 @@ void Editing::removeObserver(Observer* observer)
 	PRINT("Observer removed");
 }
 
-void Editing::fractalChanged()
+void Editing::updateFractal()
 {
 	std::vector<LFLine> final_lines;
 	for (auto& line : lines) {
@@ -262,25 +263,22 @@ void Editing::fractalChanged()
 	notifyAll(Event::FRACTAL_CHANGED);
 }
 
-void Editing::moveNode(int node_id, double translation_x, double translation_y)
+void Editing::moveNode(int node_id, Vec2 translation)
 {
 	std::shared_ptr<EditableLineNode> node = nodes[node_id];
-	double new_x = node->getX() + translation_x;
-	double new_y = node->getY() + translation_y;
+	Vec2 new_pos = node->getPos() + translation;
 	std::shared_ptr<EditableLineNode> other = node->getOtherNode();
-	AbsLine new_line = { other->getX(), other->getY(), new_x, new_y };
+	AbsLine new_line = { other->getPos().x, other->getPos().y, new_pos.x, new_pos.y };
 	double new_line_length = lineLength(new_line);
 	double max_line_length = lineLength(base_line->toAbsLine()) - 5;
 	if (new_line_length > max_line_length) {
-		const Point mouse_framepos_offset = { mouse_framepos.x - node->getX(), mouse_framepos.y - node->getY() };
-		new_x = other->getX() + lendirX(max_line_length, lineAngle(new_line));
-		new_y = other->getY() + lendirY(max_line_length, lineAngle(new_line));
-		node->setPosition(new_x, new_y);
-		mouse_framepos.x = node->getX() + mouse_framepos_offset.x;
-		mouse_framepos.y = node->getY() + mouse_framepos_offset.y;
+		const Vec2 mouse_framepos_offset = mouse_framepos - node->getPos();
+		new_pos = other->getPos() + Vec2::fromLenDir(max_line_length, lineAngle(new_line));
+		node->setPosition(new_pos);
+		mouse_framepos = node->getPos() + mouse_framepos_offset;
 	}
 	else {
-		node->translate(translation_x, translation_y);
+		node->translate(translation);
 	}
 }
 

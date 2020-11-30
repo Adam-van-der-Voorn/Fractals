@@ -2,53 +2,50 @@
 #include "EditableLine.h"
 #include "vecutil.h"
 #include "LFLine.h"
+#include <cassert>
 
-EditableLineNode::EditableLineNode(int id, double x, double y, bool is_front, EditableLine* line) : id(id), xpos(x), ypos(y), is_front(is_front), line(line)
+EditableLineNode::EditableLineNode(int id, Vec2 pos, bool is_front, EditableLine* line) : id(id), pos(pos), is_front(is_front), line(line)
 {
 }
 
-bool EditableLineNode::pointIntersection(int x, int y) const
+bool EditableLineNode::pointIntersection(Vec2 point) const
 {
-	if (distanceBetweenAB(x, y, xpos, ypos) <= NODE_RADIUS) {
+	if (distanceBetweenAB(point.x, point.y, pos.x, pos.y) <= NODE_RADIUS) {
 		return true;
 	}
 	return false;
 }
 
-void EditableLineNode::translate(double dx, double dy)
+void EditableLineNode::translate(Vec2 translation)
 {
-	xpos += dx;
-	ypos += dy;
+	pos += translation;
 }
 
-void EditableLineNode::setPosition(double x, double y)
+void EditableLineNode::setPosition(Vec2 position)
 {
-	xpos = x;
-	ypos = y;
+	pos = position;
 }
 
 void EditableLineNode::setLength(double length)
 {
-
+	assert(false && "func not defined");
 }
 
 void EditableLineNode::setAngle(double angle)
 {
+	assert(false && "func not defined");
 }
 
 void EditableLineNode::setRecursive(bool front_node)
 {
-
+	assert(false && "idk if this should be here");
 }
 
-double EditableLineNode::getX() const
+Vec2 EditableLineNode::getPos() const
 {
-	return xpos;
+	return pos;
 }
-double EditableLineNode::getY() const
-{
-	return ypos;
-}
+
 bool EditableLineNode::isFront() const
 {
 	return is_front;

@@ -5,17 +5,24 @@
 #include <TGUI/TGUI.hpp>
 #include "Observer.h"
 #include "EditingState.h"
+#include "EventHandler.h"
 class Editing;
 class EditableLineNode;
 class WidgetHoriStack;
 
-class EditingGUI : public sf::Drawable, public Observer
+class EditingGUI : public sf::Drawable, public Observer, public EventHandler
 {
 public:
 	EditingGUI(EditingState* state, Editing* data);
-	void onNotify(int event_num);
-	void draw(sf::RenderTarget& target, sf::RenderStates states) const;
-	void handleEvent(sf::Event& event);
+
+	// inherited via Observer
+	void onNotify(int event_num) override;
+
+	// inherited via sf::Drawable
+	void draw(sf::RenderTarget& target, sf::RenderStates states) const;	
+
+	// inherited via EventHandler
+	void handleEvent(sf::Event& event) override;
 
 private:
 	void updateNodes();

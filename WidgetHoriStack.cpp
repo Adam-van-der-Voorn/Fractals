@@ -2,12 +2,6 @@
 
 WidgetHoriStack::WidgetHoriStack()
 {
-	panel = tgui::Panel::create();
-}
-
-tgui::Panel::Ptr WidgetHoriStack::getPanel()
-{
-	return panel;
 }
 
 void WidgetHoriStack::swapStack(std::vector<tgui::Widget::Ptr>& new_widgets)
@@ -43,18 +37,18 @@ void WidgetHoriStack::swapStack(std::vector<tgui::Widget::Ptr>& new_widgets)
 		widgets.emplace_back(new_widget);
 	}
 
-	reconstructPanel();
+	reconstructWidgetStack();
 	
 }
 
-void WidgetHoriStack::reconstructPanel()
+void WidgetHoriStack::reconstructWidgetStack()
 {
-	panel->removeAllWidgets();
+	removeAllWidgets();
 	if (widgets.size() > 0) {
-		panel->add(widgets[0]);
+		add(widgets[0]);
 		widgets[0]->setPosition(left_margin, 0);
 		for (size_t i = 1; i < widgets.size(); i++) {
-			panel->add(widgets[i]);
+			add(widgets[i]);
 			widgets[i]->setPosition(left_margin, tgui::bindBottom(widgets[i-1]) + top_margin);
 		}
 	}
@@ -64,11 +58,11 @@ void WidgetHoriStack::setMargins(float left, float top)
 {
 	left_margin = left;
 	top_margin = top;
-	reconstructPanel();
+	reconstructWidgetStack();
 }
 
 void WidgetHoriStack::clear()
 {
-	panel->removeAllWidgets();
+	removeAllWidgets();
 	widgets.clear();
 }

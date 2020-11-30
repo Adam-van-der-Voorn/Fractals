@@ -4,9 +4,9 @@
 #include <cmath>
 #include <SFML/System/Vector2.hpp>
 
-inline float angleBetweenAB(sf::Vector2f back_node, sf::Vector2f front_node) {
-	float line_angle = atanf((back_node.y - front_node.y) / (back_node.x - front_node.x));
-	if (back_node.x >= front_node.x) {
+inline float angleBetweenAB(sf::Vector2f a, sf::Vector2f b) {
+	float line_angle = atanf((a.y - b.y) / (a.x - b.x));
+	if (a.x >= b.x) {
 		line_angle += m_pi;
 	}
 	return line_angle;

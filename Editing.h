@@ -1,10 +1,8 @@
 #pragma once
 #include "Subject.h"
-#include "Point.h"
-#include <SFML/Graphics/Drawable.hpp>
-#include <SFML/Graphics/RenderWindow.hpp>
-#include <SFML/Graphics/RenderTarget.hpp>
-
+#include "Vec2.h"
+#include "EventHandler.h"
+#include <SFML/Window/Event.hpp>
 #include <unordered_map>
 #include <unordered_set>
 #include <memory>
@@ -17,46 +15,143 @@ class LineFractal;
 class StateMachine;
 class Observer;
 class EditingState;
-struct Point;
+struct Vec2;
 
-class Editing : public Subject
+class Editing : public Subject, public EventHandler
 {
 public:
 	Editing(EditingState* state, LineFractal* fractal);
 
-	void handleEvent(sf::Event& event);
-
+	/**
+	\return the moveable nodes of the foundational lines.
+	**/
 	const std::unordered_map<int, std::shared_ptr<EditableLineNode>>& getNodes() const;
-	const std::unordered_map<int, std::shared_ptr<EditableLine>>& getLines() const;
-	const std::shared_ptr<EditableLine> getBaseLine() const;
-	const std::unordered_set<int>& getSelectedNodes() const;
-	const LineFractal* getFractal() const;
-	int getNumRecursions() const;
-	void setNumRecursions(int num);
-	sf::Vector2i getEditingFrameSize() const;
-	sf::Vector2i getEditingFrameCenter() const;
-	sf::Vector2i getMousePosInFrame() const;
-	void recalcEditingFrameCenter(int window_width, int window_height);
-	void fractalChanged();
-	void moveNode(int node_id, double translation_x, double translation_y);
 
+	/**
+	\return the foundational lines of the fractal (ie the lines that are used in the recursion for the fractal)
+	**/
+	const std::unordered_map<int, std::shared_ptr<EditableLine>>& getLines() const;
+
+	/**
+	\return the base line for the fractal
+	**/
+	const std::shared_ptr<EditableLine> getBaseLine() const;
+
+	/**
+	\return th ids of all the nodes that are selected
+	**/
+	const std::unordered_set<int>& getSelectedNodes() const;
+
+	/**
+	\the fractal currently being edited
+	**/
+	const LineFractal* getFractal() const;
+
+	/**
+	\return the maximum amount of recursions this editor is allowing the fractal.
+	a return value of anything under 0 means there is no limit set 
+	**/
+	int getNumRecursions() const;
+
+	/**
+	sets the maximum amount of recursions this editor will allow the fractal
+	if set below 0 no limit will be set
+	\param num the number of recursions
+	**/
+	void setNumRecursions(int num);
+
+	/**
+	\return the size of the editing frame
+	**/
+	Vec2 getEditingFrameSize() const;
+
+	/**
+	\return the center of the editing frame
+	**/
+	Vec2 getEditingFrameCenter() const;
+
+	/**
+	\return the most recent position of the mouse in the editing frame
+	**/
+	Vec2 getMousePosInFrame() const;
+
+	/** 
+	recalculates the center of the editing frame.
+	\param dimensions the dimensions of the window
+	**/
+	void recalcEditingFrameCenter(Vec2 dimensions);
+
+	/**
+	updates the fractal
+	**/
+	void updateFractal();
+
+	/**
+	Moves a node by a given amount.
+	node movement is restricted to ensure line length is a little less than the base line
+	\param node_id the id of the node to move
+	\param translation amount to move
+	**/
+	void moveNode(int node_id, Vec2 translation);
+
+	/**
+	Sets the hovered node to the node with the given id
+	\param node_id the id of the node
+	**/
 	void setHoveredNode(int node_id);
+
+	/**
+	\return the id of the hovered node, or a val < 0 if no node is being hovered
+	**/
 	int getHoveredNode() const;
+
+	/**
+	sets the hovered node state to no node being hovered over
+	**/
 	void clearHoveredNode();
+
+	/**
+	removes all other nodes from selection apart from the hovered node
+	**/
 	void selectOnlyHoveredNode();
+
+	/**
+	\return true if a node is being hovered over
+	**/
 	bool nodeIsHovered() const;
 
+	/**
+	adds a line to the editing surface
+	**/
 	void addLine();
+
+	/**
+	removes all selected lines from the editing surface
+	**/
 	void removeSelectedLines();
 
-	void addObserver(Observer* observer);
-	void removeObserver(Observer* observer);
+	// inherited via Subject
+	void addObserver(Observer* observer) override;
+	void removeObserver(Observer* observer) override;
 
+	// inherited via EventHandler
+	void handleEvent(sf::Event& event) override;
+
+	/**
+	Events to be sent to observers when something of note happens
+	**/
 	enum Event{
-		LINES_CHANGED, SELECTION_CHANGED, FRACTAL_CHANGED, MOUSE_MOVED, HOVERED_NODE_CHANGED
+		LINES_CHANGED, // lines being moved, added or removed,
+		SELECTION_CHANGED, // any change of selection (not including chnage in hovered node)
+		FRACTAL_CHANGED, // if the fractal has changed in any way
+		MOUSE_MOVED, 
+		HOVERED_NODE_CHANGED 
 	};
 
+	// the width of the right panel
 	const int right_panel_width = 200;
+
+	// convinence constants for the gui
 	const int general_padding = 6;
 	const int general_element_width = right_panel_width - (general_padding * 2);
 private:
@@ -67,7 +162,7 @@ private:
 	std::list<Observer*> observers;
 	std::unordered_map<int, std::shared_ptr<EditableLineNode>> nodes;
 	std::unordered_set<int> selected_nodes;
-	std::unordered_map<int, Point> dragging_nodes;
+	std::unordered_map<int, Vec2> dragging_nodes;
 	std::unordered_map<int, std::shared_ptr<EditableLine>> lines;
 	std::shared_ptr<EditableLine> base_line;
 
@@ -79,10 +174,10 @@ private:
 
 	int num_recursions = 7;
 	bool mouse_moved_since_lpress = false;
-	sf::Vector2i left_press_location;
+	Vec2 left_press_location;
 
-	sf::Vector2i editing_frame_size;
-	sf::Vector2i editing_frame_center;
-	sf::Vector2i mouse_framepos;
+	Vec2 editing_frame_size;
+	Vec2 editing_frame_center;
+	Vec2 mouse_framepos;
 };
 
