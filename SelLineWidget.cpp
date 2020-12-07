@@ -3,26 +3,17 @@
 #include "Editing.h"
 #include "EditableLine.h"
 #include "vecutil.h"
+#include "debug_printing.h"
 #include <unordered_map>
+#include <memory>
 
 class Editing;
 
-SelLineWidget::SelLineWidget(Editing* editing, int node_id, float width, float height)
+SelLineWidget::SelLineWidget(Editing* editing, int node_id, float width)
 	: editing(editing), node_id(node_id)
 {
-	setSize(width, height);
-	setWidgetName(std::to_string(node_id));
-	add(select_button);
-	select_button->setSize("100%", "100%");
-	select_button->onClick(&Editing::selectOnlyHoveredNode, editing);
-	select_button->onMouseEnter(&Editing::setHoveredNode, editing, node_id);
-	select_button->onMouseLeave(&Editing::setHoveredNode, editing, -1);
-	add(icon);
-	constexpr float icon_padding = 3;
-	icon->setSize(height - icon_padding * 2, height - icon_padding * 2);
-	icon->setPosition(icon_padding, icon_padding);
-	redrawIcon();
-	editing->addObserver(this);
+	setSize({ width, 105 });
+	init();
 }
 
 SelLineWidget::~SelLineWidget() {
@@ -30,33 +21,110 @@ SelLineWidget::~SelLineWidget() {
 }
 
 SelLineWidget::SelLineWidget(const SelLineWidget& copy_from)
+	: editing(copy_from.editing), node_id(copy_from.node_id)
 {
-	editing = copy_from.editing;
-	node_id = copy_from.node_id;
 	setPosition({ copy_from.getPosition().x, copy_from.getPosition().y }); // init list is neccesarcy bc of tgui quirks
 	setSize({ copy_from.getSize().x, copy_from.getSize().y });
+	init();
+}
+
+void SelLineWidget::init()
+{
 	setWidgetName(std::to_string(node_id));
+	//temp bckg
+	add(temp_background);
+	temp_background->setSize("100%", "100%");
+	temp_background->clear(tgui::Color::Yellow);
+
+	// icon
+	icon = tgui::Canvas::create();
+	add(icon);
+	constexpr float icon_padding = 3;
+	icon->setSize(50 - icon_padding * 2, 50 - icon_padding * 2);
+	icon->setPosition(icon_padding, icon_padding);
+	redrawIcon();
+
+	// selection button
+	select_button = tgui::Button::create();
 	add(select_button);
-	select_button->setSize("100%", "100%");
+	select_button->setSize(40, 40);
+	select_button->setPosition(tgui::bindRight(icon) + padding, 6);
 	select_button->onClick(&Editing::selectOnlyHoveredNode, editing);
 	select_button->onMouseEnter(&Editing::setHoveredNode, editing, node_id);
 	select_button->onMouseLeave(&Editing::setHoveredNode, editing, -1);
-	add(icon);
-	constexpr float icon_padding = 3;
-	icon->setSize(copy_from.getSize().y - icon_padding * 2, copy_from.getSize().y - icon_padding * 2);
-	icon->setPosition(icon_padding, icon_padding);
-	redrawIcon();
+	select_button->setText("sel");
+
+	// measurements block
+	constexpr float field_height = 25;
+	const float field_width = (getSize().x - (padding * 3)) / 2;
+	constexpr float label_width = 23;
+
+	xpos_input = std::make_shared<NumFieldExt>("x", editing->getValClipboard());
+	add(xpos_input);
+	xpos_input->setPosition(padding, tgui::bindBottom(icon) + padding);
+	xpos_input->setSize({ field_width, field_height });
+	xpos_input->setLabelWidth(label_width);
+	xpos_input->setVal(editing->getNodes().at(node_id)->getPosition().x);
+	xpos_input->setMaximumCharacters(4);
+
+	ypos_input = std::make_shared<NumFieldExt>("y", editing->getValClipboard());
+	add(ypos_input);
+	ypos_input->setPosition(tgui::bindRight(xpos_input) + padding, tgui::bindBottom(icon) + padding);
+	ypos_input->setSize({ field_width, field_height });
+	ypos_input->setLabelWidth(label_width);
+	ypos_input->setVal(editing->getNodes().at(node_id)->getPosition().y);
+	ypos_input->setMaximumCharacters(4);
+
+	dir_input = std::make_shared<NumFieldExt>("dir", editing->getValClipboard());
+	add(dir_input);
+	dir_input->setPosition(padding, tgui::bindBottom(xpos_input) + padding);
+	dir_input->setSize({ field_width, field_height });
+	dir_input->setLabelWidth(label_width);
+	dir_input->setVal(editing->getNodes().at(node_id)->getAngle());
+	dir_input->setMaximumCharacters(4);
+
+	len_input = std::make_shared<NumFieldExt>("len", editing->getValClipboard());
+	add(len_input);
+	len_input->setPosition(tgui::bindRight(dir_input) + padding, tgui::bindBottom(xpos_input) + padding);
+	len_input->setSize({ field_width, field_height });
+	len_input->setLabelWidth(label_width);
+	len_input->setVal(editing->getNodes().at(node_id)->getLength());
+	len_input->setMaximumCharacters(4);
+
 	editing->addObserver(this);
+	xpos_input->addObserver(this);
+	ypos_input->addObserver(this);
+	dir_input->addObserver(this);
+	len_input->addObserver(this);
+
 }
 
-void SelLineWidget::onNotify(int event_num)
+void SelLineWidget::onNotify(Editing* e, int event_num)
 {
 	auto event = static_cast<Editing::Event>(event_num);
 	switch (event)
 	{
 	case Editing::Event::LINES_CHANGED:
 		redrawIcon();
+		xpos_input->setVal(editing->getNodes().at(node_id)->getPosition().x);
+		ypos_input->setVal(editing->getNodes().at(node_id)->getPosition().y);
+		dir_input->setVal(editing->getNodes().at(node_id)->getAngle());
+		len_input->setVal(editing->getNodes().at(node_id)->getLength());
 		break;
+	}
+}
+
+void SelLineWidget::onNotify(NumFieldExt* field, int event_num)
+{
+	if (*field == *xpos_input.get() || *field == *ypos_input.get()) {
+		editing->setNodePosition(node_id, { xpos_input->getVal(), ypos_input->getVal() });
+	}
+	else if (*field == *len_input.get()) {
+		editing->setNodeLength(node_id, len_input->getVal());
+	}
+	else {
+		assert(*field == *dir_input.get() && "field not == to anything");
+		editing->setNodeAngle(node_id, dir_input->getVal());
 	}
 }
 

@@ -10,13 +10,13 @@ class Editing;
 class EditableLineNode;
 class WidgetHoriStack;
 
-class EditingGUI : public sf::Drawable, public Observer, public EventHandler
+class EditingGUI : public sf::Drawable, public Observer<Editing>, public EventHandler
 {
 public:
 	EditingGUI(EditingState* state, Editing* data);
 
 	// inherited via Observer
-	void onNotify(int event_num) override;
+	void onNotify(Editing* editing, int event_num) override;
 
 	// inherited via sf::Drawable
 	void draw(sf::RenderTarget& target, sf::RenderStates states) const;	

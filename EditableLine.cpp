@@ -33,16 +33,16 @@ LFLine EditableLine::toLFLine(AbsLine base_line) const
 {
 	double base_line_len = lineLength(base_line);
 	double base_line_angle = lineAngle(base_line);
-	double distance = distanceBetweenAB(base_line.back_x, base_line.back_y, back_node->getPos().x, back_node->getPos().y) / base_line_len;
-	double angle1 = angleBetweenAB(base_line.back_x, base_line.back_y, back_node->getPos().x, back_node->getPos().y) - base_line_angle;
-	double length = distanceBetweenAB(back_node->getPos().x, back_node->getPos().y, front_node->getPos().x, front_node->getPos().y) / base_line_len;
-	double angle2 = angleBetweenAB(back_node->getPos().x, back_node->getPos().y, front_node->getPos().x, front_node->getPos().y) - base_line_angle;
+	double distance = distanceBetweenAB(base_line.back_x, base_line.back_y, back_node->getPosition().x, back_node->getPosition().y) / base_line_len;
+	double angle1 = angleBetweenAB(base_line.back_x, base_line.back_y, back_node->getPosition().x, back_node->getPosition().y) - base_line_angle;
+	double length = distanceBetweenAB(back_node->getPosition().x, back_node->getPosition().y, front_node->getPosition().x, front_node->getPosition().y) / base_line_len;
+	double angle2 = angleBetweenAB(back_node->getPosition().x, back_node->getPosition().y, front_node->getPosition().x, front_node->getPosition().y) - base_line_angle;
 	return { distance, angle1, length, angle2, recursive};
 }
 
 AbsLine EditableLine::toAbsLine() const
 {
-	return { back_node->getPos().x, back_node->getPos().y, front_node->getPos().x, front_node->getPos().y };
+	return { back_node->getPosition().x, back_node->getPosition().y, front_node->getPosition().x, front_node->getPosition().y };
 }
 
 int EditableLine::getID() const

@@ -19,12 +19,12 @@
 EditingGUI::EditingGUI(EditingState* state, Editing* data)
 	: state(state), editing(data)
 {
-	baseLine[0].position.x = editing->getBaseLine()->getBackNode()->getPos().x;
-	baseLine[0].position.y = editing->getBaseLine()->getBackNode()->getPos().y;
+	baseLine[0].position.x = editing->getBaseLine()->getBackNode()->getPosition().x;
+	baseLine[0].position.y = editing->getBaseLine()->getBackNode()->getPosition().y;
 	baseLine[0].color = sf::Color::Color(80, 80, 80);
 
-	baseLine[1].position.x = editing->getBaseLine()->getFrontNode()->getPos().x;
-	baseLine[1].position.y = editing->getBaseLine()->getFrontNode()->getPos().y;
+	baseLine[1].position.x = editing->getBaseLine()->getFrontNode()->getPosition().x;
+	baseLine[1].position.y = editing->getBaseLine()->getFrontNode()->getPosition().y;
 	baseLine[1].color = sf::Color::Color(80, 80, 80);
 
 	updateFractal();
@@ -33,7 +33,7 @@ EditingGUI::EditingGUI(EditingState* state, Editing* data)
 	setupTGUI(state->getRenderWindow()->getSize().x, state->getRenderWindow()->getSize().y);
 }
 
-void EditingGUI::onNotify(int event_num)
+void EditingGUI::onNotify(Editing* e, int event_num)
 {
 	auto event = static_cast<Editing::Event>(event_num);
 	switch (event)
@@ -47,7 +47,7 @@ void EditingGUI::onNotify(int event_num)
 		{
 			std::vector<tgui::Widget::Ptr> widgets;
 			for (int selected_node_id : editing->getSelectedNodes()) {
-				auto widget = std::make_shared<SelLineWidget>(editing, selected_node_id, editing->general_element_width, 50);
+				auto widget = std::make_shared<SelLineWidget>(editing, selected_node_id, editing->general_element_width);
 				widgets.push_back(widget);
 			}
 			node_selections->swapStack(widgets);
@@ -76,7 +76,7 @@ void EditingGUI::updateNodes()
 		nodes[i].setOutlineThickness(1.0f);
 		nodes[i].setOrigin(sf::Vector2f(EditableLineNode::NODE_RADIUS, EditableLineNode::NODE_RADIUS));
 
-		nodes[i].setPosition(sf::Vector2f(node_pair.second->getPos().x, node_pair.second->getPos().y));
+		nodes[i].setPosition(sf::Vector2f(node_pair.second->getPosition().x, node_pair.second->getPosition().y));
 
 		if (editing->getHoveredNode() == node_pair.first) { // node is selected and hovered
 			nodes[i].setOutlineColor(sf::Color::Green);
@@ -107,10 +107,10 @@ void EditingGUI::updateLines()
 	}
 	int i = 0;
 	for (const auto& line_pair : editing->getLines()) {
-		double node_a_x = line_pair.second->getBackNode()->getPos().x;
-		double node_a_y = line_pair.second->getBackNode()->getPos().y;
-		double node_b_x = line_pair.second->getFrontNode()->getPos().x;
-		double node_b_y = line_pair.second->getFrontNode()->getPos().y;
+		double node_a_x = line_pair.second->getBackNode()->getPosition().x;
+		double node_a_y = line_pair.second->getBackNode()->getPosition().y;
+		double node_b_x = line_pair.second->getFrontNode()->getPosition().x;
+		double node_b_y = line_pair.second->getFrontNode()->getPosition().y;
 
 		// centerline
 		nodeLines[i].position.x = node_a_x;

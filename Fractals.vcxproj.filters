@@ -75,6 +75,12 @@
     <ClCompile Include="Vec2.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="NumFieldExt.cpp">
+      <Filter>Source Files\Editing</Filter>
+    </ClCompile>
+    <ClCompile Include="AbsLine.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="signum.h">
@@ -148,6 +154,9 @@
     </ClInclude>
     <ClInclude Include="EventHandler.h">
       <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="NumFieldExt.h">
+      <Filter>Header Files\Editing</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

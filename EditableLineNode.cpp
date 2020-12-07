@@ -28,22 +28,30 @@ void EditableLineNode::setPosition(Vec2 position)
 
 void EditableLineNode::setLength(double length)
 {
-	assert(false && "func not defined");
+	double line_angle = getAngle();
+	getOtherNode()->setPosition({ pos.x + lendirX(length, line_angle), pos.y + lendirY(length, line_angle) });
 }
 
 void EditableLineNode::setAngle(double angle)
 {
-	assert(false && "func not defined");
+	double line_length = getLength();
+	getOtherNode()->setPosition({ pos.x + lendirX(line_length, angle), pos.y + lendirY(line_length, angle) });
 }
 
-void EditableLineNode::setRecursive(bool front_node)
-{
-	assert(false && "idk if this should be here");
-}
-
-Vec2 EditableLineNode::getPos() const
+Vec2 EditableLineNode::getPosition() const
 {
 	return pos;
+}
+
+double EditableLineNode::getLength() const
+{
+	return lineLength(getLine()->toAbsLine());
+}
+
+double EditableLineNode::getAngle() const
+{
+	EditableLineNode* other = getOtherNode().get();
+	return lineAngle({pos.x, pos.y, other->getPosition().x, other->getPosition().y});
 }
 
 bool EditableLineNode::isFront() const

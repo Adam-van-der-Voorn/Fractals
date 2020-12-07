@@ -13,11 +13,10 @@ class EditableLine;
 class EditingGUI;
 class LineFractal;
 class StateMachine;
-class Observer;
 class EditingState;
 struct Vec2;
 
-class Editing : public Subject, public EventHandler
+class Editing : public Subject<Editing>, public EventHandler
 {
 public:
 	Editing(EditingState* state, LineFractal* fractal);
@@ -75,6 +74,11 @@ public:
 	**/
 	Vec2 getMousePosInFrame() const;
 
+	/**
+	\return a pointer to the clipboard
+	**/
+	double* getValClipboard();
+
 	/** 
 	recalculates the center of the editing frame.
 	\param dimensions the dimensions of the window
@@ -130,9 +134,27 @@ public:
 	**/
 	void removeSelectedLines();
 
-	// inherited via Subject
-	void addObserver(Observer* observer) override;
-	void removeObserver(Observer* observer) override;
+	/**
+	sets the given nodes position
+	\param node_id the id of the node to change
+	\param pos the new position of that node
+	**/
+	void setNodePosition(int node_id, Vec2 pos);
+
+	/**
+	sets the line angle of the given node
+	\param node_id the id of the node to change
+	\param pos the new line angle
+	**/
+	void setNodeAngle(int node_id, double angle);
+
+	/**
+	sets the line length of the given node
+	\param node_id the id of the node to change
+	\param pos the new line length
+	**/
+	void setNodeLength(int node_id, double length);
+	
 
 	// inherited via EventHandler
 	void handleEvent(sf::Event& event) override;
@@ -156,10 +178,8 @@ public:
 	const int general_element_width = right_panel_width - (general_padding * 2);
 private:
 
-	void notifyAll(Event e) const;
 	bool isWithinEditingFrame(sf::Vector2f point) const;
 
-	std::list<Observer*> observers;
 	std::unordered_map<int, std::shared_ptr<EditableLineNode>> nodes;
 	std::unordered_set<int> selected_nodes;
 	std::unordered_map<int, Vec2> dragging_nodes;
@@ -175,6 +195,8 @@ private:
 	int num_recursions = 7;
 	bool mouse_moved_since_lpress = false;
 	Vec2 left_press_location;
+
+	double value_clipboard = 0.0;
 
 	Vec2 editing_frame_size;
 	Vec2 editing_frame_center;

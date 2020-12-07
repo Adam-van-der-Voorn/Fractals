@@ -50,7 +50,7 @@ void Editing::handleEvent(sf::Event& event)
 				for (int node_id : selected_nodes) {
 					std::shared_ptr<EditableLineNode> node = nodes[node_id];
 					if (node->pointIntersection(Vec2::prim(event.mouseButton.x, event.mouseButton.y))) {
-						Vec2 selected_offset = { event.mouseButton.x - node->getPos().x, event.mouseButton.y - node->getPos().y };
+						Vec2 selected_offset = { event.mouseButton.x - node->getPosition().x, event.mouseButton.y - node->getPosition().y };
 						dragging_nodes.emplace(node_id, selected_offset);
 						on_any_selnode = true;
 					}
@@ -58,7 +58,7 @@ void Editing::handleEvent(sf::Event& event)
 				if (!on_any_selnode) {
 					for (auto& node : nodes) {
 						if (node.second->pointIntersection(Vec2::prim(event.mouseButton.x, event.mouseButton.y))) {
-							Vec2 selected_offset = { event.mouseButton.x - node.second->getPos().x, event.mouseButton.y - node.second->getPos().y };
+							Vec2 selected_offset = { event.mouseButton.x - node.second->getPosition().x, event.mouseButton.y - node.second->getPosition().y };
 							dragging_nodes.emplace(node.first, selected_offset);
 						}
 					}
@@ -72,8 +72,8 @@ void Editing::handleEvent(sf::Event& event)
 			for (auto& pair : dragging_nodes) {
 				node_moved = true;
 				Vec2 translation = { 
-				event.mouseMove.x - (nodes[pair.first]->getPos().x + pair.second.x),
-				event.mouseMove.y - (nodes[pair.first]->getPos().y + pair.second.y) };
+				event.mouseMove.x - (nodes[pair.first]->getPosition().x + pair.second.x),
+				event.mouseMove.y - (nodes[pair.first]->getPosition().y + pair.second.y) };
 				moveNode(pair.first, translation);
 			}
 			if (node_moved) {
@@ -113,6 +113,8 @@ void Editing::handleEvent(sf::Event& event)
 	}
 }
 
+
+
 void Editing::recalcEditingFrameCenter(Vec2 dimensions) {
 	editing_frame_size.x = (dimensions.x - right_panel_width);
 	editing_frame_size.y = dimensions.y;
@@ -128,6 +130,11 @@ Vec2 Editing::getEditingFrameCenter() const
 Vec2 Editing::getMousePosInFrame() const
 {
 	return mouse_framepos;
+}
+
+double* Editing::getValClipboard()
+{
+	return &value_clipboard;
 }
 
 
@@ -199,6 +206,13 @@ void Editing::removeSelectedLines()
 	updateFractal();
 }
 
+void Editing::setNodePosition(int node_id, Vec2 pos)
+{
+	nodes[node_id]->setPosition(pos);
+	notifyAll(Event::LINES_CHANGED);
+	updateFractal();
+}
+
 const std::unordered_map<int, std::shared_ptr<EditableLineNode>>& Editing::getNodes() const
 {
 	return nodes;
@@ -239,16 +253,18 @@ Vec2 Editing::getEditingFrameSize() const
 	return editing_frame_size;
 }
 
-void Editing::addObserver(Observer* observer)
+void Editing::setNodeAngle(int node_id, double angle)
 {
-	observers.push_back(observer);
-	PRINT("observer added");
+	nodes[node_id]->setAngle(angle);
+	notifyAll(Event::LINES_CHANGED);
+	updateFractal();
 }
 
-void Editing::removeObserver(Observer* observer)
+void Editing::setNodeLength(int node_id, double length)
 {
-	observers.remove(observer);
-	PRINT("Observer removed");
+	nodes[node_id]->setLength(length);
+	notifyAll(Event::LINES_CHANGED);
+	updateFractal();
 }
 
 void Editing::updateFractal()
@@ -266,26 +282,19 @@ void Editing::updateFractal()
 void Editing::moveNode(int node_id, Vec2 translation)
 {
 	std::shared_ptr<EditableLineNode> node = nodes[node_id];
-	Vec2 new_pos = node->getPos() + translation;
+	Vec2 new_pos = node->getPosition() + translation;
 	std::shared_ptr<EditableLineNode> other = node->getOtherNode();
-	AbsLine new_line = { other->getPos().x, other->getPos().y, new_pos.x, new_pos.y };
+	AbsLine new_line = { other->getPosition().x, other->getPosition().y, new_pos.x, new_pos.y };
 	double new_line_length = lineLength(new_line);
 	double max_line_length = lineLength(base_line->toAbsLine()) - 5;
 	if (new_line_length > max_line_length) {
-		const Vec2 mouse_framepos_offset = mouse_framepos - node->getPos();
-		new_pos = other->getPos() + Vec2::fromLenDir(max_line_length, lineAngle(new_line));
+		const Vec2 mouse_framepos_offset = mouse_framepos - node->getPosition();
+		new_pos = other->getPosition() + Vec2::fromLenDir(max_line_length, lineAngle(new_line));
 		node->setPosition(new_pos);
-		mouse_framepos = node->getPos() + mouse_framepos_offset;
+		mouse_framepos = node->getPosition() + mouse_framepos_offset;
 	}
 	else {
 		node->translate(translation);
-	}
-}
-
-void Editing::notifyAll(Event e) const
-{
-	for (Observer* observer : observers) {
-		observer->onNotify(e);
 	}
 }
 

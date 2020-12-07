@@ -45,15 +45,19 @@ public:
 	void setAngle(double angle);
 
 	/**
-	Sets the recusion status for this nodes line.
-	If true the line will recurse.
-	**/
-	void setRecursive(bool b);
-
-	/**
 	\return the position of this node
 	**/
-	Vec2 getPos() const;
+	Vec2 getPosition() const;
+
+	/**
+	\return the angle from this node to its partner
+	**/
+	double getLength() const;
+
+	/**
+	\return the angle from this node to its partner
+	**/
+	double getAngle() const;
 
 	/**
 	\return true if this node is at the front of it's line;
