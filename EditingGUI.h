@@ -56,9 +56,6 @@ private:
 	tgui::Panel::Ptr recursions_field;
 	tgui::EditBox::Ptr recursions_input;
 	tgui::Label::Ptr recursions_label;
-	tgui::Panel::Ptr measurement_fields[3];
-	tgui::EditBox::Ptr measurement_inputs[3];
-	tgui::Label::Ptr measurement_labels[3];
 	WidgetHoriStack::Ptr node_selections;
 };
 

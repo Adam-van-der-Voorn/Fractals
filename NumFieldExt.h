@@ -13,7 +13,7 @@ public:
 	typedef std::shared_ptr<NumFieldExt> Ptr; //!< Shared widget pointer
 	typedef std::shared_ptr<const NumFieldExt> ConstPtr; //!< Shared constant widget pointer
 
-	NumFieldExt(tgui::String label_text, double* clipboard);
+	NumFieldExt(double* clipboard);
 
 	/**
 	\return the actual value of the input field
@@ -27,16 +27,10 @@ public:
 	void setVal(double val);
 
 	/**
-	Sets the width of the input box
-	\param the width of the input box
+	Sets the width of the widget
+	\param the width of the widget
 	**/
-	void setInputBoxWidth(float width);
-
-	/**
-	Sets the width of the label
-	\param the width of the label
-	**/
-	void setLabelWidth(float width);
+	void setSize(const tgui::Layout2d& size) override;
 
 	/**
 	Sets the maximum amount of characters. set to 0 for unlimited.
@@ -45,7 +39,6 @@ public:
 	void setMaximumCharacters(unsigned int max);
 
 	bool operator == (NumFieldExt) const;
-
 
 private:
 	void init();
@@ -67,9 +60,8 @@ private:
 
 	const float padding = 3;
 
-
 	double* clipboard;
-	tgui::Label::Ptr label = tgui::Label::create();
+
 	tgui::EditBox::Ptr input = tgui::EditBox::create();
 	tgui::Button::Ptr copy_button = tgui::Button::create();
 	tgui::Button::Ptr paste_button = tgui::Button::create();

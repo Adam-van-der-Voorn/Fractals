@@ -4,6 +4,7 @@
 #include "EditableLine.h"
 #include "vecutil.h"
 #include "debug_printing.h"
+#include "degrad.h"
 #include <unordered_map>
 #include <memory>
 
@@ -12,7 +13,7 @@ class Editing;
 SelLineWidget::SelLineWidget(Editing* editing, int node_id, float width)
 	: editing(editing), node_id(node_id)
 {
-	setSize({ width, 105 });
+	setSize({ width, 140 });
 	init();
 }
 
@@ -55,48 +56,72 @@ void SelLineWidget::init()
 	select_button->setText("sel");
 
 	// measurements block
-	constexpr float field_height = 25;
+	constexpr float input_height = 22;
+	constexpr float label_height = 18;
+	constexpr float label_input_padding = 1;
 	const float field_width = (getSize().x - (padding * 3)) / 2;
-	constexpr float label_width = 23;
 
-	xpos_input = std::make_shared<NumFieldExt>("x", editing->getValClipboard());
+	// x position
+	auto xpos_label = tgui::Label::create();
+	add(xpos_label);
+	xpos_label->setPosition(padding, tgui::bindBottom(icon) + padding);
+	xpos_label->setSize({ field_width, label_height });
+	xpos_label->setText("xpos");
+
+	xpos_input = std::make_shared<NumFieldExt>(editing->getValClipboard());
 	add(xpos_input);
-	xpos_input->setPosition(padding, tgui::bindBottom(icon) + padding);
-	xpos_input->setSize({ field_width, field_height });
-	xpos_input->setLabelWidth(label_width);
+	xpos_input->setPosition(padding, tgui::bindBottom(xpos_label) + label_input_padding);
+	xpos_input->setSize({ field_width, input_height });
 	xpos_input->setVal(editing->getNodes().at(node_id)->getPosition().x);
-	xpos_input->setMaximumCharacters(4);
+	xpos_input->setMaximumCharacters(7);
 
-	ypos_input = std::make_shared<NumFieldExt>("y", editing->getValClipboard());
+	// y position
+	auto ypos_label = tgui::Label::create();
+	add(ypos_label);
+	ypos_label->setPosition(tgui::bindRight(xpos_input) + padding, tgui::bindBottom(icon) + padding);
+	ypos_label->setSize({ field_width, label_height });
+	ypos_label->setText("ypos");
+
+	ypos_input = std::make_shared<NumFieldExt>(editing->getValClipboard());
 	add(ypos_input);
-	ypos_input->setPosition(tgui::bindRight(xpos_input) + padding, tgui::bindBottom(icon) + padding);
-	ypos_input->setSize({ field_width, field_height });
-	ypos_input->setLabelWidth(label_width);
+	ypos_input->setPosition(tgui::bindRight(xpos_input) + padding, tgui::bindBottom(ypos_label) + label_input_padding);
+	ypos_input->setSize({ field_width, input_height });
 	ypos_input->setVal(editing->getNodes().at(node_id)->getPosition().y);
-	ypos_input->setMaximumCharacters(4);
+	ypos_input->setMaximumCharacters(7);
 
-	dir_input = std::make_shared<NumFieldExt>("dir", editing->getValClipboard());
+	// direction of line
+	auto dir_label = tgui::Label::create();
+	add(dir_label);
+	dir_label->setPosition(padding, tgui::bindBottom(xpos_input) + padding);
+	dir_label->setSize({ field_width, label_height });
+	dir_label->setText("angle");
+
+	dir_input = std::make_shared<NumFieldExt>(editing->getValClipboard());
 	add(dir_input);
-	dir_input->setPosition(padding, tgui::bindBottom(xpos_input) + padding);
-	dir_input->setSize({ field_width, field_height });
-	dir_input->setLabelWidth(label_width);
-	dir_input->setVal(editing->getNodes().at(node_id)->getAngle());
-	dir_input->setMaximumCharacters(4);
+	dir_input->setPosition(padding, tgui::bindBottom(dir_label) + label_input_padding);
+	dir_input->setSize({ field_width, input_height });
+	dir_input->setVal(toDeg(editing->getNodes().at(node_id)->getAngle()));
+	dir_input->setMaximumCharacters(7);
 
-	len_input = std::make_shared<NumFieldExt>("len", editing->getValClipboard());
+	// length of line
+	auto len_label = tgui::Label::create();
+	add(len_label);
+	len_label->setPosition(tgui::bindRight(dir_input) + padding, tgui::bindBottom(xpos_input) + padding);
+	len_label->setSize({ field_width, label_height });
+	len_label->setText("length");
+
+	len_input = std::make_shared<NumFieldExt>(editing->getValClipboard());
 	add(len_input);
-	len_input->setPosition(tgui::bindRight(dir_input) + padding, tgui::bindBottom(xpos_input) + padding);
-	len_input->setSize({ field_width, field_height });
-	len_input->setLabelWidth(label_width);
+	len_input->setPosition(tgui::bindRight(dir_input) + padding, tgui::bindBottom(len_label) + padding);
+	len_input->setSize({ field_width, input_height });
 	len_input->setVal(editing->getNodes().at(node_id)->getLength());
-	len_input->setMaximumCharacters(4);
+	len_input->setMaximumCharacters(7);
 
 	editing->addObserver(this);
 	xpos_input->addObserver(this);
 	ypos_input->addObserver(this);
 	dir_input->addObserver(this);
 	len_input->addObserver(this);
-
 }
 
 void SelLineWidget::onNotify(Editing* e, int event_num)
@@ -108,7 +133,7 @@ void SelLineWidget::onNotify(Editing* e, int event_num)
 		redrawIcon();
 		xpos_input->setVal(editing->getNodes().at(node_id)->getPosition().x);
 		ypos_input->setVal(editing->getNodes().at(node_id)->getPosition().y);
-		dir_input->setVal(editing->getNodes().at(node_id)->getAngle());
+		dir_input->setVal(toDeg(editing->getNodes().at(node_id)->getAngle()));
 		len_input->setVal(editing->getNodes().at(node_id)->getLength());
 		break;
 	}
@@ -124,7 +149,7 @@ void SelLineWidget::onNotify(NumFieldExt* field, int event_num)
 	}
 	else {
 		assert(*field == *dir_input.get() && "field not == to anything");
-		editing->setNodeAngle(node_id, dir_input->getVal());
+		editing->setNodeAngle(node_id, toRad(dir_input->getVal()));
 	}
 }
 

@@ -154,7 +154,7 @@ void EditingGUI::realignTGUI(int window_width, int window_height)
 	right_panel->setSize(editing->right_panel_width, window_height);
 	right_panel->setPosition(window_width - editing->right_panel_width, 0);
 	display_button->setPosition(editing->general_padding, window_height - editing->general_padding - display_button->getSize().y);
-	node_selections->setSize(editing->general_element_width, display_button->getPosition().y - (2 * editing->general_padding) - (measurement_fields[2]->getPosition().y + measurement_fields[2]->getSize().y));
+	node_selections->setSize(editing->general_element_width, display_button->getPosition().y - (2 * editing->general_padding) - (line_actions_field->getPosition().y + line_actions_field->getSize().y));
 }
 
 void EditingGUI::setupTGUI(int window_width, int window_height)
@@ -215,38 +215,12 @@ void EditingGUI::setupTGUI(int window_width, int window_height)
 	remove_line_button->setText("remove line");
 	remove_line_button->onClick(&Editing::removeSelectedLines, editing);
 
-	// measurements block
-	std::string label_names[] = { "Length", "Angle", "Position" };
-	static const int no_measurement_fields = sizeof(measurement_inputs) / sizeof(tgui::EditBox::Ptr);
-	for (int i = 0; i < no_measurement_fields; i++) {
-		// measurement fields
-		measurement_fields[i] = tgui::Panel::create();
-		right_panel->add(measurement_fields[i]);
-		measurement_fields[i]->setSize(editing->general_element_width, 20);
-
-		// measurement labels
-		measurement_labels[i] = tgui::Label::create();
-		measurement_fields[i]->add(measurement_labels[i]);
-		measurement_labels[i]->setText(label_names[i]);
-		measurement_labels[i]->setSize("100%", "100%");
-		measurement_labels[i]->setPosition(0, 3);
-
-		// measurement inputs
-		measurement_inputs[i] = tgui::EditBox::create();
-		measurement_fields[i]->add(measurement_inputs[i]);
-		measurement_inputs[i]->setSize(120, "100%");
-		measurement_inputs[i]->setPosition(editing->general_element_width - measurement_inputs[i]->getSize().x, 0);
-	}
-	measurement_fields[0]->setPosition(editing->general_padding, tgui::bindBottom(line_actions_field) + editing->general_padding);
-	measurement_fields[1]->setPosition(editing->general_padding, tgui::bindBottom(measurement_fields[0]) + editing->general_padding);
-	measurement_fields[2]->setPosition(editing->general_padding, tgui::bindBottom(measurement_fields[1]) + editing->general_padding);
-
 	// node selections
 	node_selections = std::make_shared<WidgetHoriStack>();
 	node_selections->setMargins(0, editing->general_padding);
 	right_panel->add(node_selections);
 
-	node_selections->setPosition({ editing->general_padding, tgui::bindBottom(measurement_fields[2]) + editing->general_padding });
+	node_selections->setPosition({ editing->general_padding, tgui::bindBottom(line_actions_field) + editing->general_padding });
 
 	realignTGUI(window_width, window_height);
 }

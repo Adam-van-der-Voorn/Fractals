@@ -158,6 +158,9 @@
     <ClInclude Include="NumFieldExt.h">
       <Filter>Header Files\Editing</Filter>
     </ClInclude>
+    <ClInclude Include="degrad.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Text Include="other algos.txt" />

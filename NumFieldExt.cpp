@@ -3,11 +3,10 @@
 #include <string>
 
 
-NumFieldExt::NumFieldExt(tgui::String label_text, double* clipboard)
+NumFieldExt::NumFieldExt(double* clipboard)
 	: clipboard(clipboard)
 {
 	init();
-	label->setText(label_text);
 }
 
 double NumFieldExt::getVal() const
@@ -22,16 +21,12 @@ void NumFieldExt::setVal(double val)
 	input->setText(field_value);
 }
 
-void NumFieldExt::setInputBoxWidth(float width)
+void NumFieldExt::setSize(const tgui::Layout2d& size)
 {
-	input->setWidth(width);
-	label->setWidth(getSize().x - width - copy_button->getSize().x - paste_button->getSize().x - (padding * 4));
-}
-
-void NumFieldExt::setLabelWidth(float width)
-{
-	label->setWidth(width);
-	input->setWidth(getSize().x - width - copy_button->getSize().x - paste_button->getSize().x - (padding * 4));
+	Panel::setSize(size);
+	input->setSize({ size.x - copy_button->getSize().x - paste_button->getSize().x - (padding * 2), size.y });
+	copy_button->setHeight(size.y);
+	paste_button->setHeight(size.y);
 }
 
 void NumFieldExt::setMaximumCharacters(unsigned int max)
@@ -53,15 +48,10 @@ void NumFieldExt::init()
 {
 	setHeight(20);
 
-	// label
-	add(label);
-	label->setSize(30, "100%");
-
 	// input
 	add(input);
 	input->setHeight(getSize().y);
-	input->setWidth(70);
-	input->setPosition(tgui::bindRight(label) + padding, 0);
+	input->setPosition(0, 0);
 	input->onReturnOrUnfocus(&NumFieldExt::confirmFieldChange, this);
 
 	// copy
@@ -80,16 +70,19 @@ void NumFieldExt::init()
 	paste_button->setText("p");
 	paste_button->onClick(&NumFieldExt::paste, this);
 	paste_button->setPosition(tgui::bindRight(copy_button) + padding, 0);
+
+	setWidth(100); // has to be last to adjust the input width based on the amount of room left
 }
 
 void NumFieldExt::copy()
 {
-	*clipboard == actual_value;
+	*clipboard = actual_value;
 }
 
 void NumFieldExt::paste()
 {
 	setVal(*clipboard);
+	notifyAll(0);
 }
 
 void NumFieldExt::confirmFieldChange()

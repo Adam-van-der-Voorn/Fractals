@@ -18,7 +18,7 @@
 // - make the gui not an event handler
 // - stop the fields letting the lines do illegal moves
 //      - some kind of message popup system to inform the user its illegal would b good.
-//
+// - lines cause abort if len is set to 0 via field and then mouse is clicked on empty space
 sf::ContextSettings settings(0, 0, 8);
 sf::RenderWindow window(sf::VideoMode(900, 600), "asd", sf::Style::Default, settings);
 
