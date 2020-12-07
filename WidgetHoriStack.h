@@ -3,6 +3,9 @@
 class WidgetHoriStack : public tgui::Panel
 {
 public:
+	typedef std::shared_ptr<WidgetHoriStack> Ptr; //!< Shared widget pointer
+	typedef std::shared_ptr<const WidgetHoriStack> ConstPtr; //!< Shared constant widget pointer
+
 	WidgetHoriStack();
 
 	/**

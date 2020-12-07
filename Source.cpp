@@ -16,6 +16,9 @@
 // - fix floating point innaccuaracies when zooming in very large amounts
 // - fix bug where new widgets in widget stack dont go to the bottom
 // - make the gui not an event handler
+// - stop the fields letting the lines do illegal moves
+//      - some kind of message popup system to inform the user its illegal would b good.
+//
 sf::ContextSettings settings(0, 0, 8);
 sf::RenderWindow window(sf::VideoMode(900, 600), "asd", sf::Style::Default, settings);
 

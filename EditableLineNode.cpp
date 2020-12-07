@@ -50,7 +50,7 @@ double EditableLineNode::getLength() const
 
 double EditableLineNode::getAngle() const
 {
-	EditableLineNode* other = getOtherNode().get();
+	EditableLineNode* other = getOtherNode();
 	return lineAngle({pos.x, pos.y, other->getPosition().x, other->getPosition().y});
 }
 
@@ -62,7 +62,7 @@ EditableLine* EditableLineNode::getLine() const
 {
 	return line;
 }
-std::shared_ptr<EditableLineNode> EditableLineNode::getOtherNode() const
+EditableLineNode* EditableLineNode::getOtherNode() const
 {
 	if (isFront()) {
 		return line->getBackNode();

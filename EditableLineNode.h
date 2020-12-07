@@ -72,7 +72,7 @@ public:
 	/**
 	\return the other node on this nodes line
 	**/
-	std::shared_ptr<EditableLineNode> getOtherNode() const;
+	EditableLineNode* getOtherNode() const;
 
 	/**
 	\return the id of the node

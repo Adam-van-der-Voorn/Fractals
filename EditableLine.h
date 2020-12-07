@@ -19,12 +19,12 @@ public:
 	/**
 	\return the back node
 	**/
-	std::shared_ptr<EditableLineNode> getBackNode() const;
+	EditableLineNode* getBackNode() const;
 
 	/**
 	\return the front node
 	**/
-	std::shared_ptr<EditableLineNode> getFrontNode() const;
+	EditableLineNode* getFrontNode() const;
 
 	/**
 	Sets the recusion status for this line.

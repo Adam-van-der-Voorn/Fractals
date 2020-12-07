@@ -24,7 +24,7 @@ public:
 	/**
 	\return the moveable nodes of the foundational lines.
 	**/
-	const std::unordered_map<int, std::shared_ptr<EditableLineNode>>& getNodes() const;
+	const std::unordered_map<int, EditableLineNode*>& getNodes() const;
 
 	/**
 	\return the foundational lines of the fractal (ie the lines that are used in the recursion for the fractal)
@@ -180,7 +180,7 @@ private:
 
 	bool isWithinEditingFrame(sf::Vector2f point) const;
 
-	std::unordered_map<int, std::shared_ptr<EditableLineNode>> nodes;
+	std::unordered_map<int, EditableLineNode*> nodes;
 	std::unordered_set<int> selected_nodes;
 	std::unordered_map<int, Vec2> dragging_nodes;
 	std::unordered_map<int, std::shared_ptr<EditableLine>> lines;

@@ -130,7 +130,7 @@ void SelLineWidget::onNotify(NumFieldExt* field, int event_num)
 
 void SelLineWidget::redrawIcon() {
 	icon->clear();
-	EditableLineNode* node = editing->getNodes().at(node_id).get();
+	EditableLineNode* node = editing->getNodes().at(node_id);
 	double line_angle = lineAngle(node->getLine()->toAbsLine());
 
 	// line

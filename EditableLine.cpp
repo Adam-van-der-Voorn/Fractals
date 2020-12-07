@@ -14,14 +14,14 @@ EditableLine::EditableLine(int line_id, int back_node_id, int front_node_id, Abs
 	front_node = std::make_shared<EditableLineNode>(front_node_id, tmp_front, true, this);
 }
 
-std::shared_ptr<EditableLineNode> EditableLine::getBackNode() const
+EditableLineNode* EditableLine::getBackNode() const
 {
-	return back_node;
+	return back_node.get();
 }
 
-std::shared_ptr<EditableLineNode> EditableLine::getFrontNode() const
+EditableLineNode* EditableLine::getFrontNode() const
 {
-	return front_node;
+	return front_node.get();
 }
 
 void EditableLine::setRecursive(bool front_node)

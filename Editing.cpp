@@ -48,7 +48,7 @@ void Editing::handleEvent(sf::Event& event)
 				left_press_location = mouse_framepos;
 				bool on_any_selnode = false;
 				for (int node_id : selected_nodes) {
-					std::shared_ptr<EditableLineNode> node = nodes[node_id];
+					EditableLineNode* node = nodes[node_id];
 					if (node->pointIntersection(Vec2::prim(event.mouseButton.x, event.mouseButton.y))) {
 						Vec2 selected_offset = { event.mouseButton.x - node->getPosition().x, event.mouseButton.y - node->getPosition().y };
 						dragging_nodes.emplace(node_id, selected_offset);
@@ -213,7 +213,7 @@ void Editing::setNodePosition(int node_id, Vec2 pos)
 	updateFractal();
 }
 
-const std::unordered_map<int, std::shared_ptr<EditableLineNode>>& Editing::getNodes() const
+const std::unordered_map<int, EditableLineNode*>& Editing::getNodes() const
 {
 	return nodes;
 }
@@ -281,9 +281,9 @@ void Editing::updateFractal()
 
 void Editing::moveNode(int node_id, Vec2 translation)
 {
-	std::shared_ptr<EditableLineNode> node = nodes[node_id];
+	EditableLineNode* node = nodes[node_id];
 	Vec2 new_pos = node->getPosition() + translation;
-	std::shared_ptr<EditableLineNode> other = node->getOtherNode();
+	EditableLineNode* other = node->getOtherNode();
 	AbsLine new_line = { other->getPosition().x, other->getPosition().y, new_pos.x, new_pos.y };
 	double new_line_length = lineLength(new_line);
 	double max_line_length = lineLength(base_line->toAbsLine()) - 5;
