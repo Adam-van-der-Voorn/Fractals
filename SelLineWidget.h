@@ -10,6 +10,7 @@
 #include <TGUI/Widgets/EditBox.hpp>
 #include <TGUI/Widgets/Label.hpp>
 #include <TGUI/Widgets/Canvas.hpp>
+#include <TGUI/Widgets/CheckBox.hpp>
 #include <unordered_map>
 
 class EditableLineNode;
@@ -52,6 +53,7 @@ private:
 	NumFieldExt::Ptr ypos_input;
 	NumFieldExt::Ptr dir_input;
 	NumFieldExt::Ptr len_input;
+	tgui::CheckBox::Ptr rec_checkbox;
 
 
 };

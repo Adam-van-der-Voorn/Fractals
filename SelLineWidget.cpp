@@ -13,7 +13,7 @@ class Editing;
 SelLineWidget::SelLineWidget(Editing* editing, int node_id, float width)
 	: editing(editing), node_id(node_id)
 {
-	setSize({ width, 140 });
+	setSize({ width, 170 });
 	init();
 }
 
@@ -61,7 +61,7 @@ void SelLineWidget::init()
 	constexpr float label_input_padding = 1;
 	const float field_width = (getSize().x - (padding * 3)) / 2;
 
-	// x position
+	// x position field
 	auto xpos_label = tgui::Label::create();
 	add(xpos_label);
 	xpos_label->setPosition(padding, tgui::bindBottom(icon) + padding);
@@ -75,7 +75,7 @@ void SelLineWidget::init()
 	xpos_input->setVal(editing->getNodes().at(node_id)->getPosition().x);
 	xpos_input->setMaximumCharacters(7);
 
-	// y position
+	// y position field
 	auto ypos_label = tgui::Label::create();
 	add(ypos_label);
 	ypos_label->setPosition(tgui::bindRight(xpos_input) + padding, tgui::bindBottom(icon) + padding);
@@ -89,7 +89,7 @@ void SelLineWidget::init()
 	ypos_input->setVal(editing->getNodes().at(node_id)->getPosition().y);
 	ypos_input->setMaximumCharacters(7);
 
-	// direction of line
+	// direction of line field
 	auto dir_label = tgui::Label::create();
 	add(dir_label);
 	dir_label->setPosition(padding, tgui::bindBottom(xpos_input) + padding);
@@ -103,7 +103,7 @@ void SelLineWidget::init()
 	dir_input->setVal(toDeg(editing->getNodes().at(node_id)->getAngle()));
 	dir_input->setMaximumCharacters(7);
 
-	// length of line
+	// length of line field
 	auto len_label = tgui::Label::create();
 	add(len_label);
 	len_label->setPosition(tgui::bindRight(dir_input) + padding, tgui::bindBottom(xpos_input) + padding);
@@ -116,6 +116,21 @@ void SelLineWidget::init()
 	len_input->setSize({ field_width, input_height });
 	len_input->setVal(editing->getNodes().at(node_id)->getLength());
 	len_input->setMaximumCharacters(7);
+
+	// recursion checkbox
+	auto rec_label = tgui::Label::create();
+	rec_checkbox = tgui::CheckBox::create();
+	add(rec_label);
+	add(rec_checkbox);
+	rec_label->setPosition(padding, tgui::bindBottom(dir_input) + padding);
+	
+	rec_checkbox->setPosition(tgui::bindRight(rec_label) + padding, tgui::bindBottom(dir_input) + padding);
+	rec_checkbox->setChecked(editing->getNodes().at(node_id)->getLine()->isRecursive());
+	rec_checkbox->onCheck(&Editing::setLineRecursiveness, editing, editing->getNodes().at(node_id)->getLine()->getID(), true);
+	rec_checkbox->onUncheck(&Editing::setLineRecursiveness, editing, editing->getNodes().at(node_id)->getLine()->getID(), false);
+
+	rec_label->setSize(getSize().x - rec_checkbox->getSize().x - (padding * 3), label_height);
+	rec_label->setText("is recursive");
 
 	editing->addObserver(this);
 	xpos_input->addObserver(this);
@@ -154,6 +169,7 @@ void SelLineWidget::onNotify(NumFieldExt* field, int event_num)
 }
 
 void SelLineWidget::redrawIcon() {
+	temp_background->clear(tgui::Color::Yellow);
 	icon->clear();
 	EditableLineNode* node = editing->getNodes().at(node_id);
 	double line_angle = lineAngle(node->getLine()->toAbsLine());

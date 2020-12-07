@@ -29,6 +29,11 @@ void EditableLine::setRecursive(bool front_node)
 	recursive = front_node;
 }
 
+bool EditableLine::isRecursive() const
+{
+	return recursive;
+}
+
 LFLine EditableLine::toLFLine(AbsLine base_line) const
 {
 	double base_line_len = lineLength(base_line);

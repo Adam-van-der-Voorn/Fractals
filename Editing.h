@@ -154,8 +154,14 @@ public:
 	\param pos the new line length
 	**/
 	void setNodeLength(int node_id, double length);
-	
 
+	/**
+	sets the given lines recursiveness 
+	\param line_id the id of the line to change
+	\param b true to make the line recursiveness
+	**/
+	void setLineRecursiveness(int line_id, bool b);
+	
 	// inherited via EventHandler
 	void handleEvent(sf::Event& event) override;
 

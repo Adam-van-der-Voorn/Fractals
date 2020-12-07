@@ -33,6 +33,11 @@ public:
 	void setRecursive(bool b);
 
 	/**
+	\return true if the line is recursive
+	**/
+	bool isRecursive() const;
+
+	/**
 	\param base_line the line that the LFLine will be based off
 	\return a line fractal line relative to the given baseline
 	**/

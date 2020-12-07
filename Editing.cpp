@@ -37,6 +37,13 @@ Editing::Editing(EditingState* state, LineFractal* fractal) :
 	clearHoveredNode();
 }
 
+void Editing::setLineRecursiveness(int line_id, bool b)
+{
+	lines[line_id]->setRecursive(b);
+	notifyAll(Event::LINES_CHANGED);
+	updateFractal();
+}
+
 void Editing::handleEvent(sf::Event& event)
 {
 	if (event.type == sf::Event::Resized) {
