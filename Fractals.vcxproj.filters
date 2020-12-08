@@ -81,6 +81,12 @@
     <ClCompile Include="AbsLine.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="ViewingState.cpp">
+      <Filter>Source Files\Viewing</Filter>
+    </ClCompile>
+    <ClCompile Include="ViewingGUI.cpp">
+      <Filter>Source Files\Viewing</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="signum.h">
@@ -160,6 +166,12 @@
     </ClInclude>
     <ClInclude Include="degrad.h">
       <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="ViewingState.h">
+      <Filter>Header Files\Viewing</Filter>
+    </ClInclude>
+    <ClInclude Include="ViewingGUI.h">
+      <Filter>Header Files\Viewing</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
