@@ -27,8 +27,8 @@ Editing::Editing(EditingState* state, LineFractal* fractal) :
 	srand(80085);
 
 	// setup base line
-	recalcEditingFrameCenter(Vec2::sf(state->getRenderWindow()->getSize()));
-	AbsLine l = { editing_frame_center.x-200, editing_frame_center.y, editing_frame_center.x + 200, editing_frame_center.y };
+	recalcEditingFrameDimensions(Vec2::sf(state->getRenderWindow()->getSize()));
+	AbsLine l = { -200, 0, +200, 0 };
 	base_line = std::make_shared<EditableLine>(getID(), getID(), getID(), l);
 	fractal->setBaseLine(l);
 	fractal->generate(num_recursions);
@@ -44,28 +44,34 @@ void Editing::setLineRecursiveness(int line_id, bool b)
 	updateFractal();
 }
 
+Vec2 Editing::getGlobalOffset() const
+{
+	return global_transform;
+}
+
 void Editing::handleEvent(sf::Event& event)
 {
 	if (event.type == sf::Event::Resized) {
-		recalcEditingFrameCenter({ static_cast<double>(event.size.width), static_cast<double>(event.size.height) });
+		recalcEditingFrameDimensions({ static_cast<double>(event.size.width), static_cast<double>(event.size.height) });
 	}
 	else if (event.type == sf::Event::MouseButtonPressed) {
-		if (isWithinEditingFrame(sf::Vector2f(event.mouseButton.x, event.mouseButton.y))) {
+		if (isWithinEditingFrame(Vec2::prim(event.mouseButton.x, event.mouseButton.y ))) {
 			if (event.mouseButton.button == sf::Mouse::Button::Left) {
 				left_press_location = mouse_framepos;
+				Vec2 transformed_pos = Vec2::prim(event.mouseButton.x, event.mouseButton.y) - global_transform;
 				bool on_any_selnode = false;
 				for (int node_id : selected_nodes) {
 					EditableLineNode* node = nodes[node_id];
-					if (node->pointIntersection(Vec2::prim(event.mouseButton.x, event.mouseButton.y))) {
-						Vec2 selected_offset = { event.mouseButton.x - node->getPosition().x, event.mouseButton.y - node->getPosition().y };
+					if (node->pointIntersection(transformed_pos)) {
+						Vec2 selected_offset = transformed_pos - node->getPosition();
 						dragging_nodes.emplace(node_id, selected_offset);
 						on_any_selnode = true;
 					}
 				}
 				if (!on_any_selnode) {
 					for (auto& node : nodes) {
-						if (node.second->pointIntersection(Vec2::prim(event.mouseButton.x, event.mouseButton.y))) {
-							Vec2 selected_offset = { event.mouseButton.x - node.second->getPosition().x, event.mouseButton.y - node.second->getPosition().y };
+						if (node.second->pointIntersection(transformed_pos)) {
+							Vec2 selected_offset = transformed_pos - node.second->getPosition();
 							dragging_nodes.emplace(node.first, selected_offset);
 						}
 					}
@@ -74,13 +80,13 @@ void Editing::handleEvent(sf::Event& event)
 		}
 	}
 	else if (event.type == sf::Event::MouseMoved) {
-		if (isWithinEditingFrame(sf::Vector2f(event.mouseMove.x, event.mouseMove.y))) {
+		if (isWithinEditingFrame(Vec2::prim(event.mouseMove.x, event.mouseMove.y))) {
+			Vec2 transformed_pos = Vec2::prim(event.mouseMove.x, event.mouseMove.y) - global_transform;
+
 			bool node_moved = false;
 			for (auto& pair : dragging_nodes) {
 				node_moved = true;
-				Vec2 translation = { 
-				event.mouseMove.x - (nodes[pair.first]->getPosition().x + pair.second.x),
-				event.mouseMove.y - (nodes[pair.first]->getPosition().y + pair.second.y) };
+				Vec2 translation = transformed_pos - (nodes[pair.first]->getPosition() + pair.second);
 				moveNode(pair.first, translation);
 			}
 			if (node_moved) {
@@ -93,7 +99,7 @@ void Editing::handleEvent(sf::Event& event)
 		}
 	}
 	else if (event.type == sf::Event::MouseButtonReleased) {
-		if (isWithinEditingFrame(sf::Vector2f(event.mouseButton.x, event.mouseButton.y))) {
+		if (isWithinEditingFrame(Vec2::prim(event.mouseButton.x, event.mouseButton.y))) {
 			if (event.mouseButton.button == sf::Mouse::Button::Left) {
 				dragging_nodes.clear();
 				if (mouse_framepos == left_press_location) {
@@ -101,7 +107,7 @@ void Editing::handleEvent(sf::Event& event)
 
 					// select new nodes
 					for (auto& node : nodes) {
-						if (node.second->pointIntersection({ mouse_framepos.x, mouse_framepos.y })) {
+						if (node.second->pointIntersection(mouse_framepos - global_transform)) {
 							selected_nodes.insert(node.first);
 						}
 					}
@@ -122,16 +128,10 @@ void Editing::handleEvent(sf::Event& event)
 
 
 
-void Editing::recalcEditingFrameCenter(Vec2 dimensions) {
-	editing_frame_size.x = (dimensions.x - right_panel_width);
-	editing_frame_size.y = dimensions.y;
-	editing_frame_center.x = editing_frame_size.x / 2;
-	editing_frame_center.y = editing_frame_size.y / 2;
-}
-
-Vec2 Editing::getEditingFrameCenter() const
-{
-	return editing_frame_center;
+void Editing::recalcEditingFrameDimensions(Vec2 window_dimensions) {
+	editing_frame_size.x = (window_dimensions.x - right_panel_width);
+	editing_frame_size.y = window_dimensions.y;
+	global_transform = editing_frame_size / 2;
 }
 
 Vec2 Editing::getMousePosInFrame() const
@@ -185,7 +185,7 @@ void Editing::addLine() {
 	float y = lendirY(length, angle);
 
 	int id_arr[] = { getID(), getID(), getID() };
-	AbsLine l = { editing_frame_center.x - x, editing_frame_center.y - y, editing_frame_center.x + x, editing_frame_center.y + y };
+	AbsLine l = {-x, -y, +x, +y };
 	std::shared_ptr<EditableLine> line = std::make_shared<EditableLine>(id_arr[0], id_arr[1], id_arr[2], l);
 
 	lines.emplace(id_arr[0], line);
@@ -305,7 +305,7 @@ void Editing::moveNode(int node_id, Vec2 translation)
 	}
 }
 
-bool Editing::isWithinEditingFrame(sf::Vector2f point) const
+bool Editing::isWithinEditingFrame(Vec2 point) const
 {
 	if (point.x >= 0 && point.y >= 0 && point.x < editing_frame_size.x && point.y < editing_frame_size.y) {
 		return true;

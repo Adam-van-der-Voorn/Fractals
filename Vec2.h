@@ -1,5 +1,7 @@
 #pragma once
 #include <SFML/System/Vector2.hpp>
+#include <SFML/Graphics/Transform.hpp>
+
 struct Vec2 {
 	double x;
 	double y;
@@ -15,7 +17,11 @@ struct Vec2 {
 	void operator -= (const Vec2& other);
 	Vec2 operator + (const Vec2& other) const;
 	Vec2 operator - (const Vec2& other) const;
+	Vec2 operator / (double other) const;
+	Vec2 operator * (double other) const;
 	bool operator == (const Vec2& other) const;
+
+	sf::Transform toSFTransform() const;
 
 
 };

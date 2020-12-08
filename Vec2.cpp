@@ -53,7 +53,24 @@ Vec2 Vec2::operator-(const Vec2 & other) const
 	return { this->x - other.x, this->y - other.y };
 }
 
+Vec2 Vec2::operator/(double other) const
+{
+	return { x / other, y / other };
+}
+
+Vec2 Vec2::operator*(double other) const
+{
+	return { x * other, y * other };
+}
+
 bool Vec2::operator==(const Vec2 & other) const
 {
 	return (x == other.x && y == other.y);
+}
+
+sf::Transform Vec2::toSFTransform() const
+{
+	sf::Transform tmp;
+	tmp.translate(x, y);
+	return tmp;
 }

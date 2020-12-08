@@ -84,7 +84,7 @@ void EditingGUI::updateNodes()
 		else if (editing->getSelectedNodes().count(node_pair.first)) { // node is selected
 			nodes[i].setOutlineColor(sf::Color::Red);
 		}
-		else if (node_pair.second->pointIntersection(editing->getMousePosInFrame())) {
+		else if (node_pair.second->pointIntersection(editing->getMousePosInFrame() - editing->getGlobalOffset())) {
 			nodes[i].setOutlineColor(sf::Color::White);
 		}
 		else {
@@ -227,13 +227,12 @@ void EditingGUI::setupTGUI(int window_width, int window_height)
 
 void EditingGUI::draw(sf::RenderTarget & target, sf::RenderStates states) const
 {
-	target.draw(fractal);
-
-	target.draw(nodeLines);
+	target.draw(fractal, editing->getGlobalOffset().toSFTransform());
+	target.draw(baseLine, editing->getGlobalOffset().toSFTransform());
+	target.draw(nodeLines, editing->getGlobalOffset().toSFTransform());
 	for (auto& node : nodes) {
-		target.draw(node);
+		target.draw(node, editing->getGlobalOffset().toSFTransform());
 	}
-	target.draw(baseLine);
 	tGui->draw();
 
 	if (DEBUG) {

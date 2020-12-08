@@ -65,11 +65,6 @@ public:
 	Vec2 getEditingFrameSize() const;
 
 	/**
-	\return the center of the editing frame
-	**/
-	Vec2 getEditingFrameCenter() const;
-
-	/**
 	\return the most recent position of the mouse in the editing frame
 	**/
 	Vec2 getMousePosInFrame() const;
@@ -83,7 +78,7 @@ public:
 	recalculates the center of the editing frame.
 	\param dimensions the dimensions of the window
 	**/
-	void recalcEditingFrameCenter(Vec2 dimensions);
+	void recalcEditingFrameDimensions(Vec2 window_dimensions);
 
 	/**
 	updates the fractal
@@ -161,6 +156,11 @@ public:
 	\param b true to make the line recursiveness
 	**/
 	void setLineRecursiveness(int line_id, bool b);
+
+	/**
+	\return the global transform
+	**/
+	Vec2 getGlobalOffset() const;
 	
 	// inherited via EventHandler
 	void handleEvent(sf::Event& event) override;
@@ -184,7 +184,7 @@ public:
 	const int general_element_width = right_panel_width - (general_padding * 2);
 private:
 
-	bool isWithinEditingFrame(sf::Vector2f point) const;
+	bool isWithinEditingFrame(Vec2 point) const;
 
 	std::unordered_map<int, EditableLineNode*> nodes;
 	std::unordered_set<int> selected_nodes;
@@ -194,6 +194,9 @@ private:
 
 	// the id of the node that the user is hovering over in the gui
 	int hovered_node;
+
+	// global transform for the contents of the editing pane.
+	Vec2 global_transform;
 
 	LineFractal* fractal;
 	EditingState* state;
@@ -205,7 +208,6 @@ private:
 	double value_clipboard = 0.0;
 
 	Vec2 editing_frame_size;
-	Vec2 editing_frame_center;
 	Vec2 mouse_framepos;
 };
 

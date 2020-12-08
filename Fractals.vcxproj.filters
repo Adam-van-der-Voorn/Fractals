@@ -31,6 +31,9 @@
     <Filter Include="Source Files\Viewing">
       <UniqueIdentifier>{01a2201e-4ed1-417c-9e2b-7b192bf030cd}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Header Files\Util">
+      <UniqueIdentifier>{2234908f-66a3-4329-b1f2-802de3cb6e47}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Source.cpp">
@@ -89,9 +92,6 @@
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="signum.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="LineFractal.h">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -122,20 +122,11 @@
     <ClInclude Include="AbsLine.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="pi.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="vecutil.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="LFLine.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="EditableLineNode.h">
       <Filter>Header Files\Editing</Filter>
-    </ClInclude>
-    <ClInclude Include="vertarrutil.h">
-      <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Observer.h">
       <Filter>Header Files</Filter>
@@ -164,14 +155,26 @@
     <ClInclude Include="NumFieldExt.h">
       <Filter>Header Files\Editing</Filter>
     </ClInclude>
-    <ClInclude Include="degrad.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="ViewingState.h">
       <Filter>Header Files\Viewing</Filter>
     </ClInclude>
     <ClInclude Include="ViewingGUI.h">
       <Filter>Header Files\Viewing</Filter>
+    </ClInclude>
+    <ClInclude Include="vertarrutil.h">
+      <Filter>Header Files\Util</Filter>
+    </ClInclude>
+    <ClInclude Include="vecutil.h">
+      <Filter>Header Files\Util</Filter>
+    </ClInclude>
+    <ClInclude Include="signum.h">
+      <Filter>Header Files\Util</Filter>
+    </ClInclude>
+    <ClInclude Include="pi.h">
+      <Filter>Header Files\Util</Filter>
+    </ClInclude>
+    <ClInclude Include="degrad.h">
+      <Filter>Header Files\Util</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
