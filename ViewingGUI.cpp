@@ -40,6 +40,6 @@ void ViewingGUI::onNotify(Viewing* subject, int event_num)
 
 void ViewingGUI::draw(sf::RenderTarget& target, sf::RenderStates states) const
 {
-	target.draw(fractal_lines);
+	target.draw(fractal_lines, data->getGlobalOffset().toSFTransform());
 	gui->draw();
 }

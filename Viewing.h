@@ -4,6 +4,7 @@
 #include <TGUI/TGUI.hpp>
 #include "State.h"
 #include "Subject.h"
+#include "Vec2.h"
 
 class LineFractal;
 class ZoomBox;
@@ -27,6 +28,11 @@ public:
 	**/
 	const LineFractal* getFractal() const;
 
+	/**
+	\return the global transform
+	**/
+	Vec2 getGlobalOffset() const;
+
 	enum Event {
 		
 	};
@@ -35,5 +41,8 @@ private:
 	ViewingState* state;
 	LineFractal* fractal;
 	ZoomBox* zoom_box;
+
+	// global transform for the contents of the editing pane.
+	Vec2 global_offset;
 };
 

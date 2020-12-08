@@ -183,31 +183,31 @@ public:
 	const int general_padding = 6;
 	const int general_element_width = right_panel_width - (general_padding * 2);
 private:
-
 	bool isWithinEditingFrame(Vec2 point) const;
 
+	EditingState* state;
+
+	// frame contents ///
 	std::unordered_map<int, EditableLineNode*> nodes;
 	std::unordered_set<int> selected_nodes;
 	std::unordered_map<int, Vec2> dragging_nodes;
 	std::unordered_map<int, std::shared_ptr<EditableLine>> lines;
 	std::shared_ptr<EditableLine> base_line;
-
+	LineFractal* fractal;
+	int num_recursions = 7;
 	// the id of the node that the user is hovering over in the gui
 	int hovered_node;
 
-	// global transform for the contents of the editing pane.
-	Vec2 global_transform;
+	double value_clipboard = 0.0;
 
-	LineFractal* fractal;
-	EditingState* state;
-
-	int num_recursions = 7;
+	// data for frame actions //
 	bool mouse_moved_since_lpress = false;
 	Vec2 left_press_location;
 
-	double value_clipboard = 0.0;
-
+	// frame data //
 	Vec2 editing_frame_size;
 	Vec2 mouse_framepos;
+	// global transform for the contents of the editing pane.
+	Vec2 global_offset;
 };
 

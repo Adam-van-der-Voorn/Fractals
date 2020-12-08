@@ -46,7 +46,7 @@ void Editing::setLineRecursiveness(int line_id, bool b)
 
 Vec2 Editing::getGlobalOffset() const
 {
-	return global_transform;
+	return global_offset;
 }
 
 void Editing::handleEvent(sf::Event& event)
@@ -58,7 +58,7 @@ void Editing::handleEvent(sf::Event& event)
 		if (isWithinEditingFrame(Vec2::prim(event.mouseButton.x, event.mouseButton.y ))) {
 			if (event.mouseButton.button == sf::Mouse::Button::Left) {
 				left_press_location = mouse_framepos;
-				Vec2 transformed_pos = Vec2::prim(event.mouseButton.x, event.mouseButton.y) - global_transform;
+				Vec2 transformed_pos = Vec2::prim(event.mouseButton.x, event.mouseButton.y) - global_offset;
 				bool on_any_selnode = false;
 				for (int node_id : selected_nodes) {
 					EditableLineNode* node = nodes[node_id];
@@ -81,7 +81,7 @@ void Editing::handleEvent(sf::Event& event)
 	}
 	else if (event.type == sf::Event::MouseMoved) {
 		if (isWithinEditingFrame(Vec2::prim(event.mouseMove.x, event.mouseMove.y))) {
-			Vec2 transformed_pos = Vec2::prim(event.mouseMove.x, event.mouseMove.y) - global_transform;
+			Vec2 transformed_pos = Vec2::prim(event.mouseMove.x, event.mouseMove.y) - global_offset;
 
 			bool node_moved = false;
 			for (auto& pair : dragging_nodes) {
@@ -107,7 +107,7 @@ void Editing::handleEvent(sf::Event& event)
 
 					// select new nodes
 					for (auto& node : nodes) {
-						if (node.second->pointIntersection(mouse_framepos - global_transform)) {
+						if (node.second->pointIntersection(mouse_framepos - global_offset)) {
 							selected_nodes.insert(node.first);
 						}
 					}
@@ -131,7 +131,7 @@ void Editing::handleEvent(sf::Event& event)
 void Editing::recalcEditingFrameDimensions(Vec2 window_dimensions) {
 	editing_frame_size.x = (window_dimensions.x - right_panel_width);
 	editing_frame_size.y = window_dimensions.y;
-	global_transform = editing_frame_size / 2;
+	global_offset = editing_frame_size / 2;
 }
 
 Vec2 Editing::getMousePosInFrame() const

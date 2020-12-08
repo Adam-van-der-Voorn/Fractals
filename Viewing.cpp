@@ -10,6 +10,7 @@ Viewing::Viewing(ViewingState* state, LineFractal* fractal) :
 	fractal(fractal), state(state)
 {
 	zoom_box = new ZoomBox(state->getRenderWindow());
+	global_offset = Vec2::sf(state->getRenderWindow()->getSize()) / 2;
 }
 
 Viewing::~Viewing()
@@ -25,6 +26,11 @@ ZoomBox* Viewing::getZoomBox() const
 const LineFractal * Viewing::getFractal() const
 {
 	return fractal;
+}
+
+Vec2 Viewing::getGlobalOffset() const
+{
+	return global_offset;
 }
 
 void Viewing::handleEvent(sf::Event& event)
