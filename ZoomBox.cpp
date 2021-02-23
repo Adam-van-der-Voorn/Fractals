@@ -39,7 +39,7 @@ sf::Vector2f ZoomBox::getZoomPoint() const
 	float tl_grad = top_of_box / left_of_box;
 	float tr_grad = (-top_of_box) / (window->getSize().x - right_of_box);
 	float tr_yinter = top_of_box - (tr_grad * right_of_box); // top left y intercept == 0 as it always passes though (0,0) 
-	//PRINT("top:" << top_of_box << " lef:" << left_of_box << " rig:" << right_of_box << " tlm:" << tl_grad << " trm:" << tr_grad << " trc:" << tr_yinter)
+	//PRINTLN("top:" << top_of_box << " lef:" << left_of_box << " rig:" << right_of_box << " tlm:" << tl_grad << " trm:" << tr_grad << " trc:" << tr_yinter)
 	intercept.x = (-tr_yinter) / (tr_grad - tl_grad);
 	intercept.y = (tl_grad*intercept.x);
 	return intercept;
@@ -68,7 +68,7 @@ sf::Vector2f ZoomBox::getFinalBoxSize() const {
 	float window_gradient = window_size.y / window_size.x;
 
 	float box_gradient = abs(box_size.y / box_size.x);
-	//PRINT("Box size: (" << box_size.x << ", " << box_size.y << ") Box, Window gradient : " << box_gradient << ", " << window_gradient)
+	//PRINTLN("Box size: (" << box_size.x << ", " << box_size.y << ") Box, Window gradient : " << box_gradient << ", " << window_gradient)
 	sf::Vector2f final_box_size;
 	if (window_gradient < box_gradient) { // window is wider than the box
 		final_box_size.y = box_size.y;

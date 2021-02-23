@@ -3,14 +3,21 @@
 #include "vecutil.h"
 #include "LFLine.h"
 #include "AbsLine.h"
+#include "Vec2.h"
 #include <memory>
 #include <queue>
+#include <stack>
+#include <set>
+#include <unordered_set>
 #include <cassert>
+#include <float.h>
 #include "debug_printing.h"
 #include "LineFractal.h"
+#include "signum.h"
+#include "convex_hull.h"
 
-LineFractal::LineFractal(AbsLine base_line, double scale, double origin_x, double origin_y) :
-	base_line(base_line), scale(scale), origin_x(origin_x), origin_y(origin_y)
+LineFractal::LineFractal(AbsLine base_line) :
+	base_line(base_line)
 {
 	derived_lines = {
 		{0, 0, 0.5, 0, true},
@@ -56,15 +63,13 @@ void LineFractal::generate(int recursions)
 {
 	lines.clear();
 	recurse(base_line, recursions);
-	final_lines.resize(lines.size()*2); // resize array length, not scaling
-	transfromLine();
 }
 
 // 1 step = 100 lines
-void LineFractal::generateIter(int steps)
+bool LineFractal::generateIter(int steps, std::vector<AbsLine>& target) const
 {
+	target.clear();
 	steps *= 100;
-	lines.clear();
 	std::queue<AbsLine> line_queue;
 	line_queue.push(base_line);
 	while (!line_queue.empty() && steps > 0) {
@@ -72,7 +77,7 @@ void LineFractal::generateIter(int steps)
 		line_queue.pop();
 		double line_length = lineLength(current_line);
 		if (line_length < 2) {
-			lines.push_back(current_line);
+			target.push_back(current_line);
 		}
 		else {
 			double line_angle = lineAngle(current_line);
@@ -95,17 +100,24 @@ void LineFractal::generateIter(int steps)
 					line_queue.push(new_line);
 				}
 				else {
-					lines.push_back(new_line);
+					target.push_back(new_line);
 				}
 			}
 		}
 		steps--;
 	}
-	final_lines.resize(lines.size() * 2); // resize array length, not scaling
-	transfromLine();
+	if (steps <= 0) {
+		return false;
+	}
+	return true;
 }
 
-void LineFractal::generateIter(double bbox_x, double bbox_y, double bbox_width, double bbox_height)
+bool LineFractal::generateIter(int steps)
+{
+	return generateIter(steps, lines);
+}
+
+void LineFractal::generate()
 {
 	lines.clear();
 	std::queue<AbsLine> line_queue;
@@ -143,8 +155,6 @@ void LineFractal::generateIter(double bbox_x, double bbox_y, double bbox_width, 
 			}
 		}
 	}
-	final_lines.resize(lines.size() * 2); // resize array length, not scaling
-	transfromLine();
 }
 
 void LineFractal::setDerivedLines(std::vector<LFLine>& lines) {
@@ -162,8 +172,12 @@ void LineFractal::setBaseLine(AbsLine line)
 	base_line = line;
 }
 
-sf::VertexArray& LineFractal::getFractal() {
-	return final_lines;
+void LineFractal::setView(double top, double bottom, double left, double right)
+{
+	view_top = top;
+	view_bottom = bottom;
+	view_left = left;
+	view_right = right;
 }
 
 const std::vector<AbsLine>& LineFractal::getLines() const
@@ -171,25 +185,36 @@ const std::vector<AbsLine>& LineFractal::getLines() const
 	return lines;
 }
 
-void LineFractal::transfromLine() {
-	int j = 0;
-	for (size_t i = 0; i < final_lines.getVertexCount(); i+=2) {
-		//float transformed_x = (float)((lines[j] * scale) + origin_x);
-		//float transformed_y = (float)((lines[j + 1] * scale) + origin_y);
-		final_lines[i] = sf::Vertex(sf::Vector2f(lines[j].back_x, lines[j].back_y));
-		final_lines[i+1] = sf::Vertex(sf::Vector2f(lines[j].head_x, lines[j].head_y));
-		j++;
+void LineFractal::updateBounds()
+{
+	std::vector<AbsLine> fractal_lines;
+	generateIter(10000, fractal_lines);
+	auto points = (std::vector<Vec2>&) fractal_lines;
+	std::vector<Vec2> hull;
+	putConvexHull(points, hull);
+	double largest_distance = DBL_MIN;
+	Vec2 current_edges[2];
+	for (int i = 0; i < hull.size(); i++) {
+		for (int ii = 0; ii < hull.size(); ii++) {
+			if (i != ii) {
+				double new_distance = dist(hull.at(i), hull.at(ii));
+				if (new_distance > largest_distance) {
+					largest_distance = new_distance;
+					current_edges[0] = hull.at(i);
+					current_edges[1] = hull.at(ii);
+				}
+			}
+		}
 	}
+	Vec2 bounds_center = current_edges[0] + Vec2::fromLenDir(largest_distance * 0.5, angleAtoB(current_edges[0], current_edges[1]));
+	bounds.offset = dist({ base_line.back_x, base_line.back_y }, bounds_center) / base_line.length();
+	bounds.offset_angle = angleAtoB({ base_line.back_x, base_line.back_y }, bounds_center);
+	bounds.radius = largest_distance;
 }
-
+	
 void LineFractal::setScale(double new_scale, double scale_point_x, double scale_point_y)
 {
 	/*zoom(new_scale / scale, scale_point_x, scale_point_y);*/
-}
-
-double LineFractal::getScale() const
-{
-	return scale;
 }
 
 void LineFractal::setOrigin(double x, double y)
@@ -206,9 +231,9 @@ void LineFractal::zoom(double zoom_multi, double zoom_point_x, double zoom_point
 	origin_x += diff_x * (zoom_multi - 1);
 	origin_y += diff_y * (zoom_multi - 1);
 	scale *= zoom_multi;
-	PRINT("zoom factor: " << getScale());
-	PRINT("minimum float value * scale: " << FLT_EPSILON * getScale());
-	PRINT("minimum double value * scale: " << DBL_EPSILON * getScale());
+	PRINTLN("zoom factor: " << getScale());
+	PRINTLN("minimum float value * scale: " << FLT_EPSILON * getScale());
+	PRINTLN("minimum double value * scale: " << DBL_EPSILON * getScale());
 	transfromLine();*/
 }
 
@@ -217,14 +242,4 @@ void LineFractal::translate(double translation_x, double translation_y)
 	/*origin_x += translation_x;
 	origin_y += translation_y;
 	transfromLine();*/
-}
-
-double LineFractal::getOriginX() const
-{
-	return origin_x;
-}
-
-double LineFractal::getOriginY() const
-{
-	return origin_y;
 }

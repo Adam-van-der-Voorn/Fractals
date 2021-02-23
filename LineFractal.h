@@ -1,6 +1,4 @@
 #pragma once
-#include <SFML/System/Vector2.hpp>
-#include <SFML/Graphics/VertexArray.hpp>
 #include <vector>
 #include "LFLine.h"
 #include "AbsLine.h"
@@ -8,7 +6,8 @@
 class LineFractal
 {
 public:
-	LineFractal(AbsLine base_line, double scale = 1, double origin_x = 0, double origin_y = 0);
+
+	LineFractal(AbsLine base_line);
 
 	// getters & setters
 	void setScale(double new_scale, double scale_point_x, double scale_point_y);
@@ -18,29 +17,33 @@ public:
 	double getOriginY() const;
 	void setDerivedLines(std::vector<LFLine>& lines);
 	void setBaseLine(AbsLine line);
+	void setView(double top, double bottom, double left, double right);
 		
 	void zoom(double zoom_multi, double zoom_point_x, double zoom_point_y);
 	void translate(double translation_x, double translation_y);
 
 	void generate(int recursions);
-	void generateIter(int steps);
-	void generateIter(double bbox_x, double bbox_y, double bbox_width, double bbox_height);
-
-
-	sf::VertexArray& getFractal();
+	bool generateIter(int steps, std::vector<AbsLine>& target) const;
+	bool generateIter(int steps);
+	void generate();
+	void updateBounds();
 	const std::vector<AbsLine>& getLines() const;
+
 private:
 	void recurse(AbsLine line, int limit);
-	void transfromLine();
 
-	double scale, origin_x, origin_y;
+	struct BoundingCircle {
+		double offset;
+		double offset_angle;
+		double radius;
+	};
+
+	BoundingCircle bounds;
+	double view_top, view_bottom, view_left, view_right;
+
 	AbsLine base_line;
 	std::vector<LFLine> derived_lines;
 	std::vector<AbsLine> lines;
-	sf::VertexArray final_lines = sf::VertexArray(sf::Lines);
-
-
-
 };
 
 

@@ -11,7 +11,12 @@
 
 #include "vecutil.h"
 
+#include "Vec2.h"
+#include "degrad.h"
+
 //TODO
+// VIEW WINDOW FOR FRACTAL
+
 // - add undo
 // - fix floating point innaccuaracies when zooming in very large amounts
 // - fix bug where new widgets in widget stack dont go to the bottom
@@ -23,7 +28,7 @@ sf::ContextSettings settings(0, 0, 8);
 sf::RenderWindow window(sf::VideoMode(900, 600), "asd", sf::Style::Default, settings);
 
 int main()
-{
+{	
 	LineFractal fractal({0, 0, 0, 0});
 	StateMachine state_machine;
 	std::shared_ptr<State> viewing_state = std::make_shared<ViewingState>(&state_machine, &fractal, &window);

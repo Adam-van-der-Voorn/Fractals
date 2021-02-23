@@ -90,6 +90,12 @@
     <ClCompile Include="ViewingGUI.cpp">
       <Filter>Source Files\Viewing</Filter>
     </ClCompile>
+    <ClCompile Include="convex_hull.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="RightAngleRect.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="LineFractal.h">
@@ -175,6 +181,15 @@
     </ClInclude>
     <ClInclude Include="degrad.h">
       <Filter>Header Files\Util</Filter>
+    </ClInclude>
+    <ClInclude Include="convex_hull.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="tests.txt">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="RightAngleRect.h">
+      <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

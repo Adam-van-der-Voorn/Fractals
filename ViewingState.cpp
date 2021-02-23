@@ -21,6 +21,7 @@ sf::RenderWindow* ViewingState::getRenderWindow() const
 
 void ViewingState::enter()
 {
+	data->updateFractalBounds();
 	view->updateFractal();
 }
 

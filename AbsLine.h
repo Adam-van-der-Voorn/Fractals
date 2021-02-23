@@ -1,5 +1,5 @@
 #pragma once
-
+#include <ostream>
 struct Vec2;
 
 /**
@@ -23,4 +23,14 @@ struct AbsLine {
 	\param angle the angle of the line (in rads)
 	**/
 	static AbsLine fromLenAngle(Vec2 origin, double length, double angle);
+
+	/**
+	\return the length of this line
+	**/
+	double length() {
+		return sqrt(pow(back_x - head_x, 2) + pow(back_y - head_y, 2));
+	}
 };
+
+std::ostream & operator<<(std::ostream & os, const AbsLine & line);
+

@@ -27,7 +27,7 @@ Editing::Editing(EditingState* state, LineFractal* fractal) :
 	srand(80085);
 
 	// setup base line
-	recalcEditingFrameDimensions(Vec2::sf(state->getRenderWindow()->getSize()));
+	recalcEditingFrameDimensions((state->getRenderWindow()->getSize()));
 	AbsLine l = { -200, 0, +200, 0 };
 	base_line = std::make_shared<EditableLine>(getID(), getID(), getID(), l);
 	fractal->setBaseLine(l);
@@ -55,10 +55,10 @@ void Editing::handleEvent(sf::Event& event)
 		recalcEditingFrameDimensions({ static_cast<double>(event.size.width), static_cast<double>(event.size.height) });
 	}
 	else if (event.type == sf::Event::MouseButtonPressed) {
-		if (isWithinEditingFrame(Vec2::prim(event.mouseButton.x, event.mouseButton.y ))) {
+		if (isWithinEditingFrame(Vec2(event.mouseButton.x, event.mouseButton.y ))) {
 			if (event.mouseButton.button == sf::Mouse::Button::Left) {
 				left_press_location = mouse_framepos;
-				Vec2 transformed_pos = Vec2::prim(event.mouseButton.x, event.mouseButton.y) - global_offset;
+				Vec2 transformed_pos = Vec2(event.mouseButton.x, event.mouseButton.y) - global_offset;
 				bool on_any_selnode = false;
 				for (int node_id : selected_nodes) {
 					EditableLineNode* node = nodes[node_id];
@@ -80,8 +80,8 @@ void Editing::handleEvent(sf::Event& event)
 		}
 	}
 	else if (event.type == sf::Event::MouseMoved) {
-		if (isWithinEditingFrame(Vec2::prim(event.mouseMove.x, event.mouseMove.y))) {
-			Vec2 transformed_pos = Vec2::prim(event.mouseMove.x, event.mouseMove.y) - global_offset;
+		if (isWithinEditingFrame(Vec2(event.mouseMove.x, event.mouseMove.y))) {
+			Vec2 transformed_pos = Vec2(event.mouseMove.x, event.mouseMove.y) - global_offset;
 
 			bool node_moved = false;
 			for (auto& pair : dragging_nodes) {
@@ -99,7 +99,7 @@ void Editing::handleEvent(sf::Event& event)
 		}
 	}
 	else if (event.type == sf::Event::MouseButtonReleased) {
-		if (isWithinEditingFrame(Vec2::prim(event.mouseButton.x, event.mouseButton.y))) {
+		if (isWithinEditingFrame(Vec2(event.mouseButton.x, event.mouseButton.y))) {
 			if (event.mouseButton.button == sf::Mouse::Button::Left) {
 				dragging_nodes.clear();
 				if (mouse_framepos == left_press_location) {
@@ -113,11 +113,11 @@ void Editing::handleEvent(sf::Event& event)
 					}
 					
 					if (DEBUG) {
-						PRINT("Seletec ids:");
+						PRINTLN("Seletec ids:");
 						for (int i : selected_nodes) {
-							PRINT(i);
+							PRINTLN(i);
 						}
-						PRINT("");
+						PRINTLN("");
 					}
 					notifyAll(Event::SELECTION_CHANGED);
 				}

@@ -2,9 +2,9 @@
 #include <SFML\Graphics.hpp>
 #ifdef _DEBUG
 #  include <iostream>
-#  define PRINT(x) std::cout << x << std::endl;
+#  define PRINTLN(x) std::cout << x << std::endl;
 #else
-#  define PRINT(x) while(false){}
+#  define PRINTLN(x) while(false){}
 #endif
 
 //TODO

@@ -1,29 +1,45 @@
 #include "Vec2.h"
 #include <cmath>
 
-Vec2 Vec2::sf(const sf::Vector2f v)
+Vec2::Vec2(const sf::Vector2f v)
 {
-	return { static_cast<double>(v.x), static_cast<double>(v.y) };
+	x = static_cast<double>(v.x);
+	y = static_cast<double>(v.y);
 }
 
-Vec2 Vec2::sf(const sf::Vector2i v)
+Vec2::Vec2(const sf::Vector2i v)
 {
-	return { static_cast<double>(v.x), static_cast<double>(v.y) };
+	x = static_cast<double>(v.x);
+	y = static_cast<double>(v.y);
 }
 
-Vec2 Vec2::sf(const sf::Vector2u v)
+Vec2::Vec2(const sf::Vector2u v)
 {
-	return { static_cast<double>(v.x), static_cast<double>(v.y) };
+	x = static_cast<double>(v.x);
+	y = static_cast<double>(v.y);
 }
 
-Vec2 Vec2::prim(unsigned int x, unsigned int y)
+Vec2::Vec2(unsigned int x, unsigned int y)
 {
-	return { static_cast<double>(x), static_cast<double>(y) };
+	this->x = static_cast<double>(x);
+	this->y = static_cast<double>(y);
 }
 
-Vec2 Vec2::prim(int x, int y)
+Vec2::Vec2(int x, int y)
 {
-	return { static_cast<double>(x), static_cast<double>(y) };
+	this->x = static_cast<double>(x);
+	this->y = static_cast<double>(y);
+}
+
+Vec2::Vec2(double x, double y)
+{
+	this->x = x;
+	this->y = y;
+}
+
+Vec2::Vec2()
+{
+	x = 0; y = 0;
 }
 
 Vec2 Vec2::fromLenDir(double len, double dir)
@@ -43,29 +59,9 @@ void Vec2::operator-=(const Vec2 & other)
 	y -= other.y;
 }
 
-Vec2 Vec2::operator+(const Vec2 & other) const
+double Vec2::angle() const
 {
-	return { this->x + other.x, this->y + other.y };
-}
-
-Vec2 Vec2::operator-(const Vec2 & other) const
-{
-	return { this->x - other.x, this->y - other.y };
-}
-
-Vec2 Vec2::operator/(double other) const
-{
-	return { x / other, y / other };
-}
-
-Vec2 Vec2::operator*(double other) const
-{
-	return { x * other, y * other };
-}
-
-bool Vec2::operator==(const Vec2 & other) const
-{
-	return (x == other.x && y == other.y);
+	return atan2(y, x);
 }
 
 sf::Transform Vec2::toSFTransform() const
@@ -73,4 +69,54 @@ sf::Transform Vec2::toSFTransform() const
 	sf::Transform tmp;
 	tmp.translate(x, y);
 	return tmp;
+}
+
+double dot(Vec2 a, Vec2 b)
+{
+	return a.x * b.x + a.y * b.y;
+}
+
+double cross(const Vec2 & a, const Vec2 & b)
+{
+	return (a.x * b.y) - (a.y * b.x);
+}
+
+double dist(const Vec2 & a, const Vec2 & b) {
+	return sqrt(pow(a.x - b.x, 2) + pow(a.y - b.y, 2));
+}
+
+Vec2 operator+(const Vec2 & a, const Vec2 & b)
+{
+	return { a.x + b.x, a.y + b.y };
+}
+
+Vec2 operator-(const Vec2 & a, const Vec2 & b)
+{
+	return { a.x - b.x, a.y - b.y };
+}
+
+Vec2 operator/(const Vec2 & vec, double scalar)
+{
+	return { vec.x / scalar, vec.y / scalar };
+}
+
+Vec2 operator*(const Vec2 & vec, double scalar)
+{
+	return { vec.x * scalar, vec.y * scalar };
+}
+
+bool operator==(const Vec2 & a, const Vec2 & b)
+{
+	return (a.x == b.x && a.y == b.y);
+}
+
+bool operator!=(const Vec2 & a, const Vec2 & b)
+{
+	return !(a == b);
+}
+
+std::ostream & operator<<(std::ostream & os, const Vec2 & vec)
+{
+	os << '(' << vec.x << ", " << vec.y << ')';
+	return os;
 }

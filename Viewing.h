@@ -29,6 +29,11 @@ public:
 	const LineFractal* getFractal() const;
 
 	/**
+	Updates the bounding box of each fractal
+	**/
+	void updateFractalBounds();
+
+	/**
 	\return the global transform
 	**/
 	Vec2 getGlobalOffset() const;

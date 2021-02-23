@@ -8,3 +8,9 @@ AbsLine AbsLine::fromLenAngle(Vec2 origin, double length, double angle)
 	float y = sin(angle) * length;
 	return { origin.x, origin.y, origin.x + x, origin.y + y };
 }
+
+std::ostream & operator<<(std::ostream & os, const AbsLine & line)
+{
+	os << '(' << line.back_x << ", " << line.back_y << ")-->(" << line.head_x << ", " << line.head_y << ')';
+	return os;
+}
