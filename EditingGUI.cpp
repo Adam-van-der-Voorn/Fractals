@@ -10,6 +10,7 @@
 #include "WidgetHoriStack.h"
 #include "AbsLine.h"
 #include "vecutil.h"
+#include "sfml_conversions.h"
 #include "pi.h"
 #include <unordered_set>
 #include <unordered_map>
@@ -107,33 +108,27 @@ void EditingGUI::updateLines()
 	}
 	int i = 0;
 	for (const auto& line_pair : editing->getLines()) {
-		double node_a_x = line_pair.second->getBackNode()->getPosition().x;
-		double node_a_y = line_pair.second->getBackNode()->getPosition().y;
-		double node_b_x = line_pair.second->getFrontNode()->getPosition().x;
-		double node_b_y = line_pair.second->getFrontNode()->getPosition().y;
-
+		AbsLine line = line_pair.second->toAbsLine();
+		sf::Vector2f sfBack = sfVecFromVec2(line.back);
+		sf::Vector2f sfHead = sfVecFromVec2(line.head);
 		// centerline
-		nodeLines[i].position.x = node_a_x;
-		nodeLines[i].position.y = node_a_y;
+		nodeLines[i].position = sfBack;
 		i++;
-		nodeLines[i].position.x = node_b_x;
-		nodeLines[i].position.y = node_b_y;
+		nodeLines[i].position = sfHead;
 		i++;
 
 		// arrowheads
 		constexpr double arrowhead_len = EditableLineNode::NODE_RADIUS;
-		const double arrow_dir = lineAngle({ node_a_x, node_a_y, node_b_x, node_b_y });
-		nodeLines[i].position.x = node_b_x;
-		nodeLines[i].position.y = node_b_y;
+		const double arrow_dir = line.angle();
+		nodeLines[i].position = sfHead;
 		i++;
-		nodeLines[i].position.x = node_b_x + lendirX(arrowhead_len, arrow_dir + m_pi4*3);
-		nodeLines[i].position.y = node_b_y + lendirY(arrowhead_len, arrow_dir + m_pi4*3);
+		nodeLines[i].position.x = line.head.x + lendirX(arrowhead_len, arrow_dir + m_pi4*3);
+		nodeLines[i].position.y = line.head.y + lendirY(arrowhead_len, arrow_dir + m_pi4*3);
 		i++;
-		nodeLines[i].position.x = node_b_x;
-		nodeLines[i].position.y = node_b_y;
+		nodeLines[i].position = sfHead;
 		i++;
-		nodeLines[i].position.x = node_b_x + lendirX(arrowhead_len, arrow_dir - m_pi4*3);
-		nodeLines[i].position.y = node_b_y + lendirY(arrowhead_len, arrow_dir - m_pi4*3);
+		nodeLines[i].position.x = line.head.x + lendirX(arrowhead_len, arrow_dir - m_pi4*3);
+		nodeLines[i].position.y = line.head.y + lendirY(arrowhead_len, arrow_dir - m_pi4*3);
 		i++;
 	}
 }
@@ -143,8 +138,8 @@ void EditingGUI::updateFractal() {
 	std::vector<AbsLine> fractal_lines = editing->getFractal()->getLines();
 	fractal.resize(fractal_lines.size() * 2);
 	for (size_t i = 0; i < fractal.getVertexCount(); i += 2) {
-		fractal[i] = sf::Vertex(sf::Vector2f(fractal_lines[j].back_x, fractal_lines[j].back_y));
-		fractal[i + 1] = sf::Vertex(sf::Vector2f(fractal_lines[j].head_x, fractal_lines[j].head_y));
+		fractal[i] = sf::Vertex(sf::Vector2f(fractal_lines[j].back.x, fractal_lines[j].back.y));
+		fractal[i + 1] = sf::Vertex(sf::Vector2f(fractal_lines[j].head.x, fractal_lines[j].head.y));
 		j++;
 	}
 }
@@ -227,11 +222,11 @@ void EditingGUI::setupTGUI(int window_width, int window_height)
 
 void EditingGUI::draw(sf::RenderTarget & target, sf::RenderStates states) const
 {
-	target.draw(fractal, editing->getGlobalOffset().toSFTransform());
-	target.draw(baseLine, editing->getGlobalOffset().toSFTransform());
-	target.draw(nodeLines, editing->getGlobalOffset().toSFTransform());
+	target.draw(fractal, sfTransformFromVec2(editing->getGlobalOffset()));
+	target.draw(baseLine, sfTransformFromVec2(editing->getGlobalOffset()));
+	target.draw(nodeLines, sfTransformFromVec2(editing->getGlobalOffset()));
 	for (auto& node : nodes) {
-		target.draw(node, editing->getGlobalOffset().toSFTransform());
+		target.draw(node, sfTransformFromVec2(editing->getGlobalOffset()));
 	}
 	tGui->draw();
 

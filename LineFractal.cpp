@@ -12,57 +12,21 @@
 #include <cassert>
 #include <float.h>
 #include "debug_printing.h"
+#include "intersections.h"
 #include "LineFractal.h"
 #include "signum.h"
-#include "convex_hull.h"
+#include "Circle.h"
+#include "intersections.h"
+#include "smallest_enclosing_circle.h"
 
 LineFractal::LineFractal(AbsLine base_line) :
 	base_line(base_line)
 {
 	derived_lines = {
-		{0, 0, 0.5, 0, true},
+		{0, 0, 0.5, 0, false},
 		{0.5, 0, 0.5, m_pi4, true},
 		{0.5, 0, 0.5, -m_pi4, true}
 	};
-}
-
-void LineFractal::recurse(AbsLine line, int limit)
-{
-	double line_length = lineLength(line);
-	if (limit == 0 || line_length < 2) {
-		lines.push_back(line);
-	}
-	else {
-		double line_angle = lineAngle(line);
-		for (size_t i = 0; i < derived_lines.size(); i++) {
-			// the length of the child line
-			double b1 = line_length * derived_lines[i].length;
-			// the distace from the start point of the parent line to the start point of this child line
-			double a1 = line_length * derived_lines[i].distance; 
-			// the angle from the start point of the parent line to the start point of this child line
-			double a2 = line_angle + derived_lines[i].angle1;
-			// the angle of the child line
-			double b2 = line_angle + derived_lines[i].angle2;
-
-			AbsLine new_line;
-			new_line.back_x = line.back_x + lendirX(a1, a2);
-			new_line.back_y = line.back_y + lendirY(a1, a2);
-			new_line.head_x = new_line.back_x + lendirX(b1, b2);
-			new_line.head_y = new_line.back_y + lendirY(b1, b2);
-			if (derived_lines[i].recursing) {
-				recurse(new_line, limit - 1);
-			}
-			else {
-				lines.push_back(new_line);
-			}
-		}
-	}
-}
-
-void LineFractal::generate(int recursions)
-{
-	lines.clear();
-	recurse(base_line, recursions);
 }
 
 // 1 step = 100 lines
@@ -70,13 +34,14 @@ bool LineFractal::generateIter(int steps, std::vector<AbsLine>& target) const
 {
 	target.clear();
 	steps *= 100;
+	double line_threshold = ATOMIC_LENGTH * getDefinition();
 	std::queue<AbsLine> line_queue;
 	line_queue.push(base_line);
 	while (!line_queue.empty() && steps > 0) {
 		AbsLine current_line = line_queue.front();
 		line_queue.pop();
 		double line_length = lineLength(current_line);
-		if (line_length < 2) {
+		if (line_length < line_threshold) {
 			target.push_back(current_line);
 		}
 		else {
@@ -92,10 +57,10 @@ bool LineFractal::generateIter(int steps, std::vector<AbsLine>& target) const
 				double b2 = line_angle + derived_lines[i].angle2;
 
 				AbsLine new_line;
-				new_line.back_x = current_line.back_x + lendirX(a1, a2);
-				new_line.back_y = current_line.back_y + lendirY(a1, a2);
-				new_line.head_x = new_line.back_x + lendirX(b1, b2);
-				new_line.head_y = new_line.back_y + lendirY(b1, b2);
+				new_line.back.x = current_line.back.x + lendirX(a1, a2);
+				new_line.back.y = current_line.back.y + lendirY(a1, a2);
+				new_line.head.x = new_line.back.x + lendirX(b1, b2);
+				new_line.head.y = new_line.back.y + lendirY(b1, b2);
 				if (derived_lines[i].recursing) {
 					line_queue.push(new_line);
 				}
@@ -117,40 +82,55 @@ bool LineFractal::generateIter(int steps)
 	return generateIter(steps, lines);
 }
 
+RightAngleRect LineFractal::getBoundsInstance(AbsLine line) const
+{
+	double line_length = line.length();
+	double radius = bounds.radius * line_length;
+	Vec2 center = Vec2(line.back.x, line.back.y) + Vec2::fromLenDir(bounds.offset * line_length, bounds.offset_angle + line.angle());
+	return RightAngleRect(center - Vec2(radius, radius), center + Vec2(radius, radius));
+}
+
 void LineFractal::generate()
 {
 	lines.clear();
 	std::queue<AbsLine> line_queue;
 	line_queue.push(base_line);
+	double line_threshold = ATOMIC_LENGTH * getDefinition();
+	PRINTLN("base_line_bounds = " << getBoundsInstance(base_line));
+	PRINTLN("view_coords = " << view);
 	while (!line_queue.empty()) {
 		AbsLine current_line = line_queue.front();
 		line_queue.pop();
 		double line_length = lineLength(current_line);
-		if (line_length < 2) {
+		if (line_length < line_threshold) {
 			lines.push_back(current_line);
 		}
 		else {
-			double line_angle = lineAngle(current_line);
-			for (size_t i = 0; i < derived_lines.size(); i++) {
-				// the length of the child line
-				double b1 = line_length * derived_lines[i].length;
-				// the distace from the start point of the parent line to the start point of this child line
-				double a1 = line_length * derived_lines[i].distance;
-				// the angle from the start point of the parent line to the start point of this child line
-				double a2 = line_angle + derived_lines[i].angle1;
-				// the angle of the child line
-				double b2 = line_angle + derived_lines[i].angle2;
+			// check bounds
+			RightAngleRect local_bounds = getBoundsInstance(current_line);
+			if (isIntersectingIncl(local_bounds, view)) {
+				double line_angle = lineAngle(current_line);
+				for (size_t i = 0; i < derived_lines.size(); i++) {
+					// the length of the child line
+					double b1 = line_length * derived_lines[i].length;
+					// the distace from the start point of the parent line to the start point of this child line
+					double a1 = line_length * derived_lines[i].distance;
+					// the angle from the start point of the parent line to the start point of this child line
+					double a2 = line_angle + derived_lines[i].angle1;
+					// the angle of the child line
+					double b2 = line_angle + derived_lines[i].angle2;
 
-				AbsLine new_line;
-				new_line.back_x = current_line.back_x + lendirX(a1, a2);
-				new_line.back_y = current_line.back_y + lendirY(a1, a2);
-				new_line.head_x = new_line.back_x + lendirX(b1, b2);
-				new_line.head_y = new_line.back_y + lendirY(b1, b2);
-				if (derived_lines[i].recursing) {
-					line_queue.push(new_line);
-				}
-				else {
-					lines.push_back(new_line);
+					AbsLine new_line;
+					new_line.back.x = current_line.back.x + lendirX(a1, a2);
+					new_line.back.y = current_line.back.y + lendirY(a1, a2);
+					new_line.head.x = new_line.back.x + lendirX(b1, b2);
+					new_line.head.y = new_line.back.y + lendirY(b1, b2);
+					if (derived_lines[i].recursing) {
+						line_queue.push(new_line);
+					}
+					else {
+						lines.push_back(new_line);
+					}
 				}
 			}
 		}
@@ -160,7 +140,7 @@ void LineFractal::generate()
 void LineFractal::setDerivedLines(std::vector<LFLine>& lines) {
 	if (DEBUG) {
 		double base_line_len = lineLength(base_line);
-		for (LFLine line : lines) {
+		for (const LFLine& line : lines) {
 			assert(line.length < base_line_len && "derived line length cannot be > base line length");
 		}
 	}
@@ -172,12 +152,19 @@ void LineFractal::setBaseLine(AbsLine line)
 	base_line = line;
 }
 
-void LineFractal::setView(double top, double bottom, double left, double right)
+AbsLine LineFractal::getBaseLine() const
 {
-	view_top = top;
-	view_bottom = bottom;
-	view_left = left;
-	view_right = right;
+	return base_line;
+}
+
+void LineFractal::setView(RightAngleRect const& new_view)
+{
+	view = new_view;
+}
+
+const RightAngleRect& LineFractal::getView() const
+{
+	return view;
 }
 
 const std::vector<AbsLine>& LineFractal::getLines() const
@@ -185,61 +172,30 @@ const std::vector<AbsLine>& LineFractal::getLines() const
 	return lines;
 }
 
+void LineFractal::setDefinition(double definition)
+{
+	this->definition = definition;
+}
+
+double LineFractal::getDefinition() const
+{
+	return definition;
+}
+
 void LineFractal::updateBounds()
 {
 	std::vector<AbsLine> fractal_lines;
 	generateIter(10000, fractal_lines);
 	auto points = (std::vector<Vec2>&) fractal_lines;
-	std::vector<Vec2> hull;
-	putConvexHull(points, hull);
-	double largest_distance = DBL_MIN;
-	Vec2 current_edges[2];
-	for (int i = 0; i < hull.size(); i++) {
-		for (int ii = 0; ii < hull.size(); ii++) {
-			if (i != ii) {
-				double new_distance = dist(hull.at(i), hull.at(ii));
-				if (new_distance > largest_distance) {
-					largest_distance = new_distance;
-					current_edges[0] = hull.at(i);
-					current_edges[1] = hull.at(ii);
-				}
-			}
-		}
-	}
-	Vec2 bounds_center = current_edges[0] + Vec2::fromLenDir(largest_distance * 0.5, angleAtoB(current_edges[0], current_edges[1]));
-	bounds.offset = dist({ base_line.back_x, base_line.back_y }, bounds_center) / base_line.length();
-	bounds.offset_angle = angleAtoB({ base_line.back_x, base_line.back_y }, bounds_center);
-	bounds.radius = largest_distance;
-}
-	
-void LineFractal::setScale(double new_scale, double scale_point_x, double scale_point_y)
-{
-	/*zoom(new_scale / scale, scale_point_x, scale_point_y);*/
+	Circle abs_circle = makeSmallestEnclosingCircle(points);
+	double base_line_length = base_line.length();
+	bounds.radius = abs_circle.getRadius() / base_line_length;
+	bounds.offset = dist({ base_line.back.x, base_line.back.y }, abs_circle.getCenter()) / base_line.length();
+	bounds.offset_angle = angleAtoB({ base_line.back.x, base_line.back.y }, abs_circle.getCenter());
 }
 
-void LineFractal::setOrigin(double x, double y)
+void LineFractal::translate(const Vec2& translation)
 {
-	/*origin_x = x;
-	origin_y = y;
-	transfromLine();*/
-}
-
-void LineFractal::zoom(double zoom_multi, double zoom_point_x, double zoom_point_y)
-{
-	/*double diff_x = origin_x - zoom_point_x;
-	double diff_y = origin_y - zoom_point_y;
-	origin_x += diff_x * (zoom_multi - 1);
-	origin_y += diff_y * (zoom_multi - 1);
-	scale *= zoom_multi;
-	PRINTLN("zoom factor: " << getScale());
-	PRINTLN("minimum float value * scale: " << FLT_EPSILON * getScale());
-	PRINTLN("minimum double value * scale: " << DBL_EPSILON * getScale());
-	transfromLine();*/
-}
-
-void LineFractal::translate(double translation_x, double translation_y)
-{
-	/*origin_x += translation_x;
-	origin_y += translation_y;
-	transfromLine();*/
+	base_line.back += translation;
+	base_line.head += translation;
 }

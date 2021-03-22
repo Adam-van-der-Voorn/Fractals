@@ -183,8 +183,10 @@ public:
 	const int general_padding = 6;
 	const int general_element_width = right_panel_width - (general_padding * 2);
 private:
-	bool isWithinEditingFrame(Vec2 point) const;
+	const double MAX_LINE_LEN_LEWAY = 5;
 
+	bool isWithinEditingFrame(Vec2 point) const;
+	bool nodeTranslationLegal(EditableLineNode* node, const Vec2& new_pos);
 	EditingState* state;
 
 	// frame contents ///

@@ -1,40 +1,18 @@
 #include "Vec2.h"
 #include <cmath>
 
-Vec2::Vec2(const sf::Vector2f v)
+
+
+Vec2::Vec2(unsigned int x, unsigned int y) : x(static_cast<double>(x)), y(static_cast<double>(y))
 {
-	x = static_cast<double>(v.x);
-	y = static_cast<double>(v.y);
 }
 
-Vec2::Vec2(const sf::Vector2i v)
+Vec2::Vec2(int x, int y) : x(static_cast<double>(x)), y(static_cast<double>(y))
 {
-	x = static_cast<double>(v.x);
-	y = static_cast<double>(v.y);
 }
 
-Vec2::Vec2(const sf::Vector2u v)
+Vec2::Vec2(double x, double y) : x(x), y(y)
 {
-	x = static_cast<double>(v.x);
-	y = static_cast<double>(v.y);
-}
-
-Vec2::Vec2(unsigned int x, unsigned int y)
-{
-	this->x = static_cast<double>(x);
-	this->y = static_cast<double>(y);
-}
-
-Vec2::Vec2(int x, int y)
-{
-	this->x = static_cast<double>(x);
-	this->y = static_cast<double>(y);
-}
-
-Vec2::Vec2(double x, double y)
-{
-	this->x = x;
-	this->y = y;
 }
 
 Vec2::Vec2()
@@ -64,13 +42,6 @@ double Vec2::angle() const
 	return atan2(y, x);
 }
 
-sf::Transform Vec2::toSFTransform() const
-{
-	sf::Transform tmp;
-	tmp.translate(x, y);
-	return tmp;
-}
-
 double dot(Vec2 a, Vec2 b)
 {
 	return a.x * b.x + a.y * b.y;
@@ -93,6 +64,11 @@ Vec2 operator+(const Vec2 & a, const Vec2 & b)
 Vec2 operator-(const Vec2 & a, const Vec2 & b)
 {
 	return { a.x - b.x, a.y - b.y };
+}
+
+Vec2 operator-(const Vec2& a)
+{
+	return { Vec2(0,0)-a };
 }
 
 Vec2 operator/(const Vec2 & vec, double scalar)

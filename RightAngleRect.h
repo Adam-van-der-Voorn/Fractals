@@ -1,12 +1,16 @@
 #pragma once
-class Vec2;
+#include <ostream>
+
+struct Vec2;
 
 class RightAngleRect
 {
 public:
 	RightAngleRect();
-	RightAngleRect(Vec2 pa, Vec2 pb);
-	static RightAngleRect fromSize(Vec2 tl_pos, double width, double height);
+	RightAngleRect(const Vec2& pa, const Vec2& pb);
+	static RightAngleRect fromSize(const Vec2& tl_pos, const Vec2& size);
+	
+	RightAngleRect translate(const Vec2& translation) const;
 
 	double top() const;
 	double bottom() const;
@@ -20,7 +24,11 @@ public:
 
 	Vec2 size() const;
 
-
 private:
 	double n_edge, s_edge, e_edge, w_edge;
 };
+
+std::ostream& operator<<(std::ostream& os, const RightAngleRect& rect);
+
+bool operator== (const RightAngleRect& a, const RightAngleRect& b);
+bool operator!= (const RightAngleRect& a, const RightAngleRect& b);

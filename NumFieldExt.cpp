@@ -90,7 +90,7 @@ void NumFieldExt::confirmFieldChange()
 	tgui::String new_input = input->getText();
 	if (new_input != field_value) {
 		field_value = new_input;
-		actual_value = stod(new_input.toAnsiString());
+		actual_value = stod(new_input.toStdString());
 		notifyAll(0);
 	}
 }

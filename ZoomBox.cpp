@@ -1,30 +1,32 @@
 #include "ZoomBox.h"
 #include "signum.h"
-#include "algorithm"
+#include <algorithm>
+#include <cassert>
 
-ZoomBox::ZoomBox(const sf::RenderWindow* window): window(window) {
-	rect.setFillColor(sf::Color::Transparent);
-	rect.setOutlineThickness(1.0f);
-	rect.setOutlineColor(sf::Color::Red);
+#include "RightAngleRect.h"
+
+ZoomBox::ZoomBox(const sf::Window* window) : window(window)
+{
 }
 
-void ZoomBox::setStartPoint(sf::Vector2f new_start_point)
+void ZoomBox::setStartPoint(const Vec2& new_start_point)
 {
 	active = true;
 	start_point = new_start_point;
-	end_point = start_point;
+	end_point = new_start_point;
 }
 
-void ZoomBox::setEndPoint(sf::Vector2f new_end_point)
+void ZoomBox::setEndPoint(const Vec2& new_end_point)
 {
 	end_point = new_end_point;
 }
 
-float ZoomBox::getZoomMulti() const
+RightAngleRect ZoomBox::getBox() const
 {
-	return window->getSize().x / getFinalBoxSize().x;
+	return RightAngleRect::fromSize(start_point, getFinalBoxSize());
 }
 
+/* might need coede later
 sf::Vector2f ZoomBox::getZoomPoint() const
 {
 	// zoom point is the intersection of two lines.
@@ -44,6 +46,16 @@ sf::Vector2f ZoomBox::getZoomPoint() const
 	intercept.y = (tl_grad*intercept.x);
 	return intercept;
 }
+*/
+
+bool ZoomBox::isRect() const
+{
+	//assert(active && "function only useful when box is active");
+	if (start_point.x == end_point.x || start_point.y == end_point.y) {
+		return false;
+	}
+	return true;
+}
 
 bool ZoomBox::isActive() const
 {
@@ -55,21 +67,14 @@ void ZoomBox::setUnactive()
 	active = false;
 }
 
-const sf::RectangleShape* ZoomBox::getRect()
-{
-	rect.setPosition(start_point);
-	rect.setSize(getFinalBoxSize());
-	return &rect;
-}
-
-sf::Vector2f ZoomBox::getFinalBoxSize() const {
-	sf::Vector2f box_size = (end_point - start_point); // could be negative
-	sf::Vector2f window_size = sf::Vector2f((float)(window->getSize().x), (float)(window->getSize().y));
+Vec2 ZoomBox::getFinalBoxSize() const {
+	Vec2 box_size = end_point - start_point; // could be negative
+	Vec2 window_size = { window->getSize().x, window->getSize().y };
 	float window_gradient = window_size.y / window_size.x;
 
 	float box_gradient = abs(box_size.y / box_size.x);
 	//PRINTLN("Box size: (" << box_size.x << ", " << box_size.y << ") Box, Window gradient : " << box_gradient << ", " << window_gradient)
-	sf::Vector2f final_box_size;
+	Vec2 final_box_size;
 	if (window_gradient < box_gradient) { // window is wider than the box
 		final_box_size.y = box_size.y;
 		float y_ratio = window_size.x / window_size.y; // ratio of y:x where y = 1
@@ -85,5 +90,7 @@ sf::Vector2f ZoomBox::getFinalBoxSize() const {
 	}
 	return final_box_size;
 }
+
+
 
 

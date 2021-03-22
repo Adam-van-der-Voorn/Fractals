@@ -5,6 +5,7 @@
 #include "State.h"
 #include "Subject.h"
 #include "Vec2.h"
+#include "RightAngleRect.h"
 
 class LineFractal;
 class ZoomBox;
@@ -34,12 +35,37 @@ public:
 	void updateFractalBounds();
 
 	/**
-	\return the global transform
+	Increases or decreases the view window based on the relative size of the given rectangle
+	in this case, the view window is the view window stored in the fractal in this class
+	\param view_multi the dimesions of the new view relative to the current
+	The w:h ratio of view_multi must be equal to the ratio of the view window.
+	If the width of view_multi is smaller than the view window, this results in a more "zoomed in" view, and vice versa.
 	**/
-	Vec2 getGlobalOffset() const;
+	void changeViewWindow(const RightAngleRect& view_multi);
+
+	/**
+	\return the fractal zoom
+	**/
+	double getFractalZoom() const;
+
+	/**
+	\return the fractal offset
+	**/
+	Vec2 getFractalOffset() const;
+
+	/**
+	resets the transform of the fractal back to its default values
+	**/
+	void resetFractalTransform();
+
+	/**
+	positions the fractal in the center of the screen, based off it's base lines bounding box
+	does not work :(
+	**/
+	void centerFractal();
 
 	enum Event {
-		
+		ZOOM_BOX_CHANGE, VIEW_CHANGE
 	};
 
 private:
@@ -47,7 +73,10 @@ private:
 	LineFractal* fractal;
 	ZoomBox* zoom_box;
 
-	// global transform for the contents of the editing pane.
-	Vec2 global_offset;
+	RightAngleRect current_view;
+
+	// local transform for the fractal only
+	double fractal_zoom = 1;
+	Vec2 fractal_offset = {0, 0};
 };
 

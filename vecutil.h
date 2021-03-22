@@ -21,8 +21,8 @@ inline double angleBetweenAB(double ax, double ay, double bx, double by) {
 }
 
 inline double lineAngle(AbsLine line) {
-	double line_angle = atanf((line.back_y - line.head_y) / (line.back_x - line.head_x));
-	if (line.back_x >= line.head_x) {
+	double line_angle = atanf((line.back.y - line.head.y) / (line.back.x - line.head.x));
+	if (line.back.x >= line.head.x) {
 		line_angle += m_pi;
 	}
 	return line_angle;
@@ -37,7 +37,7 @@ inline double distanceBetweenAB(double ax, double ay, double bx, double by) {
 }
 
 inline double lineLength(AbsLine line) {
-	return sqrt(pow(line.back_x - line.head_x, 2) + pow(line.back_y - line.head_y, 2));
+	return sqrt(pow(line.back.x - line.head.x, 2) + pow(line.back.y - line.head.y, 2));
 }
 
 /*

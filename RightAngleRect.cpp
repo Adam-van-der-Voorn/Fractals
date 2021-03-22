@@ -1,12 +1,8 @@
 #include "RightAngleRect.h"
 #include "Vec2.h"
 
-RightAngleRect RightAngleRect::fromSize(Vec2 tl_pos, double width, double height)
-{
-	return RightAngleRect();
-}
 
-RightAngleRect::RightAngleRect(Vec2 pa, Vec2 pb) {
+RightAngleRect::RightAngleRect(const Vec2& pa, const Vec2& pb) {
 	if (pa.x < pb.x) {
 		w_edge = pa.x;
 		e_edge = pb.x;
@@ -24,6 +20,20 @@ RightAngleRect::RightAngleRect(Vec2 pa, Vec2 pb) {
 		n_edge = pb.y;
 	}
 }
+
+RightAngleRect RightAngleRect::fromSize(const Vec2& tl_pos, const Vec2& size)
+{
+	return RightAngleRect(tl_pos, tl_pos + size);
+}
+
+RightAngleRect RightAngleRect::translate(const Vec2& translation) const
+{
+	return RightAngleRect(
+		tL() + translation,
+		bR() + translation
+	);
+}
+
 
 RightAngleRect::RightAngleRect()
 {
@@ -77,4 +87,22 @@ Vec2 RightAngleRect::bR() const
 Vec2 RightAngleRect::size() const
 {
 	return bR() - tL();
+}
+
+bool operator== (const RightAngleRect& a, const RightAngleRect& b) {
+	return (
+		a.left() == b.left() &&
+		a.bottom() == b.bottom() &&
+		a.right() == b.right() &&
+		a.top() == b.top()
+		);
+}
+bool operator!= (const RightAngleRect& a, const RightAngleRect& b) {
+	return !(a == b);
+}
+
+std::ostream& operator<<(std::ostream& os, const RightAngleRect& rect)
+{
+	os << "( top: " << rect.top() << ", bottom: " << rect.bottom() << ", left: " << rect.left() << ", right: " << rect.right() << ')';
+	return os;
 }

@@ -32,6 +32,7 @@ private:
 	Viewing* data;
 	
 	sf::VertexArray fractal_lines = sf::VertexArray(sf::Lines);
+	sf::RectangleShape zoom_box_shape = sf::RectangleShape();
 
 	//tgui stuff
 	std::unique_ptr<tgui::Gui> gui;

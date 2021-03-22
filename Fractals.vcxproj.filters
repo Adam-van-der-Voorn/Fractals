@@ -34,6 +34,12 @@
     <Filter Include="Header Files\Util">
       <UniqueIdentifier>{2234908f-66a3-4329-b1f2-802de3cb6e47}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Header Files\Geometry">
+      <UniqueIdentifier>{20b1941e-cf42-4167-9bb8-021e76360f5a}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Geometrey">
+      <UniqueIdentifier>{c46cc3d7-57c6-4129-99fc-7a81e305a18c}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Source.cpp">
@@ -75,14 +81,8 @@
     <ClCompile Include="WidgetHoriStack.cpp">
       <Filter>Source Files\Editing</Filter>
     </ClCompile>
-    <ClCompile Include="Vec2.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="NumFieldExt.cpp">
       <Filter>Source Files\Editing</Filter>
-    </ClCompile>
-    <ClCompile Include="AbsLine.cpp">
-      <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="ViewingState.cpp">
       <Filter>Source Files\Viewing</Filter>
@@ -93,7 +93,22 @@
     <ClCompile Include="convex_hull.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="AbsLine.cpp">
+      <Filter>Source Files\Geometrey</Filter>
+    </ClCompile>
+    <ClCompile Include="Circle.cpp">
+      <Filter>Source Files\Geometrey</Filter>
+    </ClCompile>
+    <ClCompile Include="intersections.cpp">
+      <Filter>Source Files\Geometrey</Filter>
+    </ClCompile>
     <ClCompile Include="RightAngleRect.cpp">
+      <Filter>Source Files\Geometrey</Filter>
+    </ClCompile>
+    <ClCompile Include="Vec2.cpp">
+      <Filter>Source Files\Geometrey</Filter>
+    </ClCompile>
+    <ClCompile Include="smallest_enclosing_circle.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
@@ -125,9 +140,6 @@
     <ClInclude Include="EditableLine.h">
       <Filter>Header Files\Editing</Filter>
     </ClInclude>
-    <ClInclude Include="AbsLine.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="LFLine.h">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -150,9 +162,6 @@
       <Filter>Header Files\Editing</Filter>
     </ClInclude>
     <ClInclude Include="Subject.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Vec2.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="EventHandler.h">
@@ -188,11 +197,37 @@
     <ClInclude Include="tests.txt">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="resource.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="AbsLine.h">
+      <Filter>Header Files\Geometry</Filter>
+    </ClInclude>
+    <ClInclude Include="Circle.h">
+      <Filter>Header Files\Geometry</Filter>
+    </ClInclude>
+    <ClInclude Include="intersections.h">
+      <Filter>Header Files\Geometry</Filter>
+    </ClInclude>
+    <ClInclude Include="Vec2.h">
+      <Filter>Header Files\Geometry</Filter>
+    </ClInclude>
     <ClInclude Include="RightAngleRect.h">
+      <Filter>Header Files\Geometry</Filter>
+    </ClInclude>
+    <ClInclude Include="sfml_conversions.h">
+      <Filter>Header Files\Util</Filter>
+    </ClInclude>
+    <ClInclude Include="smallest_enclosing_circle.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Text Include="other algos.txt" />
+  </ItemGroup>
+  <ItemGroup>
+    <ResourceCompile Include="Fractals.rc">
+      <Filter>Resource Files</Filter>
+    </ResourceCompile>
   </ItemGroup>
 </Project>

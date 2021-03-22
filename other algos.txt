@@ -1,4 +1,4 @@
-// has potential for new growth upon zooming I think
+// has potential for new growth upon zooming I think. try and translate it into derived lines.
 void KochSnowflake::recurse(const sf::Vector2f end_point, int limit)
 {
 	if (limit == 0) {
@@ -23,44 +23,42 @@ void KochSnowflake::recurse(const sf::Vector2f end_point, int limit)
 	}
 }
 
-// big spike
-void KochSnowflake::recurse(const sf::Vector2f end_point, int limit)
+// old recursive algo
+void LineFractal::recurse(AbsLine line, int limit)
 {
-	if (limit == 0) {
-		relative_line.push_back(end_point);
+	double line_length = lineLength(line);
+	if (limit == 0 || line_length < 2) {
+		lines.push_back(line);
 	}
 	else {
-		const sf::Vector2f origin_point = relative_line[relative_line.size() - 1].position;
-		const float line_angle = angle_between_ab(origin_point, end_point), line_length = vec_len(end_point - origin_point);
+		double line_angle = lineAngle(line);
+		for (size_t i = 0; i < derived_lines.size(); i++) {
+			// the length of the child line
+			double b1 = line_length * derived_lines[i].length;
+			// the distace from the start point of the parent line to the start point of this child line
+			double a1 = line_length * derived_lines[i].distance; 
+			// the angle from the start point of the parent line to the start point of this child line
+			double a2 = line_angle + derived_lines[i].angle1;
+			// the angle of the child line
+			double b2 = line_angle + derived_lines[i].angle2;
 
-		const sf::Vector2f first_third = origin_point + vec_from_len_angle(line_length/3, line_angle),
-			triangle_tip = first_third + vec_from_len_angle(line_length*0.5, line_angle - (m_pi / 2.55)),
-			second_third = first_third + vec_from_len_angle(line_length/3, line_angle);
-
-		recurse(first_third, limit - 1);
-		recurse(triangle_tip, limit - 1);
-		recurse(second_third, limit - 1);
-		recurse(end_point, limit - 1);
+			AbsLine new_line;
+			new_line.back.x = line.back.x + lendirX(a1, a2);
+			new_line.back.y = line.back.y + lendirY(a1, a2);
+			new_line.head.x = new_line.back.x + lendirX(b1, b2);
+			new_line.head.y = new_line.back.y + lendirY(b1, b2);
+			if (derived_lines[i].recursing) {
+				recurse(new_line, limit - 1);
+			}
+			else {
+				lines.push_back(new_line);
+			}
+		}
 	}
 }
 
-// og
-void KochSnowflake::recurse(const sf::Vector2f end_point, int limit)
+void LineFractal::generate(int recursions)
 {
-	if (limit == 0) {
-		relative_line.push_back(end_point);
-	}
-	else {
-		const sf::Vector2f origin_point = relative_line[relative_line.size() - 1].position;
-		const float line_angle = angle_between_ab(origin_point, end_point), subline_length = vec_len(end_point - origin_point) / 3;
-
-		const sf::Vector2f first_third = origin_point + vec_from_len_angle(subline_length, line_angle),
-			triangle_tip = first_third + vec_from_len_angle(subline_length, line_angle - (m_pi / 3)),
-			second_third = first_third + vec_from_len_angle(subline_length, line_angle);
-
-		recurse(first_third, limit - 1);
-		recurse(triangle_tip, limit - 1);
-		recurse(second_third, limit - 1);
-		recurse(end_point, limit - 1);
-	}
+	lines.clear();
+	recurse(base_line, recursions);
 }

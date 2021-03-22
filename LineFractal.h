@@ -2,45 +2,60 @@
 #include <vector>
 #include "LFLine.h"
 #include "AbsLine.h"
+#include "RightAngleRect.h"
+
+class Circle;
 
 class LineFractal
 {
+
+
 public:
 
 	LineFractal(AbsLine base_line);
 
 	// getters & setters
-	void setScale(double new_scale, double scale_point_x, double scale_point_y);
-	double getScale() const;
-	void setOrigin(double x, double y);
-	double getOriginX() const;
-	double getOriginY() const;
 	void setDerivedLines(std::vector<LFLine>& lines);
 	void setBaseLine(AbsLine line);
-	void setView(double top, double bottom, double left, double right);
+	AbsLine getBaseLine() const;
+	void setView(RightAngleRect const& new_view);
+	const RightAngleRect& getView() const;
 		
-	void zoom(double zoom_multi, double zoom_point_x, double zoom_point_y);
-	void translate(double translation_x, double translation_y);
+	void translate(const Vec2& translation);
 
-	void generate(int recursions);
 	bool generateIter(int steps, std::vector<AbsLine>& target) const;
 	bool generateIter(int steps);
 	void generate();
 	void updateBounds();
+	RightAngleRect getBoundsInstance(AbsLine line) const;
 	const std::vector<AbsLine>& getLines() const;
 
+	void setDefinition(double definition);
+	double getDefinition() const;
+
 private:
-	void recurse(AbsLine line, int limit);
+	static constexpr double ATOMIC_LENGTH = 4;
 
-	struct BoundingCircle {
-		double offset;
-		double offset_angle;
-		double radius;
+	// square that can be constructed from a given line
+	// any recursions from the given line will be inside therse bounds
+	struct Bounds {
+		// the distance from the back of the line to the center of the bounds,
+		// relaive to how long the line is.
+		// e.g. if the distance is half as long as the line, offset = 0.5
+		double offset; 
+
+		// the difference between the angle of the line and the angle of the bounds offset
+		double offset_angle; 
+
+		// the shortest distance from the center to any edge of the bounds,
+		// relaive to how long the line is.
+		// e.g. if the radius is half as long as the line, radius = 0.5
+		double radius; 
 	};
-
-	BoundingCircle bounds;
-	double view_top, view_bottom, view_left, view_right;
-
+	
+	double definition = 1;
+	Bounds bounds;
+	RightAngleRect view;
 	AbsLine base_line;
 	std::vector<LFLine> derived_lines;
 	std::vector<AbsLine> lines;

@@ -51,7 +51,7 @@ double EditableLineNode::getLength() const
 double EditableLineNode::getAngle() const
 {
 	EditableLineNode* other = getOtherNode();
-	return lineAngle({pos.x, pos.y, other->getPosition().x, other->getPosition().y});
+	return lineAngle({pos, other->getPosition()});
 }
 
 bool EditableLineNode::isFront() const

@@ -1,8 +1,12 @@
 #include "convex_hull.h"
 #include "debug_printing.h"
+#include <algorithm>
 
 void putConvexHull(std::vector<Vec2> points, std::vector<Vec2>& target)
 {
+	if (points.size() == 0) {
+		return;
+	}
 	// find lowest point 
 	Vec2 lowest_point = { DBL_MIN, DBL_MIN };
 	int lowest_point_index;
@@ -47,11 +51,11 @@ void putConvexHull(std::vector<Vec2> points, std::vector<Vec2>& target)
 		}
 	}
 
-	PRINTLN("new size : " << points.size());
+	//PRINTLN("new size : " << points.size());
 	for (const Vec2& vec : points) {
-		PRINT(vec << "\t");
+		/*PRINT(vec << "\t");
 		PRINT("angle: " << atan2(vec.y - lowest_point.y, vec.x - lowest_point.x) << "\t");
-		PRINTLN("pseud: " << psudeoAngle(vec - lowest_point));
+		PRINTLN("pseud: " << psudeoAngle(vec - lowest_point));*/
 
 	}
 
@@ -63,8 +67,8 @@ void putConvexHull(std::vector<Vec2> points, std::vector<Vec2>& target)
 		const Vec2 line_candidate = new_point - hull.at(hull.size() - 2);
 		double turn = (cross(previous_line, line_candidate));
 		if (turn < 0) return CLOCKWISE;
-		if (turn > 0) return COUNTER_CLOCKWISE;
-		if (turn == 0) return COVARIANT;
+		else if (turn > 0) return COUNTER_CLOCKWISE;
+		else return COVARIANT;
 	};
 
 	std::vector<Vec2>& hull = target;

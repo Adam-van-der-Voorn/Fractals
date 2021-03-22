@@ -1,31 +1,28 @@
 #pragma once
 #include <SFML\Graphics.hpp>
-#ifdef _DEBUG
-#  include <iostream>
-#  define PRINTLN(x) std::cout << x << std::endl;
-#else
-#  define PRINTLN(x) while(false){}
-#endif
+#include "Vec2.h"
 
-//TODO
+class RightAngleRect;
+
 class ZoomBox
 {
 private:
-	sf::Vector2f start_point;
-	sf::Vector2f end_point;
-	sf::RectangleShape rect;
-	const sf::RenderWindow* window;
-	bool active;
+	Vec2 start_point = {0, 0};
+	Vec2 end_point = {0, 0};
+	bool active = false;
+	const sf::Window* window;
 
-	sf::Vector2f getFinalBoxSize() const;
+	Vec2 getFinalBoxSize() const;
 public:
-	ZoomBox(const sf::RenderWindow* window);
-	void setStartPoint(sf::Vector2f new_start_point);
-	void setEndPoint(sf::Vector2f new_end_point);
-	float getZoomMulti() const;
-	sf::Vector2f getZoomPoint() const;
+	ZoomBox(const sf::Window* window);
+	void setStartPoint(const Vec2& new_start_point);
+	void setEndPoint(const Vec2& new_end_point);
+	RightAngleRect getBox() const;
+	/**
+	\return true if the zoom box is NOT a line or point, but a proper rectangle
+	**/
+	bool isRect() const;
 	bool isActive() const;
 	void setUnactive();
-	const sf::RectangleShape* getRect();
 };
 

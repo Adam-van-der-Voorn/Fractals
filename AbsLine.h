@@ -1,19 +1,15 @@
 #pragma once
 #include <ostream>
-struct Vec2;
+#include "Vec2.h"
 
 /**
 a line represented by coords of its start and end points
-double back_x x position of back
-double back_y y position of back
-double head_x x position of head
-double head_y y position of head
+Vec2 back position of back
+Vec2 head position of head
 **/
 struct AbsLine {
-	double back_x;
-	double back_y;
-	double head_x;
-	double head_y;
+	Vec2 back;
+	Vec2 head;
 
 	/**
 	Creates an absline with a given length and angle.
@@ -27,9 +23,13 @@ struct AbsLine {
 	/**
 	\return the length of this line
 	**/
-	double length() {
-		return sqrt(pow(back_x - head_x, 2) + pow(back_y - head_y, 2));
-	}
+	double length();
+
+	/**
+	\return the angle of the line
+	**/
+	double angle();
+	
 };
 
 std::ostream & operator<<(std::ostream & os, const AbsLine & line);
