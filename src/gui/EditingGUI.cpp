@@ -22,11 +22,11 @@ EditingGUI::EditingGUI(EditingState* state, Editing* data)
 {
 	baseLine[0].position.x = editing->getBaseLine()->getBackNode()->getPosition().x;
 	baseLine[0].position.y = editing->getBaseLine()->getBackNode()->getPosition().y;
-	baseLine[0].color = sf::Color::Color(80, 80, 80);
+	baseLine[0].color = sf::Color(80, 80, 80);
 
 	baseLine[1].position.x = editing->getBaseLine()->getFrontNode()->getPosition().x;
 	baseLine[1].position.y = editing->getBaseLine()->getFrontNode()->getPosition().y;
-	baseLine[1].color = sf::Color::Color(80, 80, 80);
+	baseLine[1].color = sf::Color(80, 80, 80);
 
 	updateFractal();
 
@@ -135,7 +135,7 @@ void EditingGUI::updateLines()
 
 void EditingGUI::updateFractal() {
 	int j = 0;
-	std::vector<AbsLine> fractal_lines = editing->getFractal()->getLines();
+	std::vector<AbsLine> fractal_lines = editing->getFractal().getLines();
 	fractal.resize(fractal_lines.size() * 2);
 	for (size_t i = 0; i < fractal.getVertexCount(); i += 2) {
 		fractal[i] = sf::Vertex(sf::Vector2f(fractal_lines[j].back.x, fractal_lines[j].back.y));
@@ -200,7 +200,7 @@ void EditingGUI::setupTGUI(int window_width, int window_height)
 	add_line_button->setSize((line_actions_field->getSize().x - editing->general_padding) / 2, "100%");
 	add_line_button->setPosition(0, 0);
 	add_line_button->setText("add line");
-	add_line_button->onClick(&Editing::addLine, editing);
+	add_line_button->onClick(&Editing::newLine, editing);
 
 	// remove line button
 	remove_line_button = tgui::Button::create();

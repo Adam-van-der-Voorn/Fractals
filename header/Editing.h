@@ -5,21 +5,23 @@
 #include <SFML/Window/Event.hpp>
 #include <unordered_map>
 #include <unordered_set>
+#include <stack>
 #include <memory>
+#include <vector>
+#include "LineFractal.h"
 
 
 class EditableLineNode;
 class EditableLine;
-class EditingGUI;
-class LineFractal;
 class StateMachine;
 class EditingState;
+class AbsLine;
 struct Vec2;
 
 class Editing : public Subject<Editing>, public EventHandler
 {
 public:
-	Editing(EditingState* state, LineFractal* fractal);
+	Editing(EditingState* state);
 
 	/**
 	\return the moveable nodes of the foundational lines.
@@ -44,13 +46,13 @@ public:
 	/**
 	\the fractal currently being edited
 	**/
-	const LineFractal* getFractal() const;
+	const LineFractal& getFractal() const; // 
 
 	/**
 	\return the maximum amount of recursions this editor is allowing the fractal.
 	a return value of anything under 0 means there is no limit set 
 	**/
-	int getNumRecursions() const;
+	int getNumRecursions() const; 
 
 	/**
 	sets the maximum amount of recursions this editor will allow the fractal
@@ -120,9 +122,15 @@ public:
 	bool nodeIsHovered() const;
 
 	/**
-	adds a line to the editing surface
+	adds a random line to the editing surface
 	**/
-	void addLine();
+	void newLine();
+
+	/**
+	adds a line to the editing surface
+	\param line t   he line to base the editingLine off
+	**/
+	void addLine(AbsLine l);
 
 	/**
 	removes all selected lines from the editing surface
@@ -195,12 +203,12 @@ private:
 	std::unordered_map<int, Vec2> dragging_nodes;
 	std::unordered_map<int, std::shared_ptr<EditableLine>> lines;
 	std::shared_ptr<EditableLine> base_line;
-	LineFractal* fractal;
 	int num_recursions = 7;
 	// the id of the node that the user is hovering over in the gui
 	int hovered_node;
 
 	double value_clipboard = 0.0;
+	std::vector<LineFractal> fractal_stack;
 
 	// data for frame actions //
 	bool mouse_moved_since_lpress = false;
@@ -209,6 +217,7 @@ private:
 	// frame data //
 	Vec2 editing_frame_size;
 	Vec2 mouse_framepos;
+
 	// global transform for the contents of the editing pane.
 	Vec2 global_offset;
 };

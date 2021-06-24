@@ -2,11 +2,12 @@
 #include "Viewing.h"
 #include "ViewingGUI.h"
 #include "LineFractal.h"
+#include "Editing.h"
 
-ViewingState::ViewingState(StateMachine* state_machine, LineFractal* fractal, sf::RenderWindow* window)
-	: state_machine(state_machine), window(window)
+ViewingState::ViewingState(StateMachine* state_machine, const Editing* editing, sf::RenderWindow* window)
+	: state_machine(state_machine), editing(editing), window(window)
 {
-	data = std::make_shared<Viewing>(this, fractal);
+	data = std::make_shared<Viewing>(this);
 	view = std::make_shared<ViewingGUI>(this, data.get());
 	data->addObserver(view.get());
 }
@@ -23,9 +24,8 @@ sf::RenderWindow* ViewingState::getRenderWindow() const
 
 void ViewingState::enter()
 {
-	data->updateFractalBounds();
-	//data->centerFractal();
-	data->resetFractalTransform();
+	const LineFractal& f = editing->getFractal();
+	data->setFractal(f);
 	view->updateFractal();
 }
 

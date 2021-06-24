@@ -1,4 +1,8 @@
 /Debug/
 /Release/
+/build/
+/.vscode/
+/extlibs_src/
 Fractals.vcxproj
 Fractals.vcxproj.user
+Fractals.aps

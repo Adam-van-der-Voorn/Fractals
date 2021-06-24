@@ -21,7 +21,6 @@ ViewingGUI::ViewingGUI(ViewingState* state, Viewing* data)
 	zoom_box_shape.setFillColor(sf::Color::Transparent);
 	zoom_box_shape.setOutlineThickness(1.0f);
 	zoom_box_shape.setOutlineColor(sf::Color::Red);
-	updateFractal();
 }
 
 void ViewingGUI::handleEvent(sf::Event & event)
@@ -31,7 +30,7 @@ void ViewingGUI::handleEvent(sf::Event & event)
 
 void ViewingGUI::updateFractal() {
 	int j = 0;
-	std::vector<AbsLine> raw_lines = data->getFractal()->getLines();
+	std::vector<AbsLine> raw_lines = data->getFractal().getLines();
 	fractal_lines.resize(raw_lines.size() * 2);
 	for (size_t i = 0; i < fractal_lines.getVertexCount(); i += 2) {
 		fractal_lines[i] = sf::Vertex(sf::Vector2f(raw_lines[j].back.x, raw_lines[j].back.y));
@@ -61,11 +60,11 @@ void ViewingGUI::draw(sf::RenderTarget& target, sf::RenderStates states) const
 		static sf::VertexArray frac_shadow(sf::Lines);
 		static RightAngleRect bounds({ 0,0 }, { 0,0 });
 		static std::vector<sf::RectangleShape> bounds_shape_list;
-		if (bounds != data->getFractal()->getBoundsInstance(data->getFractal()->getBaseLine())) {
+		if (bounds != data->getFractal().getBoundsInstance(data->getFractal().getBaseLine())) {
 			// shadow
 			int j = 0;
 			std::vector<AbsLine> raw_lines;
-			data->getFractal()->generateIter(9999, raw_lines);
+			data->getFractal().generateIter(9999, raw_lines);
 			frac_shadow.resize(raw_lines.size() * 2);
 			for (size_t i = 0; i < frac_shadow.getVertexCount(); i += 2) {
 				frac_shadow[i] = sf::Vertex(sf::Vector2f(raw_lines[j].back.x, raw_lines[j].back.y), sf::Color(255, 255, 255, 80));
@@ -75,8 +74,8 @@ void ViewingGUI::draw(sf::RenderTarget& target, sf::RenderStates states) const
 
 			// bounds
 			bounds_shape_list.clear();
-			for (const AbsLine& line : data->getFractal()->getLines()) {
-				RightAngleRect r = data->getFractal()->getBoundsInstance(line);
+			for (const AbsLine& line : data->getFractal().getLines()) {
+				RightAngleRect r = data->getFractal().getBoundsInstance(line);
 				sf::RectangleShape bounds_shape;
 				bounds_shape.setFillColor(sf::Color(255, 0, 255, 30));
 				bounds_shape.setSize(sfVecFromVec2(r.size()));

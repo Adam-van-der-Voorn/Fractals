@@ -1,0 +1,6 @@
+target_sources(${PROJECT_NAME} PRIVATE
+    ${CMAKE_CURRENT_LIST_DIR}/EditingState.cpp
+    ${CMAKE_CURRENT_LIST_DIR}/EmptyState.cpp
+    ${CMAKE_CURRENT_LIST_DIR}/StateMachine.cpp
+    ${CMAKE_CURRENT_LIST_DIR}/ViewingState.cpp
+)

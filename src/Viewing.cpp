@@ -8,9 +8,10 @@
 #include "debug_printing.h"
 #include <cassert>
 #include <iostream>
+#include <vector>
 
-Viewing::Viewing(ViewingState* state, LineFractal* fractal) :
-	fractal(fractal), state(state)
+Viewing::Viewing(ViewingState* state) :
+	state(state)
 {
 	zoom_box = new ZoomBox(state->getRenderWindow());
 }
@@ -25,14 +26,14 @@ ZoomBox* Viewing::getZoomBox() const
 	return zoom_box;
 }
 
-const LineFractal * Viewing::getFractal() const
+const LineFractal& Viewing::getFractal() const
 {
 	return fractal;
 }
 
 void Viewing::updateFractalBounds()
 {
-	fractal->updateBounds();
+	fractal.updateBounds();
 }
 
 void Viewing::changeViewWindow(const RightAngleRect& view_multi)
@@ -48,10 +49,10 @@ void Viewing::changeViewWindow(const RightAngleRect& view_multi)
 	);
 
 	fractal_zoom = state->getRenderWindow()->getSize().x / current_view.size().x;
-	fractal->setDefinition(current_view.size().x / state->getRenderWindow()->getSize().x);
-	fractal_offset = ((current_view.tL()) * -1);  // go to top left
+	fractal.setDefinition(current_view.size().x / state->getRenderWindow()->getSize().x);
+	fractal_offset = -current_view.tL();  // go to top left
 
-	fractal->setView(current_view.translate({ -450, -300 }));
+	fractal.setView(current_view.translate({ -450, -300 }));
 }
 
 double Viewing::getFractalZoom() const
@@ -68,18 +69,33 @@ void Viewing::resetFractalTransform()
 {
 	fractal_zoom = 1;
 	fractal_offset = Vec2(0, 0);
-	fractal->setDefinition(1);
-	current_view = RightAngleRect::fromSize({0, 0}, vec2FromSF(state->getRenderWindow()->getSize()));
-	fractal->setView(current_view.translate(Vec2(450, 300)));
+	fractal.setDefinition(1);
+	Vec2 window_size = vec2FromSF(state->getRenderWindow()->getSize());
+	current_view = RightAngleRect::fromSize({0, 0}, window_size);
+	fractal.setView(current_view.translate({-450, -300}));
 }
 
 void Viewing::centerFractal()
 {
-	RightAngleRect to_center = fractal->getBoundsInstance(fractal->getBaseLine());
+	RightAngleRect to_center = fractal.getBoundsInstance(fractal.getBaseLine());
 	Vec2 window_size = vec2FromSF(state->getRenderWindow()->getSize());
 	Vec2 position = (window_size - to_center.size()) / 2;
 	Vec2 translation = position - to_center.tL();
-	fractal->translate(translation);
+	fractal.translate(translation);
+}
+
+void Viewing::setFractal(const LineFractal& new_fractal)
+{
+	AbsLine base = new_fractal.getBaseLine();
+	fractal = LineFractal(base);
+	std::vector<LFLine> derived;
+	for (const LFLine& lf_line : new_fractal.getDerivedLines()) {
+		derived.push_back(lf_line);
+	}
+	fractal.setDerivedLines(derived);
+	updateFractalBounds();
+	resetFractalTransform();
+	fractal.generate();
 }
 
 void Viewing::handleEvent(sf::Event& event)
@@ -105,7 +121,7 @@ void Viewing::handleEvent(sf::Event& event)
 			if (zoom_box->isRect()) {
 				auto view_multi = zoom_box->getBox();
 				changeViewWindow(view_multi);
-				fractal->generate();
+				fractal.generate();
 				notifyAll(VIEW_CHANGE);
 			}
 			zoom_box->setUnactive();

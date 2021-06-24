@@ -1,0 +1,10 @@
+target_sources(${PROJECT_NAME} PRIVATE
+    ${CMAKE_CURRENT_LIST_DIR}/EditableLine.cpp
+    ${CMAKE_CURRENT_LIST_DIR}/EditableLineNode.cpp
+    ${CMAKE_CURRENT_LIST_DIR}/EditingGUI.cpp
+    ${CMAKE_CURRENT_LIST_DIR}/NumFieldExt.cpp
+    ${CMAKE_CURRENT_LIST_DIR}/SelLineWidget.cpp
+    ${CMAKE_CURRENT_LIST_DIR}/ViewingGUI.cpp
+    ${CMAKE_CURRENT_LIST_DIR}/WidgetHoriStack.cpp
+    ${CMAKE_CURRENT_LIST_DIR}/ZoomBox.cpp
+)

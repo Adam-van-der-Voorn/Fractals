@@ -1,4 +1,3 @@
-#pragma once
 #include "LineFractal.h"
 #include "ViewingState.h"
 #include "EditingState.h"
@@ -16,10 +15,10 @@
 
 // TODO
 // FEATURES
-// - add undo
+// - add undo (change system so state of editor is also put back, not just fractal. You will most likeley have to save the editor state alongside the fractal).
 // - add save/load
-// - add auopositioning when entering fractal view?
-// - add gradual zoom?
+// - add gradual zoom
+// - add auopositioning when entering fractal view? or let user move base line?
 // - add colors?
 // - add concurrency during fractal creation?
 // BUGS
@@ -34,12 +33,11 @@ sf::RenderWindow window(sf::VideoMode(900, 600), "asd", sf::Style::Default, sett
 
 int main()
 {	
-	LineFractal fractal({ {0, 0}, {0, 0} });
 	StateMachine state_machine;
-	std::shared_ptr<State> viewing_state = std::make_shared<ViewingState>(&state_machine, &fractal, &window);
-	std::shared_ptr<State> editing_state = std::make_shared<EditingState>(&state_machine, &fractal, &window);
-	state_machine.addState("viewing", viewing_state.get());
-	state_machine.addState("editing", editing_state.get());
+	EditingState editing_state(&state_machine, &window);
+	ViewingState viewing_state(&state_machine, editing_state.getData(), &window);
+	state_machine.addState("viewing", &viewing_state);
+	state_machine.addState("editing", &editing_state);
 	state_machine.changeState("editing");
 	while (window.isOpen()) {
 		sf::Event event;

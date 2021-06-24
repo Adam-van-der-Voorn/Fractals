@@ -21,19 +21,19 @@ int getID() {
 	return i++;
 }
 
-Editing::Editing(EditingState* state, LineFractal* fractal) :
-	state(state), fractal(fractal)
+Editing::Editing(EditingState* state) :
+	state(state)
 {
 	// set seed for line creation
-	srand(80085);
+	srand(132);
 
 	// setup base line
 	recalcEditingFrameDimensions(vec2FromSF(state->getRenderWindow()->getSize()));
 	AbsLine l = { {-200, 0}, {+200, 0} };
 	base_line = std::make_shared<EditableLine>(getID(), getID(), getID(), l);
-	fractal->setBaseLine(l);
-	fractal->generateIter(num_recursions);
-
+	fractal_stack.push_back(LineFractal(l));
+	fractal_stack.back().generateIter(num_recursions);
+	
 	//setup hovered node
 	clearHoveredNode();
 }
@@ -54,6 +54,18 @@ void Editing::handleEvent(sf::Event& event)
 {
 	if (event.type == sf::Event::Resized) {
 		recalcEditingFrameDimensions({ static_cast<double>(event.size.width), static_cast<double>(event.size.height) });
+	}
+	else if (event.type == sf::Event::KeyPressed) {
+		if (event.key.code == sf::Keyboard::Z) {
+			nodes.clear();
+			lines.clear();
+			selected_nodes.clear();
+			dragging_nodes.clear(); // TODO: may cause bug where if you press z while dragging node something bad happens
+			fractal_stack.pop_back();
+			for (const auto& unused : fractal_stack.back().getDerivedLines()) {
+				notifyAll(Event::FRACTAL_CHANGED);
+			}
+		}
 	}
 	else if (event.type == sf::Event::MouseButtonPressed) {
 		if (isWithinEditingFrame({ event.mouseButton.x, event.mouseButton.y })) {
@@ -179,13 +191,16 @@ bool Editing::nodeIsHovered() const
 	return true;
 }
 
-void Editing::addLine() {
+void Editing::newLine() {
 	float length = rand() % 50 + 50; // random length from 50 - 100
 	float angle = ((float)(rand() % (3141 * 2))) / 100; // random angle in radians from 0 - ~2pi
 	Vec2 position = Vec2::fromLenDir(length, angle);
+	addLine({ -position, position });
+}
 
+void Editing::addLine(AbsLine l)
+{
 	int id_arr[] = { getID(), getID(), getID() };
-	AbsLine l = {Vec2(0,0)-position, position };
 	std::shared_ptr<EditableLine> line = std::make_shared<EditableLine>(id_arr[0], id_arr[1], id_arr[2], l);
 
 	lines.emplace(id_arr[0], line);
@@ -243,9 +258,9 @@ const std::unordered_set<int>& Editing::getSelectedNodes() const
 	return selected_nodes;
 }
 
-const LineFractal* Editing::getFractal() const
+const LineFractal& Editing::getFractal() const
 {
-	return fractal;
+	return fractal_stack.back();
 }
 
 int Editing::getNumRecursions() const
@@ -287,13 +302,14 @@ void Editing::setNodeLength(int node_id, double length)
 
 void Editing::updateFractal()
 {
+	fractal_stack.push_back(LineFractal(fractal_stack.back().getBaseLine()));
 	std::vector<LFLine> final_lines;
 	for (auto& line : lines) {
 		LFLine lfl = line.second->toLFLine(base_line->toAbsLine());
 		final_lines.push_back(lfl);
 	}
-	fractal->setDerivedLines(final_lines);
-	fractal->generateIter(num_recursions);
+	fractal_stack.back().setDerivedLines(final_lines);
+	fractal_stack.back().generateIter(num_recursions);
 	notifyAll(Event::FRACTAL_CHANGED);
 }
 

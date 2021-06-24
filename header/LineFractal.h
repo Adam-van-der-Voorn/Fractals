@@ -16,6 +16,7 @@ public:
 
 	// getters & setters
 	void setDerivedLines(std::vector<LFLine>& lines);
+	const std::vector<LFLine>& getDerivedLines() const;
 	void setBaseLine(AbsLine line);
 	AbsLine getBaseLine() const;
 	void setView(RightAngleRect const& new_view);

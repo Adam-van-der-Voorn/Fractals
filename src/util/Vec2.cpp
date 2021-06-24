@@ -37,6 +37,11 @@ void Vec2::operator-=(const Vec2 & other)
 	y -= other.y;
 }
 
+Vec2 Vec2::operator-()
+{
+	return Vec2(-x, -y);
+}
+
 double Vec2::angle() const
 {
 	return atan2(y, x);
@@ -54,6 +59,15 @@ double cross(const Vec2 & a, const Vec2 & b)
 
 double dist(const Vec2 & a, const Vec2 & b) {
 	return sqrt(pow(a.x - b.x, 2) + pow(a.y - b.y, 2));
+}
+
+double angleAtoB(const Vec2& a, const Vec2& b)
+{
+	double line_angle = atanf((a.y - b.y) / (a.x - b.x));
+	if (a.x >= b.x) {
+		//line_angle += m_pi;
+	}
+	return line_angle;
 }
 
 Vec2 operator+(const Vec2 & a, const Vec2 & b)

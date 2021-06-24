@@ -8,7 +8,7 @@ void putConvexHull(std::vector<Vec2> points, std::vector<Vec2>& target)
 		return;
 	}
 	// find lowest point 
-	Vec2 lowest_point = { DBL_MIN, DBL_MIN };
+	Vec2 lowest_point = {std::numeric_limits<double>::min(), std::numeric_limits<double>::min() };
 	int lowest_point_index;
 	for (size_t i = 0; i < points.size();) {
 		if (points[i].y > lowest_point.y) {

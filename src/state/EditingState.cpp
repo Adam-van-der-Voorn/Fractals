@@ -2,10 +2,10 @@
 #include "Editing.h"
 #include "EditingGUI.h"
 
-EditingState::EditingState(StateMachine * state_machine, LineFractal * fractal, sf::RenderWindow * window)
+EditingState::EditingState(StateMachine * state_machine, sf::RenderWindow * window)
 	: state_machine(state_machine), window(window)
 {
-	data = std::make_shared<Editing>(this, fractal);
+	data = std::make_shared<Editing>(this);
 	view = std::make_shared<EditingGUI>(this, data.get());
 	data->addObserver(view.get());
 }
@@ -18,6 +18,11 @@ StateMachine* EditingState::getStateMachine() const
 sf::RenderWindow* EditingState::getRenderWindow() const
 {
 	return window;
+}
+
+const Editing* EditingState::getData() const
+{
+	return data.get();
 }
 
 void EditingState::enter()

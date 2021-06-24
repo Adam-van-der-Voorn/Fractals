@@ -6,8 +6,8 @@
 #include "Subject.h"
 #include "Vec2.h"
 #include "RightAngleRect.h"
+#include "LineFractal.h"
 
-class LineFractal;
 class ZoomBox;
 class StateMachine;
 class ViewingState;
@@ -15,7 +15,7 @@ class ViewingState;
 class Viewing : public EventHandler, public Subject<Viewing>
 {
 public:
-	Viewing(ViewingState* state, LineFractal* fractal);
+	Viewing(ViewingState* state);
 	~Viewing();
 
 	//inherited via EventHandler
@@ -27,7 +27,7 @@ public:
 	/**
 	\return the fractal being viewed
 	**/
-	const LineFractal* getFractal() const;
+	const LineFractal& getFractal() const;
 
 	/**
 	Updates the bounding box of each fractal
@@ -64,13 +64,18 @@ public:
 	**/
 	void centerFractal();
 
+	/**
+	Sets the viewed fractal to the given fractal
+	**/
+	void setFractal(const LineFractal& new_fractal);
+
 	enum Event {
 		ZOOM_BOX_CHANGE, VIEW_CHANGE
 	};
 
 private:
 	ViewingState* state;
-	LineFractal* fractal;
+	LineFractal fractal = LineFractal({ {0,0}, {0,0} });
 	ZoomBox* zoom_box;
 
 	RightAngleRect current_view;

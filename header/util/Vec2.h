@@ -14,6 +14,8 @@ struct Vec2 {
 
 	void operator += (const Vec2& other);
 	void operator -= (const Vec2& other);
+	Vec2 operator - ();
+
 
 	double angle() const;
 };
@@ -24,13 +26,7 @@ inline Vec2 abs(const Vec2& v) {
 double dot(Vec2 a, Vec2 b);
 double cross(const Vec2& a, const Vec2& b);
 double dist(const Vec2& a, const Vec2& b);
-inline double angleAtoB(const Vec2& a, const Vec2& b) {
-	double line_angle = atanf((a.y - b.y) / (a.x - b.x));
-	if (a.x >= b.x) {
-		//line_angle += m_pi;
-	}
-	return line_angle;
-}
+double angleAtoB(const Vec2& a, const Vec2& b);
 Vec2 operator + (const Vec2& a, const Vec2& b);
 Vec2 operator - (const Vec2& a, const Vec2& b);
 Vec2 operator / (const Vec2& vec, double scalar);

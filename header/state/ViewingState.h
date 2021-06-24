@@ -1,16 +1,18 @@
 #pragma once
 #include "State.h"
 #include <SFML/Graphics/RenderWindow.hpp>
+#include <memory>
 
-class Editing;
-class EditingGUI;
-class LineFractal;
 class StateMachine;
+class LineFractal;
+class Viewing;
+class ViewingGUI;
+class Editing;
 
-class EditingState : public State
+class ViewingState : public State
 {
 public:
-	EditingState(StateMachine* state_machine, LineFractal* fractal, sf::RenderWindow* window);
+	ViewingState(StateMachine* state_machine, const Editing* editing, sf::RenderWindow* window);
 
 	/**
 	\return a pointer to the state machine associated with this state
@@ -31,8 +33,9 @@ public:
 
 private:
 	StateMachine* state_machine;
+	const Editing* editing;
 	sf::RenderWindow* window;
-	std::shared_ptr<Editing> data;
-	std::shared_ptr<EditingGUI> view;
+	std::shared_ptr<Viewing> data;
+	std::shared_ptr<ViewingGUI> view;
 };
 

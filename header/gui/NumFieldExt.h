@@ -1,4 +1,4 @@
-#pragma once
+     #pragma once
 #include <TGUI/Widgets/Panel.hpp>
 #include <TGUI/Widgets/Label.hpp>
 #include <TGUI/Widgets/Button.hpp>

@@ -29,6 +29,7 @@ LineFractal::LineFractal(AbsLine base_line) :
 	};
 }
 
+
 // 1 step = 100 lines
 bool LineFractal::generateIter(int steps, std::vector<AbsLine>& target) const
 {
@@ -145,6 +146,11 @@ void LineFractal::setDerivedLines(std::vector<LFLine>& lines) {
 		}
 	}
 	derived_lines = lines;
+}
+
+const std::vector<LFLine>& LineFractal::getDerivedLines() const
+{
+	return derived_lines;
 }
 
 void LineFractal::setBaseLine(AbsLine line)
