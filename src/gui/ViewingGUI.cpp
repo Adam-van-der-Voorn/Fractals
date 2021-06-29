@@ -57,6 +57,7 @@ void ViewingGUI::onNotify(Viewing* subject, int event_num)
 void ViewingGUI::draw(sf::RenderTarget& target, sf::RenderStates states) const
 {
 	if (DEBUG) {
+		/* // not sure what this does but keeping it anyway for potentail future diagnostic use
 		static sf::VertexArray frac_shadow(sf::Lines);
 		static RightAngleRect bounds({ 0,0 }, { 0,0 });
 		static std::vector<sf::RectangleShape> bounds_shape_list;
@@ -86,7 +87,7 @@ void ViewingGUI::draw(sf::RenderTarget& target, sf::RenderStates states) const
 		for (const sf::RectangleShape& shape : bounds_shape_list) {
 			target.draw(shape);
 		}
-		target.draw(frac_shadow);
+		target.draw(frac_shadow);*/
 	}
 
 	auto fractal_transform = sf::Transform()

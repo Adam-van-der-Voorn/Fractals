@@ -14,17 +14,29 @@ Only one node can be selected at a time.
 class EditableLine
 {
 public:
-	EditableLine(int line_id, int node_id_1, int node_id_2, AbsLine line);
+	EditableLine(int line_id, int node_id_1, int node_id_2, const AbsLine& line);
 	
+	/**
+	Function allows access, unlike getBackNode()
+	\return the back node
+	**/
+	EditableLineNode* backNode();
+
+	/**
+	Function allows access, unlike getFrontNode()
+	\return the front node
+	**/
+	EditableLineNode* frontNode();
+
 	/**
 	\return the back node
 	**/
-	EditableLineNode* getBackNode() const;
+	const EditableLineNode* getBackNode() const;
 
 	/**
 	\return the front node
 	**/
-	EditableLineNode* getFrontNode() const;
+	const EditableLineNode* getFrontNode() const;
 
 	/**
 	Sets the recusion status for this line.
@@ -55,8 +67,10 @@ public:
 	
 private:
 	int id;
-	std::shared_ptr<EditableLineNode> back_node;
-	std::shared_ptr<EditableLineNode> front_node;
+	std::unique_ptr<EditableLineNode> back_node;
+	std::unique_ptr<EditableLineNode> front_node;
 	bool recursive = true;
 };
+
+
 

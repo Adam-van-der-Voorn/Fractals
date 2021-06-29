@@ -24,9 +24,8 @@ public:
 		
 	void translate(const Vec2& translation);
 
-	bool generateIter(int steps, std::vector<AbsLine>& target) const;
-	bool generateIter(int steps);
-	void generate();
+	std::vector<AbsLine> generateIter(int steps) const;
+	std::vector<AbsLine> generate() const;
 	void updateBounds();
 	RightAngleRect getBoundsInstance(AbsLine line) const;
 	const std::vector<AbsLine>& getLines() const;

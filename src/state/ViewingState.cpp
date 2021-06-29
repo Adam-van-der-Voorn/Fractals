@@ -24,7 +24,7 @@ sf::RenderWindow* ViewingState::getRenderWindow() const
 
 void ViewingState::enter()
 {
-	const LineFractal& f = editing->getFractal();
+	const LineFractal& f = editing->getFractalGenerator();
 	data->setFractal(f);
 	view->updateFractal();
 }

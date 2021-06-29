@@ -12,37 +12,45 @@
 #include "EditingState.h"
 #include "Vec2.h"
 #include "sfml_conversions.h"
+#include "FrameState.h"
 #include <cstdlib>
 #include <string>
 #include <memory>
 
-int getID() {
-	static int i = 0;
-	return i++;
-}
+const AbsLine inital_base_line = { {-200, 0}, {+200, 0} };
 
 Editing::Editing(EditingState* state) :
-	state(state)
+	state(state) , fractalGen(inital_base_line)
 {
 	// set seed for line creation
 	srand(132);
 
 	// setup base line
 	recalcEditingFrameDimensions(vec2FromSF(state->getRenderWindow()->getSize()));
-	AbsLine l = { {-200, 0}, {+200, 0} };
-	base_line = std::make_shared<EditableLine>(getID(), getID(), getID(), l);
-	fractal_stack.push_back(LineFractal(l));
-	fractal_stack.back().generateIter(num_recursions);
+	fractalGen.setView(RightAngleRect::fromSize({0, 0}, editing_frame_size));
+	frame_stack.push_back(FrameState(inital_base_line));
+	frame = &frame_stack.back();
+	frame->setFractal(fractalGen.generate());
 	
 	//setup hovered node
 	clearHoveredNode();
 }
 
+const LineFractal& Editing::getFractalGenerator() const
+{
+	return fractalGen;
+}
+
+FrameState* Editing::getFrame() 
+{
+	return frame;
+}
+
 void Editing::setLineRecursiveness(int line_id, bool b)
 {
-	lines[line_id]->setRecursive(b);
+	frame->setLineRecursiveness(line_id, b);
+	remapFractal();
 	notifyAll(Event::LINES_CHANGED);
-	updateFractal();
 }
 
 Vec2 Editing::getGlobalOffset() const
@@ -57,6 +65,7 @@ void Editing::handleEvent(sf::Event& event)
 	}
 	else if (event.type == sf::Event::KeyPressed) {
 		if (event.key.code == sf::Keyboard::Z) {
+			/* TODO REIMPLEMENT UNDO
 			nodes.clear();
 			lines.clear();
 			selected_nodes.clear();
@@ -64,28 +73,35 @@ void Editing::handleEvent(sf::Event& event)
 			fractal_stack.pop_back();
 			for (const auto& unused : fractal_stack.back().getDerivedLines()) {
 				notifyAll(Event::FRACTAL_CHANGED);
-			}
+			}*/
 		}
 	}
 	else if (event.type == sf::Event::MouseButtonPressed) {
 		if (isWithinEditingFrame({ event.mouseButton.x, event.mouseButton.y })) {
+
 			if (event.mouseButton.button == sf::Mouse::Button::Left) {
 				left_press_location = mouse_framepos;
 				Vec2 transformed_pos = Vec2(event.mouseButton.x, event.mouseButton.y) - global_offset;
+
+				// case 1: The user has clicked down on selected node(s).
+				// They are added to the set of nodes being dragged, and the unselected nodes are skipped.
 				bool on_any_selnode = false;
-				for (int node_id : selected_nodes) {
-					EditableLineNode* node = nodes[node_id];
+				for (int node_id : frame->getSelectedNodes()) {
+					const EditableLineNode* node = frame->getNodes().at(node_id);
 					if (node->pointIntersection(transformed_pos)) {
 						Vec2 selected_offset = transformed_pos - node->getPosition();
 						dragging_nodes.emplace(node_id, selected_offset);
 						on_any_selnode = true;
 					}
 				}
+
+				// case 2: No selected nodes were clicked down on.
+				// if any non selected nodes are clicked down on, they are added to the set of dragging nodes.
 				if (!on_any_selnode) {
-					for (auto& node : nodes) {
-						if (node.second->pointIntersection(transformed_pos)) {
-							Vec2 selected_offset = transformed_pos - node.second->getPosition();
-							dragging_nodes.emplace(node.first, selected_offset);
+					for (const auto& id_node : frame->getNodes()) {
+						if (id_node.second->pointIntersection(transformed_pos)) {
+							Vec2 selected_offset = transformed_pos - id_node.second->getPosition();
+							dragging_nodes.emplace(id_node.first, selected_offset);
 						}
 					}
 				}
@@ -96,15 +112,16 @@ void Editing::handleEvent(sf::Event& event)
 		if (isWithinEditingFrame({ event.mouseMove.x, event.mouseMove.y })) {
 			Vec2 transformed_pos = Vec2(event.mouseMove.x, event.mouseMove.y) - global_offset;
 
+			// if dragging nodes exist move them by the correct amount
 			bool node_moved = false;
 			for (auto& pair : dragging_nodes) {
 				node_moved = true;
-				Vec2 translation = transformed_pos - (nodes[pair.first]->getPosition() + pair.second);
+				Vec2 translation = transformed_pos - (frame->getNodes().at(pair.first)->getPosition() + pair.second);
 				moveNode(pair.first, translation);
 			}
 			if (node_moved) {
+				remapFractal();
 				notifyAll(Event::LINES_CHANGED);
-				updateFractal();
 			}
 			mouse_framepos.x = event.mouseMove.x;
 			mouse_framepos.y = event.mouseMove.y;
@@ -116,18 +133,18 @@ void Editing::handleEvent(sf::Event& event)
 			if (event.mouseButton.button == sf::Mouse::Button::Left) {
 				dragging_nodes.clear();
 				if (mouse_framepos == left_press_location) {
-					selected_nodes.clear();
+					frame->clearSelection();
 
 					// select new nodes
-					for (auto& node : nodes) {
+					for (auto& node : frame->getNodes()) {
 						if (node.second->pointIntersection(mouse_framepos - global_offset)) {
-							selected_nodes.insert(node.first);
+							frame->selectNode(node.first);
 						}
 					}
 					
 					if (DEBUG) {
 						PRINTLN("Seletec ids:");
-						for (int i : selected_nodes) {
+						for (int i : frame->getSelectedNodes()) {
 							PRINTLN(i);
 						}
 						PRINTLN("");
@@ -160,7 +177,7 @@ double* Editing::getValClipboard()
 
 void Editing::setHoveredNode(int node_id)
 {
-	assert((selected_nodes.count(node_id) == 1 || node_id == -1) && "hovering over a non-selected node (or duplicate id)");
+	assert((frame->getSelectedNodes().count(node_id) == 1 || node_id == -1) && "hovering over a non-selected node (or duplicate id)");
 	hovered_node = node_id;
 	notifyAll(Event::HOVERED_NODE_CHANGED);
 }
@@ -178,8 +195,8 @@ void Editing::clearHoveredNode()
 
 void Editing::selectOnlyHoveredNode()
 {
-	selected_nodes.clear();
-	selected_nodes.insert(hovered_node);
+	frame->clearSelection();
+	frame->selectNode(hovered_node);
 	notifyAll(Event::SELECTION_CHANGED);
 }
 
@@ -200,67 +217,36 @@ void Editing::newLine() {
 
 void Editing::addLine(AbsLine l)
 {
-	int id_arr[] = { getID(), getID(), getID() };
-	std::shared_ptr<EditableLine> line = std::make_shared<EditableLine>(id_arr[0], id_arr[1], id_arr[2], l);
-
-	lines.emplace(id_arr[0], line);
-	nodes.emplace(id_arr[1], line->getBackNode());
-	nodes.emplace(id_arr[2], line->getFrontNode());
-	updateFractal();
+	frame->addLine(l);
+	remapFractal();
 	notifyAll(Event::LINES_CHANGED);
 }
 
 void Editing::removeSelectedLines()
 {
-	for (int node_id : selected_nodes) {
+	const std::unordered_map<int, EditableLineNode*>& nodes = frame->getNodes();
+	for (int node_id : frame->getSelectedNodes()) {
 		if (nodes.count(node_id)) {
-			EditableLine* line = nodes[node_id]->getLine();
-			nodes.erase(line->getFrontNode()->getID());
-			nodes.erase(line->getBackNode()->getID());
-			lines.erase(line->getID());
+			const EditableLineNode* node = nodes.at(node_id);
+			int line_id = node->getLine()->getID();
+			frame->removeLine(line_id);
 		}
-		
 	}
-	selected_nodes.clear();
+	frame->clearSelection();
 	clearHoveredNode();
 	notifyAll(Event::SELECTION_CHANGED);
 	notifyAll(Event::LINES_CHANGED);
-	updateFractal();
+	remapFractal();
 }
 
 void Editing::setNodePosition(int node_id, Vec2 new_pos)
 {
-	EditableLineNode* node = nodes[node_id];
-	if (nodeTranslationLegal(node, new_pos)) {
-		node->setPosition(new_pos);
+	const EditableLineNode* node = frame->getNodes().at(node_id);
+	if (nodeTranslationLegal(*node, new_pos)) {
+		frame->setNodePos(node->getID(), new_pos);
+		remapFractal();
+		notifyAll(Event::LINES_CHANGED);
 	}
-	notifyAll(Event::LINES_CHANGED);
-	updateFractal();
-}
-
-const std::unordered_map<int, EditableLineNode*>& Editing::getNodes() const
-{
-	return nodes;
-}
-
-const std::unordered_map<int, std::shared_ptr<EditableLine>>& Editing::getLines() const
-{
-	return lines;
-}
-
-const std::shared_ptr<EditableLine> Editing::getBaseLine() const
-{
-	return base_line;
-}
-
-const std::unordered_set<int>& Editing::getSelectedNodes() const
-{
-	return selected_nodes;
-}
-
-const LineFractal& Editing::getFractal() const
-{
-	return fractal_stack.back();
 }
 
 int Editing::getNumRecursions() const
@@ -280,58 +266,48 @@ Vec2 Editing::getEditingFrameSize() const
 
 void Editing::setNodeAngle(int node_id, double angle)
 {
-	EditableLineNode* node = nodes[node_id];
+	const EditableLineNode* node = frame->getNodes().at(node_id);
 	Vec2 new_pos = node->getPosition() + Vec2::fromLenDir(node->getLength(), angle);
-	if (nodeTranslationLegal(node->getOtherNode(), new_pos)) {
-		node->getOtherNode()->setPosition(new_pos);
-		notifyAll(Event::LINES_CHANGED);
-		updateFractal();
-	}
+	setNodePosition(node->getOtherNode()->getID(), new_pos);
 }
 
 void Editing::setNodeLength(int node_id, double length)
 {
-	EditableLineNode* node = nodes[node_id];
+	const EditableLineNode* node = frame->getNodes().at(node_id);
 	Vec2 new_pos = node->getPosition() + Vec2::fromLenDir(length, node->getAngle());
-	if (nodeTranslationLegal(node->getOtherNode(), new_pos)) {
-		node->getOtherNode()->setPosition(new_pos);
-		notifyAll(Event::LINES_CHANGED);
-		updateFractal();
-	}
+	setNodePosition(node->getOtherNode()->getID(), new_pos);
 }
 
-void Editing::updateFractal()
+void Editing::remapFractal()
 {
-	fractal_stack.push_back(LineFractal(fractal_stack.back().getBaseLine()));
+	AbsLine base_line = frame->getBaseLine().toAbsLine();
+	fractalGen.setBaseLine(base_line);
 	std::vector<LFLine> final_lines;
-	for (auto& line : lines) {
-		LFLine lfl = line.second->toLFLine(base_line->toAbsLine());
+	for (const auto& line : frame->getLines()) {
+		LFLine lfl = line.second.toLFLine(base_line);
 		final_lines.push_back(lfl);
 	}
-	fractal_stack.back().setDerivedLines(final_lines);
-	fractal_stack.back().generateIter(num_recursions);
+	fractalGen.setDerivedLines(final_lines);
+	frame->setFractal(fractalGen.generate());
 	notifyAll(Event::FRACTAL_CHANGED);
 }
 
 void Editing::moveNode(int node_id, Vec2 translation)
 {
-	EditableLineNode* node = nodes[node_id];
+	const EditableLineNode* node = frame->getNodes().at(node_id);
 	Vec2 new_pos = node->getPosition() + translation;
-	EditableLineNode* other = nodes[node_id]->getOtherNode();
+	const EditableLineNode* other = node->getOtherNode();
 	AbsLine new_line = { other->getPosition(), new_pos };
-	double max_line_length = lineLength(base_line->toAbsLine()) - MAX_LINE_LEN_LEWAY;
+	double max_line_length = lineLength(frame->getBaseLine().toAbsLine()) - MAX_LINE_LEN_LEWAY;
 	if (new_line.length() > max_line_length) {
-		const Vec2 mouse_framepos_offset = mouse_framepos - node->getPosition();
 		new_pos = other->getPosition() + Vec2::fromLenDir(max_line_length, lineAngle(new_line));
-		node->setPosition(new_pos);
+		const Vec2 mouse_framepos_offset = mouse_framepos - node->getPosition();
 		mouse_framepos = node->getPosition() + mouse_framepos_offset;
 	}
-	else {
-		node->translate(translation);
-	}
+	frame->setNodePos(node->getID(), new_pos);
 }
 
-bool Editing::isWithinEditingFrame(Vec2 point) const
+bool Editing::isWithinEditingFrame(const Vec2& point) const
 {
 	if (point.x >= 0 && point.y >= 0 && point.x < editing_frame_size.x && point.y < editing_frame_size.y) {
 		return true;
@@ -339,10 +315,10 @@ bool Editing::isWithinEditingFrame(Vec2 point) const
 	return false;
 }
 
-bool Editing::nodeTranslationLegal(EditableLineNode* node, const Vec2& new_pos)
+bool Editing::nodeTranslationLegal(const EditableLineNode& node, const Vec2& new_pos) const
 {
-	EditableLineNode* other = node->getOtherNode();
+	const EditableLineNode* other = node.getOtherNode();
 	AbsLine new_line = { other->getPosition(), new_pos };
-	double max_line_length = lineLength(base_line->toAbsLine()) - MAX_LINE_LEN_LEWAY;
+	double max_line_length = lineLength(frame->getBaseLine().toAbsLine()) - MAX_LINE_LEN_LEWAY;
 	return (new_line.length() <= max_line_length);
 }

@@ -6,20 +6,37 @@
 #include <memory>
 #include <cassert>
 
-EditableLine::EditableLine(int line_id, int back_node_id, int front_node_id, AbsLine line) : id(line_id)
+// single line obj 
+// 
+// abs line
+// back node
+// 
+
+EditableLine::EditableLine(int line_id, int back_node_id, int front_node_id, const AbsLine& line) :
+id(line_id)
 {
 	// have to do temp variables for some reason, cannot just init in the func call
 	Vec2 tmp_back = { line.back.x, line.back.y }, tmp_front = { line.head.x, line.head.y };
-	back_node = std::make_shared<EditableLineNode>(back_node_id, tmp_back, false, this);
-	front_node = std::make_shared<EditableLineNode>(front_node_id, tmp_front, true, this);
+	back_node = std::make_unique<EditableLineNode>(back_node_id, tmp_back, false, this);
+	front_node = std::make_unique<EditableLineNode>(front_node_id, tmp_front, true, this);
 }
 
-EditableLineNode* EditableLine::getBackNode() const
+EditableLineNode* EditableLine::backNode()
 {
 	return back_node.get();
 }
 
-EditableLineNode* EditableLine::getFrontNode() const
+EditableLineNode* EditableLine::frontNode()
+{
+	return front_node.get();
+}
+
+const EditableLineNode* EditableLine::getBackNode() const
+{
+	return back_node.get();
+}
+
+const EditableLineNode* EditableLine::getFrontNode() const
 {
 	return front_node.get();
 }

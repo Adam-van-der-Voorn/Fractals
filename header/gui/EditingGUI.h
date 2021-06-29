@@ -10,6 +10,7 @@
 
 class Editing;
 class EditableLineNode;
+class FrameState;
 
 class EditingGUI : public sf::Drawable, public Observer<Editing>, public EventHandler
 {
@@ -38,6 +39,7 @@ private:
 	const sf::Color LINE_COL_UNRECURSIVE = sf::Color::Red;
 
 	Editing* editing;
+	const FrameState* frame;
 	EditingState* state;
 	sf::VertexArray nodeLines = sf::VertexArray(sf::Lines);
 	sf::VertexArray baseLine = sf::VertexArray(sf::Lines, 2);

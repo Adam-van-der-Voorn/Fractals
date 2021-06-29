@@ -1,17 +1,19 @@
 #include "SelLineWidget.h"
+
 #include "EditableLineNode.h"
 #include "Editing.h"
 #include "EditableLine.h"
 #include "vecutil.h"
 #include "debug_printing.h"
 #include "degrad.h"
+#include "FrameState.h"
 #include <unordered_map>
 #include <memory>
 
 class Editing;
 
 SelLineWidget::SelLineWidget(Editing* editing, int node_id, float width)
-	: editing(editing), node_id(node_id)
+	: editing(editing), frame(editing->getFrame()), node_id(node_id)
 {
 	setSize({ width, 170 });
 	init();
@@ -72,7 +74,7 @@ void SelLineWidget::init()
 	add(xpos_input);
 	xpos_input->setPosition(padding, tgui::bindBottom(xpos_label) + label_input_padding);
 	xpos_input->setSize({ field_width, input_height });
-	xpos_input->setVal(editing->getNodes().at(node_id)->getPosition().x);
+	xpos_input->setVal(frame->getNodes().at(node_id)->getPosition().x);
 	xpos_input->setMaximumCharacters(7);
 
 	// y position field
@@ -86,7 +88,7 @@ void SelLineWidget::init()
 	add(ypos_input);
 	ypos_input->setPosition(tgui::bindRight(xpos_input) + padding, tgui::bindBottom(ypos_label) + label_input_padding);
 	ypos_input->setSize({ field_width, input_height });
-	ypos_input->setVal(editing->getNodes().at(node_id)->getPosition().y);
+	ypos_input->setVal(frame->getNodes().at(node_id)->getPosition().y);
 	ypos_input->setMaximumCharacters(7);
 
 	// direction of line field
@@ -100,7 +102,7 @@ void SelLineWidget::init()
 	add(dir_input);
 	dir_input->setPosition(padding, tgui::bindBottom(dir_label) + label_input_padding);
 	dir_input->setSize({ field_width, input_height });
-	dir_input->setVal(toDeg(editing->getNodes().at(node_id)->getAngle()));
+	dir_input->setVal(toDeg(frame->getNodes().at(node_id)->getAngle()));
 	dir_input->setMaximumCharacters(7);
 
 	// length of line field
@@ -114,7 +116,7 @@ void SelLineWidget::init()
 	add(len_input);
 	len_input->setPosition(tgui::bindRight(dir_input) + padding, tgui::bindBottom(len_label) + padding);
 	len_input->setSize({ field_width, input_height });
-	len_input->setVal(editing->getNodes().at(node_id)->getLength());
+	len_input->setVal(frame->getNodes().at(node_id)->getLength());
 	len_input->setMaximumCharacters(7);
 
 	// recursion checkbox
@@ -125,9 +127,9 @@ void SelLineWidget::init()
 	rec_label->setPosition(padding, tgui::bindBottom(dir_input) + padding);
 	
 	rec_checkbox->setPosition(tgui::bindRight(rec_label) + padding, tgui::bindBottom(dir_input) + padding);
-	rec_checkbox->setChecked(editing->getNodes().at(node_id)->getLine()->isRecursive());
-	rec_checkbox->onCheck(&Editing::setLineRecursiveness, editing, editing->getNodes().at(node_id)->getLine()->getID(), true);
-	rec_checkbox->onUncheck(&Editing::setLineRecursiveness, editing, editing->getNodes().at(node_id)->getLine()->getID(), false);
+	rec_checkbox->setChecked(frame->getNodes().at(node_id)->getLine()->isRecursive());
+	rec_checkbox->onCheck(&FrameState::setLineRecursiveness, frame, frame->getNodes().at(node_id)->getLine()->getID(), true);
+	rec_checkbox->onUncheck(&FrameState::setLineRecursiveness, frame, frame->getNodes().at(node_id)->getLine()->getID(), false);
 
 	rec_label->setSize(getSize().x - rec_checkbox->getSize().x - (padding * 3), label_height);
 	rec_label->setText("is recursive");
@@ -146,10 +148,10 @@ void SelLineWidget::onNotify(Editing* e, int event_num)
 	{
 	case Editing::Event::LINES_CHANGED:
 		redrawIcon();
-		xpos_input->setVal(editing->getNodes().at(node_id)->getPosition().x);
-		ypos_input->setVal(editing->getNodes().at(node_id)->getPosition().y);
-		dir_input->setVal(toDeg(editing->getNodes().at(node_id)->getAngle()));
-		len_input->setVal(editing->getNodes().at(node_id)->getLength());
+		xpos_input->setVal(frame->getNodes().at(node_id)->getPosition().x);
+		ypos_input->setVal(frame->getNodes().at(node_id)->getPosition().y);
+		dir_input->setVal(toDeg(frame->getNodes().at(node_id)->getAngle()));
+		len_input->setVal(frame->getNodes().at(node_id)->getLength());
 		break;
 	}
 }
@@ -171,7 +173,7 @@ void SelLineWidget::onNotify(NumFieldExt* field, int event_num)
 void SelLineWidget::redrawIcon() {
 	temp_background->clear(tgui::Color::Yellow);
 	icon->clear();
-	EditableLineNode* node = editing->getNodes().at(node_id);
+	EditableLineNode* node = frame->getNodes().at(node_id);
 	double line_angle = lineAngle(node->getLine()->toAbsLine());
 
 	// line

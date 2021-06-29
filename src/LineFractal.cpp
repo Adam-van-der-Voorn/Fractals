@@ -29,11 +29,10 @@ LineFractal::LineFractal(AbsLine base_line) :
 	};
 }
 
-
 // 1 step = 100 lines
-bool LineFractal::generateIter(int steps, std::vector<AbsLine>& target) const
+std::vector<AbsLine> LineFractal::generateIter(int steps) const
 {
-	target.clear();
+	std::vector<AbsLine> lines = {};
 	steps *= 100;
 	double line_threshold = ATOMIC_LENGTH * getDefinition();
 	std::queue<AbsLine> line_queue;
@@ -43,7 +42,7 @@ bool LineFractal::generateIter(int steps, std::vector<AbsLine>& target) const
 		line_queue.pop();
 		double line_length = lineLength(current_line);
 		if (line_length < line_threshold) {
-			target.push_back(current_line);
+			lines.push_back(current_line);
 		}
 		else {
 			double line_angle = lineAngle(current_line);
@@ -66,21 +65,13 @@ bool LineFractal::generateIter(int steps, std::vector<AbsLine>& target) const
 					line_queue.push(new_line);
 				}
 				else {
-					target.push_back(new_line);
+					lines.push_back(new_line);
 				}
 			}
 		}
 		steps--;
 	}
-	if (steps <= 0) {
-		return false;
-	}
-	return true;
-}
-
-bool LineFractal::generateIter(int steps)
-{
-	return generateIter(steps, lines);
+	return lines;
 }
 
 RightAngleRect LineFractal::getBoundsInstance(AbsLine line) const
@@ -91,9 +82,9 @@ RightAngleRect LineFractal::getBoundsInstance(AbsLine line) const
 	return RightAngleRect(center - Vec2(radius, radius), center + Vec2(radius, radius));
 }
 
-void LineFractal::generate()
+std::vector<AbsLine> LineFractal::generate() const
 {
-	lines.clear();
+	std::vector<AbsLine> lines = {};
 	std::queue<AbsLine> line_queue;
 	line_queue.push(base_line);
 	double line_threshold = ATOMIC_LENGTH * getDefinition();
@@ -136,6 +127,7 @@ void LineFractal::generate()
 			}
 		}
 	}
+	return lines;
 }
 
 void LineFractal::setDerivedLines(std::vector<LFLine>& lines) {
@@ -190,8 +182,7 @@ double LineFractal::getDefinition() const
 
 void LineFractal::updateBounds()
 {
-	std::vector<AbsLine> fractal_lines;
-	generateIter(10000, fractal_lines);
+	std::vector<AbsLine> fractal_lines = generateIter(10000);
 	auto points = (std::vector<Vec2>&) fractal_lines;
 	Circle abs_circle = makeSmallestEnclosingCircle(points);
 	double base_line_length = base_line.length();

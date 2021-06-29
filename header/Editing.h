@@ -1,4 +1,5 @@
 #pragma once
+
 #include "Subject.h"
 #include "Vec2.h"
 #include "EventHandler.h"
@@ -9,7 +10,7 @@
 #include <memory>
 #include <vector>
 #include "LineFractal.h"
-
+#include "FrameState.h"
 
 class EditableLineNode;
 class EditableLine;
@@ -24,29 +25,14 @@ public:
 	Editing(EditingState* state);
 
 	/**
-	\return the moveable nodes of the foundational lines.
-	**/
-	const std::unordered_map<int, EditableLineNode*>& getNodes() const;
+	 * \return the fractal generator
+	*/
+	const LineFractal& getFractalGenerator() const;
 
 	/**
-	\return the foundational lines of the fractal (ie the lines that are used in the recursion for the fractal)
-	**/
-	const std::unordered_map<int, std::shared_ptr<EditableLine>>& getLines() const;
-
-	/**
-	\return the base line for the fractal
-	**/
-	const std::shared_ptr<EditableLine> getBaseLine() const;
-
-	/**
-	\return th ids of all the nodes that are selected
-	**/
-	const std::unordered_set<int>& getSelectedNodes() const;
-
-	/**
-	\the fractal currently being edited
-	**/
-	const LineFractal& getFractal() const; // 
+	 * \return the current frame
+	*/
+	FrameState* getFrame();
 
 	/**
 	\return the maximum amount of recursions this editor is allowing the fractal.
@@ -83,9 +69,9 @@ public:
 	void recalcEditingFrameDimensions(Vec2 window_dimensions);
 
 	/**
-	updates the fractal
+	maps the fractal data to the positions of the editor lines
 	**/
-	void updateFractal();
+	void remapFractal();
 
 	/**
 	Moves a node by a given amount.
@@ -97,26 +83,31 @@ public:
 
 	/**
 	Sets the hovered node to the node with the given id
+	The hovered node correspondes to the node widget the mouse is over in the sidebar
 	\param node_id the id of the node
 	**/
 	void setHoveredNode(int node_id);
 
 	/**
+	 * 	The hovered node correspondes to the node widget the mouse is over in the sidebar
 	\return the id of the hovered node, or a val < 0 if no node is being hovered
 	**/
 	int getHoveredNode() const;
 
 	/**
 	sets the hovered node state to no node being hovered over
+	The hovered node correspondes to the node widget the mouse is over in the sidebar
 	**/
 	void clearHoveredNode();
 
 	/**
+	 * 	The hovered node correspondes to the node widget the mouse is over in the sidebar
 	removes all other nodes from selection apart from the hovered node
 	**/
 	void selectOnlyHoveredNode();
 
 	/**
+	 * 	The hovered node correspondes to the node widget the mouse is over in the sidebar
 	\return true if a node is being hovered over
 	**/
 	bool nodeIsHovered() const;
@@ -128,7 +119,7 @@ public:
 
 	/**
 	adds a line to the editing surface
-	\param line t   he line to base the editingLine off
+	\param line the line to base the editingLine off
 	**/
 	void addLine(AbsLine l);
 
@@ -193,22 +184,22 @@ public:
 private:
 	const double MAX_LINE_LEN_LEWAY = 5;
 
-	bool isWithinEditingFrame(Vec2 point) const;
-	bool nodeTranslationLegal(EditableLineNode* node, const Vec2& new_pos);
+	bool isWithinEditingFrame(const Vec2& point) const;
+	bool nodeTranslationLegal(const EditableLineNode& node, const Vec2& new_pos) const;
 	EditingState* state;
 
 	// frame contents ///
-	std::unordered_map<int, EditableLineNode*> nodes;
-	std::unordered_set<int> selected_nodes;
 	std::unordered_map<int, Vec2> dragging_nodes;
-	std::unordered_map<int, std::shared_ptr<EditableLine>> lines;
-	std::shared_ptr<EditableLine> base_line;
+	std::vector<FrameState> frame_stack;
+	FrameState* frame; // the active frame
+
 	int num_recursions = 7;
 	// the id of the node that the user is hovering over in the gui
 	int hovered_node;
 
 	double value_clipboard = 0.0;
-	std::vector<LineFractal> fractal_stack;
+
+	LineFractal fractalGen;
 
 	// data for frame actions //
 	bool mouse_moved_since_lpress = false;

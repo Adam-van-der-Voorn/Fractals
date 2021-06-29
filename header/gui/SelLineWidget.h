@@ -14,6 +14,7 @@
 #include <unordered_map>
 
 class EditableLineNode;
+class FrameState;
 
 class SelLineWidget : public Observer<Editing>, public Observer<NumFieldExt> , public tgui::Panel
 {
@@ -46,6 +47,7 @@ private:
 	void init();
 	int node_id;
 	Editing* editing;
+	FrameState* frame;
 	tgui::Canvas::Ptr temp_background = tgui::Canvas::create();
 	tgui::Button::Ptr select_button;
 	tgui::Canvas::Ptr icon; 
@@ -54,7 +56,5 @@ private:
 	NumFieldExt::Ptr dir_input;
 	NumFieldExt::Ptr len_input;
 	tgui::CheckBox::Ptr rec_checkbox;
-
-
 };
 

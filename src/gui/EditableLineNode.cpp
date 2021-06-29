@@ -4,7 +4,8 @@
 #include "LFLine.h"
 #include <cassert>
 
-EditableLineNode::EditableLineNode(int id, Vec2 pos, bool is_front, EditableLine* line) : id(id), pos(pos), is_front(is_front), line(line)
+EditableLineNode::EditableLineNode(int id, const Vec2& pos, bool is_front, EditableLine* line) :
+id(id), pos(pos), is_front(is_front), line(line)
 {
 }
 
@@ -26,18 +27,6 @@ void EditableLineNode::setPosition(Vec2 position)
 	pos = position;
 }
 
-void EditableLineNode::setLength(double length)
-{
-	double line_angle = getAngle();
-	getOtherNode()->setPosition({ pos.x + lendirX(length, line_angle), pos.y + lendirY(length, line_angle) });
-}
-
-void EditableLineNode::setAngle(double angle)
-{
-	double line_length = getLength();
-	getOtherNode()->setPosition({ pos.x + lendirX(line_length, angle), pos.y + lendirY(line_length, angle) });
-}
-
 Vec2 EditableLineNode::getPosition() const
 {
 	return pos;
@@ -50,7 +39,7 @@ double EditableLineNode::getLength() const
 
 double EditableLineNode::getAngle() const
 {
-	EditableLineNode* other = getOtherNode();
+	const EditableLineNode* other = getOtherNode();
 	return lineAngle({pos, other->getPosition()});
 }
 
@@ -58,13 +47,15 @@ bool EditableLineNode::isFront() const
 {
 	return is_front;
 }
-EditableLine* EditableLineNode::getLine() const
+
+const EditableLine* EditableLineNode::getLine() const
 {
 	return line;
 }
-EditableLineNode* EditableLineNode::getOtherNode() const
+
+const EditableLineNode* EditableLineNode::getOtherNode() const
 {
-	if (isFront()) {
+ 	if (isFront()) {
 		return line->getBackNode();
 	}
 	else {

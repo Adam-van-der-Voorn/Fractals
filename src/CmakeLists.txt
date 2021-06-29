@@ -4,6 +4,7 @@ add_subdirectory("util")
 
 target_sources(${PROJECT_NAME} PRIVATE
     ${CMAKE_CURRENT_LIST_DIR}/Editing.cpp
+    ${CMAKE_CURRENT_LIST_DIR}/FrameState.cpp
     ${CMAKE_CURRENT_LIST_DIR}/LineFractal.cpp
     ${CMAKE_CURRENT_LIST_DIR}/Source.cpp
     ${CMAKE_CURRENT_LIST_DIR}/Viewing.cpp

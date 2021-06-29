@@ -12,20 +12,21 @@
 #include "vecutil.h"
 #include "sfml_conversions.h"
 #include "pi.h"
+#include "FrameState.h"
 #include <unordered_set>
 #include <unordered_map>
 #include <vector>
 #include <memory>
 
 EditingGUI::EditingGUI(EditingState* state, Editing* data)
-	: state(state), editing(data)
+	: state(state), editing(data), frame(data->getFrame())
 {
-	baseLine[0].position.x = editing->getBaseLine()->getBackNode()->getPosition().x;
-	baseLine[0].position.y = editing->getBaseLine()->getBackNode()->getPosition().y;
+	baseLine[0].position.x = frame->getBaseLine().getBackNode()->getPosition().x;
+	baseLine[0].position.y = frame->getBaseLine().getBackNode()->getPosition().y;
 	baseLine[0].color = sf::Color(80, 80, 80);
 
-	baseLine[1].position.x = editing->getBaseLine()->getFrontNode()->getPosition().x;
-	baseLine[1].position.y = editing->getBaseLine()->getFrontNode()->getPosition().y;
+	baseLine[1].position.x = frame->getBaseLine().getFrontNode()->getPosition().x;
+	baseLine[1].position.y = frame->getBaseLine().getFrontNode()->getPosition().y;
 	baseLine[1].color = sf::Color(80, 80, 80);
 
 	updateFractal();
@@ -47,7 +48,7 @@ void EditingGUI::onNotify(Editing* e, int event_num)
 		updateNodes();
 		{
 			std::vector<tgui::Widget::Ptr> widgets;
-			for (int selected_node_id : editing->getSelectedNodes()) {
+			for (int selected_node_id : frame->getSelectedNodes()) {
 				auto widget = std::make_shared<SelLineWidget>(editing, selected_node_id, editing->general_element_width);
 				widgets.push_back(widget);
 			}
@@ -59,8 +60,10 @@ void EditingGUI::onNotify(Editing* e, int event_num)
 		break;
 	case Editing::MOUSE_MOVED:
 		updateNodes();
+		break;
 	case Editing::HOVERED_NODE_CHANGED:
 		updateNodes();
+		break;
 	default:
 		break;
 	}
@@ -68,10 +71,10 @@ void EditingGUI::onNotify(Editing* e, int event_num)
 
 void EditingGUI::updateNodes()
 {
-	assert(editing->getNodes().size() % 2 == 0 && "uneven amount of nodes");
-	nodes.resize(editing->getNodes().size());
+	assert(frame->getNodes().size() % 2 == 0 && "uneven amount of nodes");
+	nodes.resize(frame->getNodes().size());
 	int i = 0;
-	for (const auto& node_pair : editing->getNodes()) {
+	for (const auto& node_pair : frame->getNodes()) {
 		nodes[i].setRadius(EditableLineNode::NODE_RADIUS);
 		nodes[i].setFillColor(sf::Color::Transparent);
 		nodes[i].setOutlineThickness(1.0f);
@@ -82,7 +85,7 @@ void EditingGUI::updateNodes()
 		if (editing->getHoveredNode() == node_pair.first) { // node is selected and hovered
 			nodes[i].setOutlineColor(sf::Color::Green);
 		}
-		else if (editing->getSelectedNodes().count(node_pair.first)) { // node is selected
+		else if (frame->getSelectedNodes().count(node_pair.first)) { // node is selected
 			nodes[i].setOutlineColor(sf::Color::Red);
 		}
 		else if (node_pair.second->pointIntersection(editing->getMousePosInFrame() - editing->getGlobalOffset())) {
@@ -97,9 +100,9 @@ void EditingGUI::updateNodes()
 
 void EditingGUI::updateLines()
 {
-	assert(editing->getNodes().size() % 2 == 0 && "uneven amount of nodes");
+	assert(frame->getNodes().size() % 2 == 0 && "uneven amount of nodes");
 	int old_vertcount = nodeLines.getVertexCount();
-	int new_vertcount = editing->getLines().size() * 6; // 6 bc two verts each on three lines making up an arrow.
+	int new_vertcount = frame->getLines().size() * 6; // 6 bc two verts each on three lines making up an arrow.
 	nodeLines.resize(new_vertcount);
 	if (new_vertcount > old_vertcount) {
 		for (int i = old_vertcount; i < new_vertcount; i++) {
@@ -107,8 +110,8 @@ void EditingGUI::updateLines()
 		}
 	}
 	int i = 0;
-	for (const auto& line_pair : editing->getLines()) {
-		AbsLine line = line_pair.second->toAbsLine();
+	for (const auto& line_pair : frame->getLines()) {
+		AbsLine line = line_pair.second.toAbsLine();
 		sf::Vector2f sfBack = sfVecFromVec2(line.back);
 		sf::Vector2f sfHead = sfVecFromVec2(line.head);
 		// centerline
@@ -135,7 +138,7 @@ void EditingGUI::updateLines()
 
 void EditingGUI::updateFractal() {
 	int j = 0;
-	std::vector<AbsLine> fractal_lines = editing->getFractal().getLines();
+	const std::vector<AbsLine>& fractal_lines = frame->getFractal();
 	fractal.resize(fractal_lines.size() * 2);
 	for (size_t i = 0; i < fractal.getVertexCount(); i += 2) {
 		fractal[i] = sf::Vertex(sf::Vector2f(fractal_lines[j].back.x, fractal_lines[j].back.y));
@@ -263,7 +266,7 @@ void EditingGUI::changeRecursionsField() {
 				recursions_input->setText(std::to_string(new_num));
 			}
 			editing->setNumRecursions(new_num);
-			editing->updateFractal();
+			editing->remapFractal();
 		}
 	}
 }

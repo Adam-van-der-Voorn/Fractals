@@ -10,7 +10,7 @@ class EditableLineNode
 {
 public:
 
-	EditableLineNode(int id, Vec2 pos, bool is_front, EditableLine* line);
+	EditableLineNode(int id, const Vec2& pos, bool is_front, EditableLine* line);
 
 	/**
 	\param point the point to check
@@ -31,33 +31,21 @@ public:
 	void setPosition(Vec2 position);
 
 	/**
-	Sets the length of this nodes line.
-	The position of this nodes partner node is changed to achieve this.
-	\param length the new length of the line
+	Gets the length of this nodes line.
+	\return the length of this nodes line
 	**/
-	void setLength(double length);
+	double getLength() const;
 
 	/**
-	Sets the angle of this nodes line.
-	The position of this nodes partner node is changed to achieve this.
-	\param angle the new angle of the line
+	Gets the angle of this nodes line, measured from this node
+	\return the angle of this nodes line
 	**/
-	void setAngle(double angle);
+	double getAngle() const;
 
 	/**
 	\return the position of this node
 	**/
 	Vec2 getPosition() const;
-
-	/**
-	\return the angle from this node to its partner
-	**/
-	double getLength() const;
-
-	/**
-	\return the angle from this node to its partner
-	**/
-	double getAngle() const;
 
 	/**
 	\return true if this node is at the front of it's line;
@@ -67,12 +55,12 @@ public:
 	/**
 	\return the line this node is a part of
 	**/
-	EditableLine* getLine() const;
+	const EditableLine* getLine() const;
 
 	/**
 	\return the other node on this nodes line
 	**/
-	EditableLineNode* getOtherNode() const;
+	const EditableLineNode* getOtherNode() const;
 
 	/**
 	\return the id of the node
