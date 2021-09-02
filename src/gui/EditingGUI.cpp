@@ -19,17 +19,18 @@
 #include <memory>
 
 EditingGUI::EditingGUI(EditingState* state, Editing* data)
-	: state(state), editing(data), frame(data->getFrame())
+	: state(state), editing(data)
 {
-	baseLine[0].position.x = frame->getBaseLine().getBackNode()->getPosition().x;
-	baseLine[0].position.y = frame->getBaseLine().getBackNode()->getPosition().y;
-	baseLine[0].color = sf::Color(80, 80, 80);
 
-	baseLine[1].position.x = frame->getBaseLine().getFrontNode()->getPosition().x;
-	baseLine[1].position.y = frame->getBaseLine().getFrontNode()->getPosition().y;
-	baseLine[1].color = sf::Color(80, 80, 80);
+	// set up baseline
+	const std::vector<const EditableLineNode*>& nodes = editing->getFrame()->getBaseLine().getNodes();
+	for (int i = 0; i < 2; i++) {
+		baseLine[i].position.x = nodes[i]->getPosition().x;
+		baseLine[i].position.y = nodes[i]->getPosition().y;
+		baseLine[i].color = sf::Color(80, 80, 80);
+	}
 
-	updateFractal();
+	updateFractal(data->getFrame());
 
 	tGui = std::make_shared<tgui::Gui>(*state->getRenderWindow());
 	setupTGUI(state->getRenderWindow()->getSize().x, state->getRenderWindow()->getSize().y);
@@ -38,17 +39,18 @@ EditingGUI::EditingGUI(EditingState* state, Editing* data)
 void EditingGUI::onNotify(Editing* e, int event_num)
 {
 	auto event = static_cast<Editing::Event>(event_num);
+	const FrameState* frame = e->getFrame();
 	switch (event)
 	{
 	case Editing::LINES_CHANGED:
-		updateLines();
-		updateNodes();
+		updateLines(frame);
+		updateNodes(frame);
 		break;
 	case Editing::SELECTION_CHANGED:
-		updateNodes();
+		updateNodes(frame);
 		{
 			std::vector<tgui::Widget::Ptr> widgets;
-			for (int selected_node_id : frame->getSelectedNodes()) {
+			for (NodeID selected_node_id : e->getFrame()->getSelectedNodes()) {
 				auto widget = std::make_shared<SelLineWidget>(editing, selected_node_id, editing->general_element_width);
 				widgets.push_back(widget);
 			}
@@ -56,20 +58,20 @@ void EditingGUI::onNotify(Editing* e, int event_num)
 		}
 		break;
 	case Editing::FRACTAL_CHANGED:
-		updateFractal();
+		updateFractal(frame);
 		break;
 	case Editing::MOUSE_MOVED:
-		updateNodes();
+		updateNodes(frame);
 		break;
 	case Editing::HOVERED_NODE_CHANGED:
-		updateNodes();
+		updateNodes(frame);
 		break;
 	default:
 		break;
 	}
 }
 
-void EditingGUI::updateNodes()
+void EditingGUI::updateNodes(const FrameState* frame)
 {
 	assert(frame->getNodes().size() % 2 == 0 && "uneven amount of nodes");
 	nodes.resize(frame->getNodes().size());
@@ -98,7 +100,7 @@ void EditingGUI::updateNodes()
 	}
 }
 
-void EditingGUI::updateLines()
+void EditingGUI::updateLines(const FrameState* frame)
 {
 	assert(frame->getNodes().size() % 2 == 0 && "uneven amount of nodes");
 	int old_vertcount = nodeLines.getVertexCount();
@@ -136,7 +138,7 @@ void EditingGUI::updateLines()
 	}
 }
 
-void EditingGUI::updateFractal() {
+void EditingGUI::updateFractal(const FrameState* frame) {
 	int j = 0;
 	const std::vector<AbsLine>& fractal_lines = frame->getFractal();
 	fractal.resize(fractal_lines.size() * 2);

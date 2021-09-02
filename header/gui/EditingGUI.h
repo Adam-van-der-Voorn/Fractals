@@ -27,9 +27,9 @@ public:
 	void handleEvent(sf::Event& event) override;
 
 private:
-	void updateNodes();
-	void updateLines();
-	void updateFractal();
+	void updateNodes(const FrameState* frame);
+	void updateLines(const FrameState* frame);
+	void updateFractal(const FrameState* frame);
 	void changeRecursionsField();
 
 	void realignTGUI(int window_width, int window_height);
@@ -39,7 +39,6 @@ private:
 	const sf::Color LINE_COL_UNRECURSIVE = sf::Color::Red;
 
 	Editing* editing;
-	const FrameState* frame;
 	EditingState* state;
 	sf::VertexArray nodeLines = sf::VertexArray(sf::Lines);
 	sf::VertexArray baseLine = sf::VertexArray(sf::Lines, 2);

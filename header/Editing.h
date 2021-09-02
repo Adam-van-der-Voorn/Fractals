@@ -11,6 +11,7 @@
 #include <vector>
 #include "LineFractal.h"
 #include "FrameState.h"
+#include "NodeID.h"
 
 class EditableLineNode;
 class EditableLine;
@@ -79,20 +80,20 @@ public:
 	\param node_id the id of the node to move
 	\param translation amount to move
 	**/
-	void moveNode(int node_id, Vec2 translation);
+	void moveNode(NodeID node_id, Vec2 translation);
 
 	/**
 	Sets the hovered node to the node with the given id
 	The hovered node correspondes to the node widget the mouse is over in the sidebar
 	\param node_id the id of the node
 	**/
-	void setHoveredNode(int node_id);
+	void setHoveredNode(NodeID node_id);
 
 	/**
 	 * 	The hovered node correspondes to the node widget the mouse is over in the sidebar
 	\return the id of the hovered node, or a val < 0 if no node is being hovered
 	**/
-	int getHoveredNode() const;
+	NodeID getHoveredNode() const;
 
 	/**
 	sets the hovered node state to no node being hovered over
@@ -133,21 +134,21 @@ public:
 	\param node_id the id of the node to change
 	\param pos the new position of that node
 	**/
-	void setNodePosition(int node_id, Vec2 pos);
+	void setNodePosition(NodeID node_id, Vec2 pos);
 
 	/**
 	sets the line angle of the given node
 	\param node_id the id of the node to change
 	\param pos the new line angle
 	**/
-	void setNodeAngle(int node_id, double angle);
+	void setNodeAngle(NodeID node_id, double angle);
 
 	/**
 	sets the line length of the given node
 	\param node_id the id of the node to change
 	\param pos the new line length
 	**/
-	void setNodeLength(int node_id, double length);
+	void setNodeLength(NodeID node_id, double length);
 
 	/**
 	sets the given lines recursiveness 
@@ -185,17 +186,23 @@ private:
 	const double MAX_LINE_LEN_LEWAY = 5;
 
 	bool isWithinEditingFrame(const Vec2& point) const;
-	bool nodeTranslationLegal(const EditableLineNode& node, const Vec2& new_pos) const;
+
+	/**
+	 * \param fixed_node the node on the line that is not being translated
+	 * \param new_pos the new position of the node being translated
+	 * \return true if the end state of the translation is legal
+	*/
+	bool nodeTranslationLegal(const EditableLineNode& fixed_node, const Vec2& new_pos) const;
 	EditingState* state;
 
 	// frame contents ///
-	std::unordered_map<int, Vec2> dragging_nodes;
+	std::unordered_map<NodeID, Vec2> dragging_nodes;
 	std::vector<FrameState> frame_stack;
 	FrameState* frame; // the active frame
 
 	int num_recursions = 7;
 	// the id of the node that the user is hovering over in the gui
-	int hovered_node;
+	NodeID hovered_node = NodeID::nonexistent();
 
 	double value_clipboard = 0.0;
 

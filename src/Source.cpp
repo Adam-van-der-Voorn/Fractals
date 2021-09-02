@@ -33,6 +33,7 @@ sf::RenderWindow window(sf::VideoMode(900, 600), "asd", sf::Style::Default, sett
 
 int main()
 {	
+	PRINT("Entered");
 	StateMachine state_machine;
 	EditingState editing_state(&state_machine, &window);
 	ViewingState viewing_state(&state_machine, editing_state.getData(), &window);

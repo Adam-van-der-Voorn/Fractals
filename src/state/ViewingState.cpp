@@ -26,7 +26,7 @@ void ViewingState::enter()
 {
 	const LineFractal& f = editing->getFractalGenerator();
 	data->setFractal(f);
-	view->updateFractal();
+	view->updateFractal();  
 }
 
 void ViewingState::run()

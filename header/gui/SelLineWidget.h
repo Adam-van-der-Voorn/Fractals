@@ -3,6 +3,7 @@
 #include "Editing.h"
 #include "Observer.h"
 #include "NumFieldExt.h"
+#include "NodeID.h"
 #include <TGUI/Widgets/Panel.hpp>
 #include <SFML/Graphics/CircleShape.hpp>
 #include <SFML/Graphics/VertexArray.hpp>
@@ -22,9 +23,10 @@ public:
 	typedef std::shared_ptr<SelLineWidget> Ptr; //!< Shared widget pointer
 	typedef std::shared_ptr<const SelLineWidget> ConstPtr; //!< Shared constant widget pointer
 
-	SelLineWidget(Editing* editing, int node_id, float width);
+	SelLineWidget(Editing* editing, NodeID node_id, float width);
 	~SelLineWidget();
-	SelLineWidget(const SelLineWidget&); 
+	SelLineWidget(const SelLineWidget&);
+	SelLineWidget& operator =(const SelLineWidget& w);
 
 	// Inherited via observer
 	void onNotify(Editing* editing, int event_num) override;
@@ -44,8 +46,14 @@ public:
 
 private:
 	const float padding = 3;
+
+	// sets up the widget- creating gui elements and adding them to the tree.
+	// should be called on new object creation. Should not be called again after that.
 	void init();
-	int node_id;
+
+	// sets all the predefined properties of all the gui elements
+	void remapGuiElements();
+	NodeID node_id;
 	Editing* editing;
 	FrameState* frame;
 	tgui::Canvas::Ptr temp_background = tgui::Canvas::create();
@@ -57,4 +65,9 @@ private:
 	NumFieldExt::Ptr len_input;
 	tgui::CheckBox::Ptr rec_checkbox;
 };
+
+
+
+
+
 

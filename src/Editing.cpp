@@ -13,6 +13,7 @@
 #include "Vec2.h"
 #include "sfml_conversions.h"
 #include "FrameState.h"
+#include "NodeID.h"
 #include <cstdlib>
 #include <string>
 #include <memory>
@@ -27,7 +28,8 @@ Editing::Editing(EditingState* state) :
 
 	// setup base line
 	recalcEditingFrameDimensions(vec2FromSF(state->getRenderWindow()->getSize()));
-	fractalGen.setView(RightAngleRect::fromSize({0, 0}, editing_frame_size));
+	Vec2 half_frame = editing_frame_size/2;
+	fractalGen.setView(RightAngleRect(-half_frame, half_frame));
 	frame_stack.push_back(FrameState(inital_base_line));
 	frame = &frame_stack.back();
 	frame->setFractal(fractalGen.generate());
@@ -82,12 +84,12 @@ void Editing::handleEvent(sf::Event& event)
 			if (event.mouseButton.button == sf::Mouse::Button::Left) {
 				left_press_location = mouse_framepos;
 				Vec2 transformed_pos = Vec2(event.mouseButton.x, event.mouseButton.y) - global_offset;
-
+				
 				// case 1: The user has clicked down on selected node(s).
 				// They are added to the set of nodes being dragged, and the unselected nodes are skipped.
 				bool on_any_selnode = false;
-				for (int node_id : frame->getSelectedNodes()) {
-					const EditableLineNode* node = frame->getNodes().at(node_id);
+				for (const NodeID& node_id : frame->getSelectedNodes()) {
+					const EditableLineNode* node = frame->getNode(node_id);
 					if (node->pointIntersection(transformed_pos)) {
 						Vec2 selected_offset = transformed_pos - node->getPosition();
 						dragging_nodes.emplace(node_id, selected_offset);
@@ -98,10 +100,10 @@ void Editing::handleEvent(sf::Event& event)
 				// case 2: No selected nodes were clicked down on.
 				// if any non selected nodes are clicked down on, they are added to the set of dragging nodes.
 				if (!on_any_selnode) {
-					for (const auto& id_node : frame->getNodes()) {
-						if (id_node.second->pointIntersection(transformed_pos)) {
-							Vec2 selected_offset = transformed_pos - id_node.second->getPosition();
-							dragging_nodes.emplace(id_node.first, selected_offset);
+					for (const std::pair<NodeID, const EditableLineNode*>& node_pair : frame->getNodes()) {
+						if (node_pair.second->pointIntersection(transformed_pos)) {
+							Vec2 selected_offset = transformed_pos - node_pair.second->getPosition();
+							dragging_nodes.emplace(node_pair.first, selected_offset);
 						}
 					}
 				}
@@ -116,7 +118,7 @@ void Editing::handleEvent(sf::Event& event)
 			bool node_moved = false;
 			for (auto& pair : dragging_nodes) {
 				node_moved = true;
-				Vec2 translation = transformed_pos - (frame->getNodes().at(pair.first)->getPosition() + pair.second);
+				Vec2 translation = transformed_pos - (frame->getNode(pair.first)->getPosition() + pair.second);
 				moveNode(pair.first, translation);
 			}
 			if (node_moved) {
@@ -140,14 +142,6 @@ void Editing::handleEvent(sf::Event& event)
 						if (node.second->pointIntersection(mouse_framepos - global_offset)) {
 							frame->selectNode(node.first);
 						}
-					}
-					
-					if (DEBUG) {
-						PRINTLN("Seletec ids:");
-						for (int i : frame->getSelectedNodes()) {
-							PRINTLN(i);
-						}
-						PRINTLN("");
 					}
 					notifyAll(Event::SELECTION_CHANGED);
 				}
@@ -175,21 +169,21 @@ double* Editing::getValClipboard()
 }
 
 
-void Editing::setHoveredNode(int node_id)
+void Editing::setHoveredNode(NodeID node_id)
 {
-	assert((frame->getSelectedNodes().count(node_id) == 1 || node_id == -1) && "hovering over a non-selected node (or duplicate id)");
+	assert((frame->getSelectedNodes().count(node_id) == 1 || node_id.lineID() == -1) && "hovering over a non-selected node (or duplicate id)");
 	hovered_node = node_id;
 	notifyAll(Event::HOVERED_NODE_CHANGED);
 }
 
-int Editing::getHoveredNode() const
+NodeID Editing::getHoveredNode() const
 {
 	return hovered_node;
 }
 
 void Editing::clearHoveredNode()
 {
-	hovered_node = -1;
+	hovered_node = NodeID::nonexistent();
 	notifyAll(Event::HOVERED_NODE_CHANGED);
 }
 
@@ -202,17 +196,20 @@ void Editing::selectOnlyHoveredNode()
 
 bool Editing::nodeIsHovered() const
 {
-	if (hovered_node == -1) {
+	if (hovered_node == NodeID::nonexistent()) {
 		return false;
 	}
 	return true;
 }
 
 void Editing::newLine() {
-	float length = rand() % 50 + 50; // random length from 50 - 100
+	float length = rand() % 200 + 100; // random length from 100 - 200
 	float angle = ((float)(rand() % (3141 * 2))) / 100; // random angle in radians from 0 - ~2pi
-	Vec2 position = Vec2::fromLenDir(length, angle);
-	addLine({ -position, position });
+	float offset_len = rand() % 20 + 5; // random offset from 5 - 25
+	float offset_angle = ((float)(rand() % (3141 * 2))) / 100;
+	Vec2 offset = Vec2::fromLenDir(offset_len, offset_angle);
+	Vec2 vec = Vec2::fromLenDir(length, angle)/2;
+	addLine({ -vec + offset, vec + offset });
 }
 
 void Editing::addLine(AbsLine l)
@@ -224,13 +221,10 @@ void Editing::addLine(AbsLine l)
 
 void Editing::removeSelectedLines()
 {
-	const std::unordered_map<int, EditableLineNode*>& nodes = frame->getNodes();
-	for (int node_id : frame->getSelectedNodes()) {
-		if (nodes.count(node_id)) {
-			const EditableLineNode* node = nodes.at(node_id);
-			int line_id = node->getLine()->getID();
-			frame->removeLine(line_id);
-		}
+	const std::unordered_map<int, EditableLine>& lines = frame->getLines();
+	for (NodeID selected : frame->getSelectedNodes()) {
+		assert(lines.count(selected.lineID())); // assert line exists with the selection id
+		frame->removeLine(selected.lineID());
 	}
 	frame->clearSelection();
 	clearHoveredNode();
@@ -239,11 +233,11 @@ void Editing::removeSelectedLines()
 	remapFractal();
 }
 
-void Editing::setNodePosition(int node_id, Vec2 new_pos)
+void Editing::setNodePosition(NodeID node_id, Vec2 new_pos)
 {
-	const EditableLineNode* node = frame->getNodes().at(node_id);
+	const EditableLineNode* node = frame->getNode(node_id);
 	if (nodeTranslationLegal(*node, new_pos)) {
-		frame->setNodePos(node->getID(), new_pos);
+		frame->setNodePos(node_id, new_pos);
 		remapFractal();
 		notifyAll(Event::LINES_CHANGED);
 	}
@@ -264,18 +258,22 @@ Vec2 Editing::getEditingFrameSize() const
 	return editing_frame_size;
 }
 
-void Editing::setNodeAngle(int node_id, double angle)
+void Editing::setNodeAngle(NodeID node_id, double angle)
 {
-	const EditableLineNode* node = frame->getNodes().at(node_id);
-	Vec2 new_pos = node->getPosition() + Vec2::fromLenDir(node->getLength(), angle);
-	setNodePosition(node->getOtherNode()->getID(), new_pos);
+	const EditableLine& line = frame->getLine(node_id.lineID());
+	const EditableLineNode* node = frame->getNode(node_id);
+	Vec2 new_pos = node->getPosition() + Vec2::fromLenDir(line.getLength(), angle);
+	NodeID other_node_id = NodeID(line.getID(), !node->isFront());
+	setNodePosition(other_node_id, new_pos);
 }
 
-void Editing::setNodeLength(int node_id, double length)
+void Editing::setNodeLength(NodeID node_id, double length)
 {
-	const EditableLineNode* node = frame->getNodes().at(node_id);
-	Vec2 new_pos = node->getPosition() + Vec2::fromLenDir(length, node->getAngle());
-	setNodePosition(node->getOtherNode()->getID(), new_pos);
+	const EditableLine& line = frame->getLine(node_id.lineID());
+	const EditableLineNode* node = frame->getNode(node_id);
+	Vec2 new_pos = node->getPosition() + Vec2::fromLenDir(length, line.getAngle(node_id.isFront()));
+	NodeID other_node_id = NodeID(line.getID(), !node->isFront());
+	setNodePosition(other_node_id, new_pos);
 }
 
 void Editing::remapFractal()
@@ -292,19 +290,24 @@ void Editing::remapFractal()
 	notifyAll(Event::FRACTAL_CHANGED);
 }
 
-void Editing::moveNode(int node_id, Vec2 translation)
+void Editing::moveNode(NodeID node_id, Vec2 translation)
 {
-	const EditableLineNode* node = frame->getNodes().at(node_id);
+
+	const EditableLineNode* node = frame->getNode(node_id);
 	Vec2 new_pos = node->getPosition() + translation;
-	const EditableLineNode* other = node->getOtherNode();
+	const EditableLineNode* other = frame->getNode(NodeID::other(node_id));
+
+	// the dimensions of the line after the node has been moved
 	AbsLine new_line = { other->getPosition(), new_pos };
+
+	// check if the new line fits length limit. If not, adjust.
 	double max_line_length = lineLength(frame->getBaseLine().toAbsLine()) - MAX_LINE_LEN_LEWAY;
 	if (new_line.length() > max_line_length) {
 		new_pos = other->getPosition() + Vec2::fromLenDir(max_line_length, lineAngle(new_line));
 		const Vec2 mouse_framepos_offset = mouse_framepos - node->getPosition();
 		mouse_framepos = node->getPosition() + mouse_framepos_offset;
 	}
-	frame->setNodePos(node->getID(), new_pos);
+	frame->setNodePos(node_id, new_pos);
 }
 
 bool Editing::isWithinEditingFrame(const Vec2& point) const
@@ -315,10 +318,9 @@ bool Editing::isWithinEditingFrame(const Vec2& point) const
 	return false;
 }
 
-bool Editing::nodeTranslationLegal(const EditableLineNode& node, const Vec2& new_pos) const
+bool Editing::nodeTranslationLegal(const EditableLineNode& fixed_node, const Vec2& new_pos) const
 {
-	const EditableLineNode* other = node.getOtherNode();
-	AbsLine new_line = { other->getPosition(), new_pos };
+	AbsLine new_line = { fixed_node.getPosition(), new_pos };
 	double max_line_length = lineLength(frame->getBaseLine().toAbsLine()) - MAX_LINE_LEN_LEWAY;
 	return (new_line.length() <= max_line_length);
 }

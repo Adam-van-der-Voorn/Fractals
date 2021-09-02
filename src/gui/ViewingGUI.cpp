@@ -30,7 +30,7 @@ void ViewingGUI::handleEvent(sf::Event & event)
 
 void ViewingGUI::updateFractal() {
 	int j = 0;
-	std::vector<AbsLine> raw_lines = data->getFractal().getLines();
+	std::vector<AbsLine> raw_lines = data->getFractal();
 	fractal_lines.resize(raw_lines.size() * 2);
 	for (size_t i = 0; i < fractal_lines.getVertexCount(); i += 2) {
 		fractal_lines[i] = sf::Vertex(sf::Vector2f(raw_lines[j].back.x, raw_lines[j].back.y));

@@ -4,15 +4,16 @@
 #include "EditableLineNode.h"
 #include "EditableLine.h"
 #include "LineFractal.h"
+#include "NodeID.h"
 #include <unordered_set>
 #include <memory>
 
 class FrameState {
     private:
-        // line map stores actual lines, nodes map stores ptrs to the nodes in the lines
-        std::unordered_map<int, EditableLineNode*> nodes;
-        std::unordered_set<int> selected_nodes;
+        // pair represents a selected node: <line_id, isFrontNode>
+        std::unordered_set<NodeID> selected_nodes;
         std::unordered_map<int, EditableLine> lines;
+        std::unordered_map<NodeID, const EditableLineNode*> nodes;
         EditableLine base_line;
         std::vector<AbsLine> fractal;
 
@@ -35,7 +36,7 @@ class FrameState {
         \param id the id of the node to reposition
         \param position the new position of the node
         */
-        void setNodePos(int id, Vec2 position);
+        void setNodePos(NodeID node_id, Vec2 position);
 
         /**
          * \param id the id of the line to change
@@ -57,12 +58,24 @@ class FrameState {
          * Selects the node with the given id
          * \param id the id of the node to select
         */
-        void selectNode(int id);
+        void selectNode(NodeID node_id);
 
         /**
-        \return the moveable nodes of the foundational lines.
-        **/
-        const std::unordered_map<int, EditableLineNode*>& getNodes() const;
+         * \param node_id the id of the node
+         * \return the node corresponding to the given id
+        */
+        const EditableLineNode* getNode(NodeID node_id) const;
+
+        /**
+         * \return a map of all the nodes on the frame, mapped to thier ids
+        */
+        const std::unordered_map<NodeID, const EditableLineNode*>& getNodes() const;
+
+        /**
+         * \param line_id the id of the line
+         * \return the node corresponding to the given id
+        */
+        const EditableLine& getLine(int line_id) const;
 
         /**
         \return the foundational lines of the fractal (ie the lines that are used in the recursion for the fractal)
@@ -77,7 +90,7 @@ class FrameState {
         /**
         \return th ids of all the nodes that are selected
         **/
-        const std::unordered_set<int>& getSelectedNodes() const;
+        const std::unordered_set<NodeID>& getSelectedNodes() const;
 
         /**
         \return the fractal currently being displayed

@@ -26,14 +26,14 @@ ZoomBox* Viewing::getZoomBox() const
 	return zoom_box;
 }
 
-const LineFractal& Viewing::getFractal() const
+const std::vector<AbsLine>& Viewing::getFractal() const
 {
 	return fractal;
 }
 
 void Viewing::updateFractalBounds()
 {
-	fractal.updateBounds();
+	fractalGen.updateBounds();
 }
 
 void Viewing::changeViewWindow(const RightAngleRect& view_multi)
@@ -49,10 +49,10 @@ void Viewing::changeViewWindow(const RightAngleRect& view_multi)
 	);
 
 	fractal_zoom = state->getRenderWindow()->getSize().x / current_view.size().x;
-	fractal.setDefinition(current_view.size().x / state->getRenderWindow()->getSize().x);
+	fractalGen.setDefinition(current_view.size().x / state->getRenderWindow()->getSize().x);
 	fractal_offset = -current_view.tL();  // go to top left
 
-	fractal.setView(current_view.translate({ -450, -300 }));
+	fractalGen.setView(current_view.translate({ -450, -300 }));
 }
 
 double Viewing::getFractalZoom() const
@@ -69,33 +69,33 @@ void Viewing::resetFractalTransform()
 {
 	fractal_zoom = 1;
 	fractal_offset = Vec2(0, 0);
-	fractal.setDefinition(1);
+	fractalGen.setDefinition(1);
 	Vec2 window_size = vec2FromSF(state->getRenderWindow()->getSize());
 	current_view = RightAngleRect::fromSize({0, 0}, window_size);
-	fractal.setView(current_view.translate({-450, -300}));
+	fractalGen.setView(current_view.translate(-window_size/2));
 }
 
 void Viewing::centerFractal()
 {
-	RightAngleRect to_center = fractal.getBoundsInstance(fractal.getBaseLine());
+	RightAngleRect to_center = fractalGen.getBoundsInstance(fractalGen.getBaseLine());
 	Vec2 window_size = vec2FromSF(state->getRenderWindow()->getSize());
 	Vec2 position = (window_size - to_center.size()) / 2;
 	Vec2 translation = position - to_center.tL();
-	fractal.translate(translation);
+	fractalGen.translate(translation);
 }
 
 void Viewing::setFractal(const LineFractal& new_fractal)
 {
 	AbsLine base = new_fractal.getBaseLine();
-	fractal = LineFractal(base);
+	fractalGen = LineFractal(base);
 	std::vector<LFLine> derived;
 	for (const LFLine& lf_line : new_fractal.getDerivedLines()) {
 		derived.push_back(lf_line);
 	}
-	fractal.setDerivedLines(derived);
+	fractalGen.setDerivedLines(derived);
 	updateFractalBounds();
 	resetFractalTransform();
-	fractal.generate();
+	fractal = fractalGen.generate();
 }
 
 void Viewing::handleEvent(sf::Event& event)
@@ -121,7 +121,7 @@ void Viewing::handleEvent(sf::Event& event)
 			if (zoom_box->isRect()) {
 				auto view_multi = zoom_box->getBox();
 				changeViewWindow(view_multi);
-				fractal.generate();
+				fractal = fractalGen.generate();
 				notifyAll(VIEW_CHANGE);
 			}
 			zoom_box->setUnactive();

@@ -28,7 +28,6 @@ void putConvexHull(std::vector<Vec2> points, std::vector<Vec2>& target)
 	// sort points by angle off lowest point
 	auto comp = CompareAngleFromPoint(lowest_point);
 	std::sort(points.begin(), points.end(), comp);
-	PRINTLN("old size : " << points.size());
 
 	// remove dupe points and points with the same angle from the lowest point
 	for (size_t i = 0; i < points.size() - 1;) {
@@ -49,14 +48,6 @@ void putConvexHull(std::vector<Vec2> points, std::vector<Vec2>& target)
 				i++;
 			}
 		}
-	}
-
-	//PRINTLN("new size : " << points.size());
-	for (const Vec2& vec : points) {
-		/*PRINT(vec << "\t");
-		PRINT("angle: " << atan2(vec.y - lowest_point.y, vec.x - lowest_point.x) << "\t");
-		PRINTLN("pseud: " << psudeoAngle(vec - lowest_point));*/
-
 	}
 
 	// function to find out if the next point is a left or right turn;

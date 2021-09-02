@@ -27,7 +27,7 @@ public:
 	/**
 	\return the fractal being viewed
 	**/
-	const LineFractal& getFractal() const;
+	const std::vector<AbsLine>& getFractal() const;
 
 	/**
 	Updates the bounding box of each fractal
@@ -75,7 +75,8 @@ public:
 
 private:
 	ViewingState* state;
-	LineFractal fractal = LineFractal({ {0,0}, {0,0} });
+	LineFractal fractalGen = LineFractal({ {0,0}, {0,0} });
+	std::vector<AbsLine> fractal;
 	ZoomBox* zoom_box;
 
 	RightAngleRect current_view;

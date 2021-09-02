@@ -1,4 +1,4 @@
-#ifdef _DEBUG
+#ifdef MY_DEBUG
 #  include <iostream>
 #  define PRINTLN(x) std::cout << x << std::endl
 #  define PRINT(x) std::cout << x

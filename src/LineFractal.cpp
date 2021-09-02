@@ -22,11 +22,7 @@
 LineFractal::LineFractal(AbsLine base_line) :
 	base_line(base_line)
 {
-	derived_lines = {
-		{0, 0, 0.5, 0, false},
-		{0.5, 0, 0.5, m_pi4, true},
-		{0.5, 0, 0.5, -m_pi4, true}
-	};
+	derived_lines = {};
 }
 
 // 1 step = 100 lines
@@ -88,8 +84,6 @@ std::vector<AbsLine> LineFractal::generate() const
 	std::queue<AbsLine> line_queue;
 	line_queue.push(base_line);
 	double line_threshold = ATOMIC_LENGTH * getDefinition();
-	PRINTLN("base_line_bounds = " << getBoundsInstance(base_line));
-	PRINTLN("view_coords = " << view);
 	while (!line_queue.empty()) {
 		AbsLine current_line = line_queue.front();
 		line_queue.pop();
