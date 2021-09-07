@@ -171,33 +171,11 @@ void EditingGUI::setupTGUI(int window_width, int window_height)
 	display_button->onClick(&StateMachine::changeState, state->getStateMachine(), "viewing");
 	display_button->setText("Display fractal");
 
-	// recursions field
-	recursions_field = tgui::Panel::create();
-	right_panel->add(recursions_field);
-	recursions_field->setSize(editing->general_element_width, 20);
-	recursions_field->setPosition(editing->general_padding, editing->general_padding);
-
-	// recursions label
-	recursions_label = tgui::Label::create();
-	recursions_field->add(recursions_label);
-	recursions_label->setSize({ "100%", "100%" });
-	recursions_label->setPosition(0, 3); // slight adjustment so it lines up with input text
-	recursions_label->setHorizontalAlignment(tgui::Label::HorizontalAlignment::Left);
-	recursions_label->setText("Number of recursions");
-
-	// recursions input
-	recursions_input = tgui::EditBox::create();
-	recursions_field->add(recursions_input);
-	recursions_input->setSize({ 33, "100%" });
-	recursions_input->setPosition({ recursions_field->getSize().x - recursions_input->getSize().x, 0 });
-	recursions_input->setText(std::to_string(editing->getNumRecursions()));
-	recursions_input->onReturnKeyPress(&EditingGUI::changeRecursionsField, this);
-
 	// line actions field
 	line_actions_field = tgui::Panel::create();
 	right_panel->add(line_actions_field);
 	line_actions_field->setSize(editing->general_element_width, 40);
-	line_actions_field->setPosition({ editing->general_padding, tgui::bindBottom(recursions_field) + editing->general_padding });
+	line_actions_field->setPosition({ editing->general_padding, editing->general_padding });
 
 	// add line button
 	add_line_button = tgui::Button::create();
@@ -252,24 +230,5 @@ void EditingGUI::handleEvent(sf::Event& event)
 		realignTGUI(event.size.width, event.size.height);
 	}
 	tGui->handleEvent(event);
-}
-
-void EditingGUI::changeRecursionsField() {
-	tgui::String new_val = recursions_input->getText();
-	if (new_val.length() == 0) {
-		recursions_input->setText(std::to_string(editing->getNumRecursions()));
-	}
-	else {
-		int new_num = new_val.toInt();
-		if (new_num != editing->getNumRecursions()) {
-			constexpr int max_val = 9999;
-			if (new_num > max_val) {
-				new_num = max_val;
-				recursions_input->setText(std::to_string(new_num));
-			}
-			editing->setNumRecursions(new_num);
-			editing->remapFractal();
-		}
-	}
 }
 

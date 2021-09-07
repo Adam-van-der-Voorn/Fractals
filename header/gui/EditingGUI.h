@@ -30,7 +30,6 @@ private:
 	void updateNodes(const FrameState* frame);
 	void updateLines(const FrameState* frame);
 	void updateFractal(const FrameState* frame);
-	void changeRecursionsField();
 
 	void realignTGUI(int window_width, int window_height);
 	void setupTGUI(int window_width, int window_height);

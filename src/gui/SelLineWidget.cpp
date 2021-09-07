@@ -106,12 +106,12 @@ void SelLineWidget::remapGuiElements()
 	redrawIcon();
 
 	// selection button
-	select_button->setSize(40, 40);
+	select_button->setSize({131, 40});
 	select_button->setPosition(tgui::bindRight(icon) + padding, 6);
 	select_button->onClick(&Editing::selectOnlyHoveredNode, editing);
 	select_button->onMouseEnter(&Editing::setHoveredNode, editing, node_id);
 	select_button->onMouseLeave(&Editing::setHoveredNode, editing, NodeID::nonexistent());
-	select_button->setText("sel");
+	select_button->setText("Select");
 
 	// measurements block
 	constexpr float input_height = 22;

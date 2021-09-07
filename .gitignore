@@ -4,7 +4,6 @@
 /.vscode
 /.vs
 /out
-/extlibs_src
 Fractals.vcxproj
 Fractals.vcxproj.user
 Fractals.aps
